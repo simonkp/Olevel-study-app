@@ -611,6 +611,10 @@ body {
   z-index: 40;
 }
 
+.dock[hidden] {
+  display: none !important;
+}
+
 .dock button {
   flex: 1;
   max-width: 100px;
