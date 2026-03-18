@@ -1,0 +1,70 @@
+(function () {
+    window.__registerTopic({
+        id: "4",
+        theme: "Section II: Newtonian Mechanics",
+        title: "Dynamics",
+        cheatBlocks: [
+          { title: "Newton’s laws", points: [
+            "**1st law**: If resultant force = 0, object stays at rest or continues in uniform velocity.",
+            "**2nd law**: Resultant force \(F = ma\\). Acceleration in direction of resultant.",
+            "**3rd law**: Action–reaction pair: equal and opposite forces on different bodies.",
+            "Inertia: tendency to resist change in velocity; larger mass → larger inertia."
+          ]},
+          { title: "Force analysis", points: [
+            "Draw **free-body diagram** then resolve forces into components (often horizontal/vertical).",
+            "On an incline: weight component down slope \(mg\\sin\\theta\\), normal \(mg\\cos\\theta\\) (if no other forces).",
+            "Terminal velocity: drag increases with speed until drag = weight → a = 0.",
+            "Resistive forces: friction (solid surfaces) and drag (fluids)."
+          ]},
+          { title: "Momentum (often paired with dynamics)", points: [
+            "Momentum \(p = mv\\) (vector).",
+            "Impulse = change in momentum \(Ft = \\Delta p\\). (Conceptual use for safety features).",
+            "A larger stopping time reduces force for same Δp."
+          ]},
+        ],
+        flashcards: [
+          { front: "Newton 2nd law", back: "F = ma (resultant force)" },
+          { front: "Newton 3rd law", back: "Action-reaction: equal/opposite, different bodies" },
+          { front: "Inertia", back: "resistance to change in velocity" },
+          { front: "Terminal velocity condition", back: "drag = weight → resultant 0" },
+          { front: "Momentum", back: "p = mv" },
+          { front: "Impulse", back: "Ft = Δp" },
+          { front: "Why airbags reduce injury", back: "increase stopping time → reduce force" },
+          { front: "Resultant force zero implies…", back: "a = 0 (rest or constant velocity)" },
+          { front: "Friction direction", back: "opposes motion/tendency" },
+          { front: "Drag depends on…", back: "speed (and shape/area/fluid)" },
+          { front: "Unit of momentum", back: "kg·m/s" },
+          { front: "Unit of force", back: "N" },
+        ],
+        quiz: [
+          { question: "Newton’s 1st law applies when resultant force is…", options: ["maximum", "zero", "negative", "infinite"], correctIndex: 1, explanation: "Resultant 0 → no acceleration." },
+          { question: "A 3 kg object accelerates at 2 m/s². Resultant force?", options: ["1.5 N", "5 N", "6 N", "12 N"], correctIndex: 2, explanation: "F=ma=3×2=6 N." },
+          { question: "Action–reaction forces act on…", options: ["same body", "different bodies", "only liquids", "only gases"], correctIndex: 1, explanation: "Newton 3rd law." },
+          { question: "At terminal velocity, acceleration is…", options: ["g", "0", "increasing", "negative infinity"], correctIndex: 1, explanation: "Resultant 0." },
+          { question: "Momentum is…", options: ["mv", "ma", "F/A", "m/V"], correctIndex: 0, explanation: "p=mv." },
+          { question: "Impulse equals…", options: ["F/t", "Ft", "mv/t", "Fv"], correctIndex: 1, explanation: "Impulse = Ft = Δp." },
+          { question: "If stopping time increases, average force for same Δp…", options: ["increases", "decreases", "same", "becomes zero always"], correctIndex: 1, explanation: "F=Δp/Δt." },
+          { question: "A force of 10 N acts on 2 kg. a=?", options: ["0.2", "2", "5", "20"], correctIndex: 2, explanation: "a=F/m=10/2=5." },
+          { question: "Inertia depends on…", options: ["mass", "weight", "speed only", "area"], correctIndex: 0, explanation: "Greater mass → more inertia." },
+          { question: "When drag < weight (falling), resultant is…", options: ["upward", "downward", "zero", "sideways"], correctIndex: 1, explanation: "Weight dominates; net downward." },
+          { question: "Which is a resistive force?", options: ["weight", "normal", "drag", "tension"], correctIndex: 2, explanation: "Drag resists motion in fluid." },
+          { question: "Newton 2nd law uses…", options: ["resultant force", "one force only", "only weight", "only friction"], correctIndex: 0, explanation: "Net (resultant) force." },
+          { question: "If resultant force is constant, acceleration is…", options: ["constant", "increasing", "zero", "unknown"], correctIndex: 0, explanation: "a=F/m constant." },
+          { question: "Unit of impulse", options: ["N", "N·s", "J", "W"], correctIndex: 1, explanation: "N·s." },
+          { question: "A car moves at constant speed on level road. Resultant force is…", options: ["zero", "mg", "ma", "infinite"], correctIndex: 0, explanation: "Constant velocity → a=0 → net force 0." },
+          { question: "Seatbelts reduce injury mainly by…", options: ["increasing Δt", "increasing Δp", "reducing mass", "increasing speed"], correctIndex: 0, explanation: "Longer stopping time lowers force." },
+        ],
+        trueFalse: [
+          { statement: "Newton’s 3rd law forces cancel because they are equal and opposite.", correct: false, explain: "They act on different bodies; don’t cancel on one body." },
+          { statement: "Resultant force is the vector sum of all forces.", correct: true, explain: "Definition." },
+          { statement: "At terminal velocity, drag equals weight (for vertical fall).", correct: true, explain: "Net force zero." },
+          { statement: "Impulse is force divided by time.", correct: false, explain: "Impulse = force × time." },
+          { statement: "If net force is zero, acceleration is zero.", correct: true, explain: "F=ma." },
+          { statement: "Inertia is larger for smaller mass.", correct: false, explain: "More mass → more inertia." },
+          { statement: "Momentum is a vector quantity.", correct: true, explain: "Depends on velocity direction." },
+          { statement: "F=ma uses only friction force.", correct: false, explain: "Resultant force." },
+          { statement: "Action and reaction act along the same line.", correct: true, explain: "Same interaction line." },
+          { statement: "If speed is constant, forces must be zero.", correct: false, explain: "Forces can balance to give resultant 0." },
+        ],
+    });
+})();

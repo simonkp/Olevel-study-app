@@ -963,6 +963,14 @@
   }
 
   document.getElementById("btn-home").onclick = () => {
+    // If we're running inside a subject shell (chemistry/physics), clicking the logo should
+    // return to the subject picker (root index.html). If not, behave like "home".
+    const isSubjectShell = !!window.SUBJECT_ID;
+    if (isSubjectShell) {
+      const to = window.SUBJECT_ID === "physics" ? "../index.html" : "index.html";
+      window.location.href = to;
+      return;
+    }
     route = { view: "home" };
     renderHome();
   };

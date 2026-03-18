@@ -1,0 +1,65 @@
+(function () {
+    window.__registerTopic({
+
+        id: "7B",
+        theme: "Section III: Thermal Physics",
+        title: "Kinetic Particle Model of Matter II (Internal Energy)",
+        cheatBlocks: [
+          { title: "Internal energy", points: [
+            "Internal energy = total microscopic energy of particles = **random kinetic** + **potential** (due to separation/forces).",
+            "Temperature change mainly changes **average kinetic** energy.",
+            "Change of state mainly changes **potential** energy (bond separation) at constant temperature."
+          ]},
+          { title: "Heating curves + latent heat", points: [
+            "During melting/boiling: temperature constant; energy absorbed = latent heat.",
+            "Latent heat of fusion (solid↔liquid), vaporisation (liquid↔gas).",
+            "Qualitative: bigger latent heat → more energy needed for state change."
+          ]},
+        ],
+        flashcards: [
+          { front: "Internal energy components", back: "random kinetic + potential energy" },
+          { front: "Temperature relates to…", back: "average kinetic energy" },
+          { front: "During boiling, energy increases mainly as…", back: "potential energy (separating particles)" },
+          { front: "Latent heat", back: "energy absorbed/released at constant temperature during change of state" },
+          { front: "Fusion vs vaporisation", back: "fusion: solid↔liquid; vaporisation: liquid↔gas" },
+          { front: "Why steam burns worse than boiling water", back: "steam releases latent heat when condensing" },
+          { front: "Heating curve flat region means…", back: "change of state" },
+          { front: "Cooling curve flat region means…", back: "change of state releasing latent heat" },
+          { front: "Internal energy increases when…", back: "temperature rises OR state changes to higher energy state" },
+          { front: "Potential energy increases when…", back: "particles move further apart" },
+          { front: "Random KE depends on…", back: "temperature" },
+          { front: "Evaporation effect on remaining liquid", back: "cools it (higher-energy particles leave)" },
+        ],
+        quiz: [
+          { question: "Internal energy is the sum of…", options: ["GPE and KE", "random KE and PE of particles", "electrical and magnetic", "mass and volume"], correctIndex: 1, explanation: "Microscopic kinetic + potential." },
+          { question: "Temperature is related to…", options: ["total energy", "average random kinetic energy", "average potential energy", "density"], correctIndex: 1, explanation: "Average random KE." },
+          { question: "During melting at constant temperature, energy supplied increases mainly…", options: ["kinetic energy", "potential energy", "mass", "pressure"], correctIndex: 1, explanation: "Separating particles increases PE." },
+          { question: "Latent heat is energy…", options: ["for raising temperature", "absorbed/released at constant temperature", "lost as sound", "for mass increase"], correctIndex: 1, explanation: "Definition." },
+          { question: "Why does evaporation cool a liquid?", options: ["mass increases", "lower-energy particles leave", "higher-energy particles leave", "temperature can’t change"], correctIndex: 2, explanation: "High-energy particles escape." },
+          { question: "Steam causes severe burns because…", options: ["it is colder", "it has low latent heat", "it condenses releasing latent heat", "it has no energy"], correctIndex: 2, explanation: "Condensation releases latent heat." },
+          { question: "On a heating curve, a flat section indicates…", options: ["constant pressure", "constant temperature change", "change of state", "no energy transfer"], correctIndex: 2, explanation: "State change." },
+          { question: "When temperature rises, average random KE…", options: ["decreases", "increases", "same", "becomes zero"], correctIndex: 1, explanation: "Increases." },
+          { question: "Internal energy can increase without temperature change during…", options: ["boiling", "cooling", "compressing a solid only", "none"], correctIndex: 0, explanation: "During boiling, energy increases as latent heat." },
+          { question: "Potential energy of particles increases when…", options: ["they move closer", "they move further apart", "they stop", "they become heavier"], correctIndex: 1, explanation: "Separation increases PE." },
+          { question: "Which change releases latent heat?", options: ["melting", "boiling", "condensation", "evaporation"], correctIndex: 2, explanation: "Condensation releases energy." },
+          { question: "Boiling point depends on…", options: ["mass only", "external pressure", "volume only", "colour"], correctIndex: 1, explanation: "Pressure affects bp." },
+          { question: "Internal energy is microscopic; it does NOT include…", options: ["random motion", "intermolecular PE", "bulk kinetic energy of object moving", "none"], correctIndex: 2, explanation: "Internal is about random microscopic motion, not bulk motion." },
+          { question: "During freezing, temperature…", options: ["always decreases", "stays constant at freezing point", "increases", "becomes undefined"], correctIndex: 1, explanation: "Latent heat released at constant T." },
+          { question: "If a substance has large latent heat of vaporisation, it needs… to boil completely", options: ["less energy", "more energy", "no energy", "less time always"], correctIndex: 1, explanation: "More energy per kg." },
+          { question: "At constant temperature, adding energy to a boiling liquid mainly increases…", options: ["average KE", "average PE", "density", "mass"], correctIndex: 1, explanation: "PE as particles separate." },
+        ],
+        trueFalse: [
+          { statement: "Internal energy includes the potential energy of particles.", correct: true, explain: "Yes, due to intermolecular forces." },
+          { statement: "During boiling, temperature increases steadily.", correct: false, explain: "Temperature stays constant at boiling point (at fixed pressure)." },
+          { statement: "Evaporation involves only surface particles.", correct: true, explain: "Surface escape." },
+          { statement: "Latent heat is involved in temperature rise.", correct: false, explain: "Latent heat is for state change at constant temperature." },
+          { statement: "Steam condensing releases energy.", correct: true, explain: "Latent heat released." },
+          { statement: "Temperature is proportional to total internal energy.", correct: false, explain: "Depends also on PE and mass; only relates to average KE." },
+          { statement: "Freezing releases latent heat.", correct: true, explain: "Opposite of melting." },
+          { statement: "Internal energy is the same as kinetic energy.", correct: false, explain: "It includes both KE and PE of particles." },
+          { statement: "During melting, particle separation increases.", correct: true, explain: "Average separation increases → PE increases." },
+          { statement: "Evaporation cools because remaining particles have lower average KE.", correct: true, explain: "Higher-energy particles leave." },
+        ],
+      
+    });
+})();
