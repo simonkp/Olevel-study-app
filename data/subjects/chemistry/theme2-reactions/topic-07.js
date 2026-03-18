@@ -122,7 +122,7 @@
     {statement:"Strong acid always has lower pH than weak at same concentration.",correct:true,explain:"Higher [H⁺]."},
     {statement:"Metal below H in series still reacts with oxidising acids differently.",correct:true,explain:"Cu + conc HNO₃ context."},
     {statement:"Al₂O₃ is only basic.",correct:false,explain:"Amphoteric."},
-    {statement:"Dilute HNO₃ + Cu:",correct:No simple H₂,explain:true},
+    {statement:"Dilute HNO₃ + Cu produces H₂ gas.",correct:false,explain:"Nitric acid is oxidising; copper does not give 'simple H₂' like with HCl/H₂SO₄. Nitrogen oxides form instead (NO/NO₂ context)."},
     {statement:"Kw increases with temperature.",correct:true,explain:"Endothermic ionisation of water."}
     ],
     });
