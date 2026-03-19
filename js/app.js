@@ -1003,13 +1003,57 @@
       tiles.push({ id: `f${i}`, text: c.front, match: `b${i}` });
       tiles.push({ id: `b${i}`, text: c.back, match: `f${i}` });
     });
-    shuffle(tiles);
+    const isAdjacent = (a, b, cols) => {
+      const ar = Math.floor(a / cols);
+      const ac = a % cols;
+      const br = Math.floor(b / cols);
+      const bc = b % cols;
+      return (ar === br && Math.abs(ac - bc) === 1) || (ac === bc && Math.abs(ar - br) === 1);
+    };
+
+    const adjacentPairCount = (arr, cols) => {
+      const posById = {};
+      arr.forEach((tile, idx) => {
+        posById[tile.id] = idx;
+      });
+      let count = 0;
+      const seen = new Set();
+      arr.forEach((tile) => {
+        const a = tile.id;
+        const b = tile.match;
+        const key = a < b ? `${a}|${b}` : `${b}|${a}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        if (isAdjacent(posById[a], posById[b], cols)) count++;
+      });
+      return count;
+    };
+
+    // Optimize the shuffled layout to avoid adjacent answer pairs.
+    // We score against both mobile (2 cols) and wider (3 cols) grid modes.
+    let arranged = shuffle(tiles);
+    let best = arranged;
+    let bestScore = adjacentPairCount(best, 2) + adjacentPairCount(best, 3);
+    for (let tries = 0; tries < 200 && bestScore > 0; tries++) {
+      const cand = shuffle(tiles);
+      const score = adjacentPairCount(cand, 2) + adjacentPairCount(cand, 3);
+      if (score < bestScore) {
+        best = cand;
+        bestScore = score;
+      }
+      if (score === 0) {
+        best = cand;
+        bestScore = 0;
+        break;
+      }
+    }
+    arranged = best;
     let sel = null;
     let matched = 0;
     area.innerHTML =
       '<div class="match-grid" id="match-grid"></div><p class="flash-progress" id="match-status"></p>';
     const grid = document.getElementById("match-grid");
-    tiles.forEach((tile) => {
+    arranged.forEach((tile) => {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "match-tile";
@@ -1034,7 +1078,7 @@
           sel.classList.remove("selected");
           sel = null;
           matched += 2;
-          if (matched === tiles.length) {
+          if (matched === arranged.length) {
             state.xp += 25;
             saveState();
             document.getElementById("match-status").textContent =
