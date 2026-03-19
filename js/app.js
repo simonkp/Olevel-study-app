@@ -59,6 +59,17 @@
   let route = { view: "home", topicId: null, tab: "cheat" };
   let quizSession = null;
   let flashSession = null;
+  let timeTracker = { topicId: null, tab: null, startedAt: 0 };
+
+  // Small time-based XP to make Flashcards + Visuals contribute too.
+  // Quiz + games keep their existing scoring (only correctness-based XP).
+  const TIME_XP = {
+    cheat: { msPerXp: 0, capXp: 0 },
+    visual: { msPerXp: 60000, capXp: 10 }, // 1 XP per minute (capped per topic+tab)
+    flash: { msPerXp: 45000, capXp: 15 }, // ~1 XP per 45s (capped per topic+tab)
+    quiz: { msPerXp: 0, capXp: 0 },
+    game: { msPerXp: 0, capXp: 0 },
+  };
 
   function loadState() {
     try {
@@ -80,6 +91,8 @@
       flashKnown: {},
       coupons: [],
       themeBossBeaten: {},
+      studyTimeMsByTopicTab: {},
+      timeXpEarnedByTopicTab: {},
     };
   }
 
@@ -96,6 +109,8 @@
       flashKnown: state.flashKnown,
       coupons: state.coupons,
       themeBossBeaten: state.themeBossBeaten,
+      studyTimeMsByTopicTab: state.studyTimeMsByTopicTab,
+      timeXpEarnedByTopicTab: state.timeXpEarnedByTopicTab,
     };
   }
 
@@ -111,12 +126,59 @@
     state.flashKnown = payload.flashKnown || state.flashKnown;
     state.coupons = payload.coupons || state.coupons;
     state.themeBossBeaten = payload.themeBossBeaten || state.themeBossBeaten;
+    state.studyTimeMsByTopicTab =
+      payload.studyTimeMsByTopicTab || state.studyTimeMsByTopicTab;
+    state.timeXpEarnedByTopicTab =
+      payload.timeXpEarnedByTopicTab || state.timeXpEarnedByTopicTab;
     saveState();
   }
 
   function saveState() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     updateTopbar();
+  }
+
+  function stopAndAwardTime() {
+    if (!timeTracker.topicId || !timeTracker.tab || !timeTracker.startedAt) return;
+    const topicId = timeTracker.topicId;
+    const tab = timeTracker.tab;
+    const elapsedMs = Date.now() - timeTracker.startedAt;
+    timeTracker = { topicId: null, tab: null, startedAt: 0 };
+
+    if (!elapsedMs || elapsedMs < 1000) return;
+
+    state.studyTimeMsByTopicTab[topicId] =
+      state.studyTimeMsByTopicTab[topicId] || {};
+    state.studyTimeMsByTopicTab[topicId][tab] =
+      (state.studyTimeMsByTopicTab[topicId][tab] || 0) + elapsedMs;
+
+    const rule = TIME_XP[tab];
+    if (!rule || rule.msPerXp <= 0 || rule.capXp <= 0) {
+      saveState();
+      return;
+    }
+
+    const rawXp = Math.floor(elapsedMs / rule.msPerXp);
+    if (rawXp <= 0) return;
+
+    state.timeXpEarnedByTopicTab[topicId] =
+      state.timeXpEarnedByTopicTab[topicId] || {};
+    const earned = state.timeXpEarnedByTopicTab[topicId][tab] || 0;
+    const remaining = Math.max(0, rule.capXp - earned);
+    const addXp = Math.min(rawXp, remaining);
+
+    if (addXp > 0) {
+      state.xp += addXp;
+      state.timeXpEarnedByTopicTab[topicId][tab] = earned + addXp;
+      saveState();
+    }
+  }
+
+  function startTime(topicId, tab) {
+    if (!topicId || !tab) return;
+    timeTracker.topicId = topicId;
+    timeTracker.tab = tab;
+    timeTracker.startedAt = Date.now();
   }
 
   function bumpStreak() {
@@ -166,6 +228,7 @@
 
   function renderHome() {
     bumpStreak();
+    stopAndAwardTime();
     dock.hidden = true;
     const parts = [];
     let currentTheme = "";
@@ -312,6 +375,7 @@
   }
 
   function goTopic(id, tab) {
+    stopAndAwardTime();
     route = { view: "topic", topicId: id, tab: tab || "cheat" };
     main.innerHTML =
       '<p class="empty-state">Loading topic…</p>';
@@ -345,6 +409,8 @@
       } else renderHome();
       return;
     }
+    // Topic is ready; finalize previous timing segment (if any).
+    stopAndAwardTime();
     dock.hidden = false;
     dock.querySelectorAll("button").forEach((b) => {
       b.classList.toggle("active", b.dataset.tab === route.tab);
@@ -396,6 +462,8 @@
       };
     }
     bindPanelHandlers(t);
+
+    startTime(t.id, route.tab);
 
     // Typeset `$...$` / `$$...$$` using KaTeX (loaded by `subject.html`).
     // Retry briefly in case KaTeX auto-render hasn't finished loading yet.
@@ -546,6 +614,15 @@
     const pool = shuffle(t.flashcards);
     const review = [];
     let idx = 0;
+    let flashCompleted = false;
+    let hadReviewRound = false;
+    let actionLock = false;
+    const MIN_FLASH_READ_MS = 2000;
+    const deckSize = pool.length;
+    let cardShownAt = 0;
+    let sawBackForCard = false;
+    const validatedCards = typeof WeakSet !== "undefined" ? new WeakSet() : null;
+    let validatedCount = 0;
     const front = document.getElementById("flash-front");
     const back = document.getElementById("flash-back");
     const card = document.getElementById("flash-card");
@@ -558,6 +635,12 @@
           review.length = 0;
           idx = 0;
         } else {
+          flashCompleted = true;
+          const baseBonus = hadReviewRound ? 18 : 10;
+          const ratio = deckSize > 0 ? validatedCount / deckSize : 0;
+          const bonus = Math.floor(baseBonus * ratio);
+          if (bonus > 0) state.xp += bonus;
+          saveState();
           front.textContent = "Deck cleared — open another tab or redo.";
           back.textContent = "Nice.";
           card.classList.remove("flipped");
@@ -570,16 +653,52 @@
       back.textContent = c.back;
       card.classList.remove("flipped");
       prog.textContent = `${idx + 1} / ${pool.length}`;
+      cardShownAt = Date.now();
+      sawBackForCard = false;
     }
 
-    card.onclick = () => card.classList.toggle("flipped");
+    card.onclick = () => {
+      card.classList.toggle("flipped");
+      sawBackForCard = card.classList.contains("flipped");
+    };
     document.getElementById("flash-got").onclick = () => {
+      if (flashCompleted || actionLock) return;
+      actionLock = true;
+      const currentCard = pool[idx];
+      const elapsed = Date.now() - cardShownAt;
+      const validRead = elapsed >= MIN_FLASH_READ_MS && sawBackForCard;
       idx++;
+      if (validRead) {
+        const already = validatedCards ? validatedCards.has(currentCard) : false;
+        if (!already) {
+          state.xp += 2;
+          if (validatedCards) validatedCards.add(currentCard);
+          validatedCount++;
+          saveState();
+        }
+      }
+      actionLock = false;
       show();
     };
     document.getElementById("flash-review").onclick = () => {
+      if (flashCompleted || actionLock) return;
+      actionLock = true;
+      const currentCard = pool[idx];
+      const elapsed = Date.now() - cardShownAt;
+      const validRead = elapsed >= MIN_FLASH_READ_MS && sawBackForCard;
       review.push(pool[idx]);
       idx++;
+      hadReviewRound = true;
+      if (validRead) {
+        const already = validatedCards ? validatedCards.has(currentCard) : false;
+        if (!already) {
+          state.xp += 1;
+          if (validatedCards) validatedCards.add(currentCard);
+          validatedCount++;
+          saveState();
+        }
+      }
+      actionLock = false;
       show();
     };
     show();
