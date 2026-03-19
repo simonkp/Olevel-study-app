@@ -20,13 +20,25 @@
   const QUIZ_PER_ROUND = 20;
   const BOSS_QUESTION_MS_MULT = 0.8;
   const BOSS_XP = 800;
-  const THEME_TOPIC_IDS = {
-    "1": ["1", "2", "3", "4", "5"],
-    "2": ["6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"],
-    "3": ["17", "18", "19"],
-  };
-  const THEME_NAMES = { "1": "Matter", "2": "Chemical Reactions", "3": "Sustainable World" };
   const loadScriptPromises = {};
+
+  // Boss themes are derived from each topic's `theme` field in the manifest.
+  // This makes boss battles generic across subjects (Chemistry, Physics, etc.).
+  const themeOrder = [];
+  const themesByKey = {};
+  (function buildThemes() {
+    const seen = new Set();
+    manifest.forEach((t) => {
+      const key = t && t.theme ? String(t.theme) : "";
+      if (!key) return;
+      if (!seen.has(key)) {
+        seen.add(key);
+        themeOrder.push(key);
+      }
+      if (!themesByKey[key]) themesByKey[key] = [];
+      themesByKey[key].push(t.id);
+    });
+  })();
 
   function loadTopicScript(id) {
     if (window.__topicRegistry[id]) {
@@ -220,9 +232,9 @@
     return (state.topicBest[prev] || 0) >= need;
   }
 
-  function isBossUnlocked(themeId) {
-    const ids = THEME_TOPIC_IDS[themeId];
-    if (!ids) return false;
+  function isBossUnlocked(themeKey) {
+    const ids = themesByKey[themeKey];
+    if (!ids || !ids.length) return false;
     return ids.every((id) => isUnlocked(id));
   }
 
@@ -262,16 +274,22 @@
       if (!next || next.theme !== currentTheme) parts.push("</div></div>");
     });
     const bossParts = [];
-    [ "1", "2", "3" ].forEach((themeId) => {
-      const beaten = state.themeBossBeaten && state.themeBossBeaten[themeId];
-      const unlocked = isBossUnlocked(themeId);
+    themeOrder.forEach((themeKey) => {
+      const beaten = state.themeBossBeaten && state.themeBossBeaten[themeKey];
+      const unlocked = isBossUnlocked(themeKey);
       if (!unlocked && !beaten) return;
-      const name = THEME_NAMES[themeId] || "Theme " + themeId;
+      const name = themeKey;
       bossParts.push(
-        `<button type="button" class="topic-card boss-card ${beaten ? "boss-beaten" : ""}" data-boss="${themeId}" ${beaten ? "disabled" : ""}>
+        `<button type="button" class="topic-card boss-card ${
+          beaten ? "boss-beaten" : ""
+        }" data-boss="${escapeHtml(themeKey)}" ${
+          beaten ? "disabled" : ""
+        }>
           <span class="num">BOSS</span>
           <span class="title">${escapeHtml(name)}</span>
-          <span class="badge">${beaten ? "🏆 Beaten" : "1 HP · fast timer · big XP"}</span>
+          <span class="badge">${
+            beaten ? "🏆 Beaten" : "1 HP · fast timer · big XP"
+          }</span>
         </button>`
       );
     });
@@ -1106,10 +1124,15 @@
     };
   }
 
-  function startBossBattle(themeId) {
-    const name = THEME_NAMES[themeId] || "Theme " + themeId;
-    const ids = THEME_TOPIC_IDS[themeId];
-    if (!ids || state.themeBossBeaten && state.themeBossBeaten[themeId]) return;
+  function startBossBattle(themeKey) {
+    const name = themeKey;
+    const ids = themesByKey[themeKey];
+    if (
+      !ids ||
+      state.themeBossBeaten &&
+        state.themeBossBeaten[themeKey]
+    )
+      return;
     main.innerHTML = `
       <div class="boss-intro">
         <h1>Boss: ${escapeHtml(name)}</h1>
@@ -1131,8 +1154,8 @@
       Promise.all(ids.map((id) => loadTopicScript(id)))
         .then((topics) => {
           const allQuiz = topics.flatMap((t) => (t.quiz || []).map((q) => ({ ...q })));
-          const synthetic = { id: "boss" + themeId, quiz: allQuiz };
-          runQuiz(synthetic, container, { boss: true, themeId });
+          const synthetic = { id: "boss:" + themeKey, quiz: allQuiz };
+          runQuiz(synthetic, container, { boss: true, themeId: themeKey });
         })
         .catch(() => {
           container.innerHTML = "<p class='empty-state'>Failed to load topics.</p><button type='button' class='btn primary' id='boss-back'>Back</button>";
