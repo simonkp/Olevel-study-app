@@ -82,6 +82,12 @@
     quiz: { msPerXp: 0, capXp: 0 },
     game: { msPerXp: 0, capXp: 0 },
   };
+  const DAILY_CHALLENGE = {
+    answered: 10,
+    reviewRounds: 1,
+    weakTopics: 1,
+    bonusXp: 60,
+  };
 
   function loadState() {
     try {
@@ -105,6 +111,15 @@
       themeBossBeaten: {},
       studyTimeMsByTopicTab: {},
       timeXpEarnedByTopicTab: {},
+      questionStats: {},
+      dailyChallenge: {
+        date: "",
+        answered: 0,
+        reviewRounds: 0,
+        weakTopics: {},
+        completed: false,
+        bonusAwarded: false,
+      },
     };
   }
 
@@ -123,6 +138,8 @@
       themeBossBeaten: state.themeBossBeaten,
       studyTimeMsByTopicTab: state.studyTimeMsByTopicTab,
       timeXpEarnedByTopicTab: state.timeXpEarnedByTopicTab,
+      questionStats: state.questionStats,
+      dailyChallenge: state.dailyChallenge,
     };
   }
 
@@ -142,6 +159,8 @@
       payload.studyTimeMsByTopicTab || state.studyTimeMsByTopicTab;
     state.timeXpEarnedByTopicTab =
       payload.timeXpEarnedByTopicTab || state.timeXpEarnedByTopicTab;
+    state.questionStats = payload.questionStats || state.questionStats;
+    state.dailyChallenge = payload.dailyChallenge || state.dailyChallenge;
     saveState();
   }
 
@@ -191,6 +210,192 @@
     timeTracker.topicId = topicId;
     timeTracker.tab = tab;
     timeTracker.startedAt = Date.now();
+  }
+
+  function todayKey() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function ensureDailyChallenge() {
+    const today = todayKey();
+    if (!state.dailyChallenge || state.dailyChallenge.date !== today) {
+      state.dailyChallenge = {
+        date: today,
+        answered: 0,
+        reviewRounds: 0,
+        weakTopics: {},
+        completed: false,
+        bonusAwarded: false,
+      };
+    }
+    return state.dailyChallenge;
+  }
+
+  function maybeCompleteDailyChallenge() {
+    const daily = ensureDailyChallenge();
+    const weakTopicCount = Object.keys(daily.weakTopics || {}).length;
+    const ready =
+      daily.answered >= DAILY_CHALLENGE.answered &&
+      daily.reviewRounds >= DAILY_CHALLENGE.reviewRounds &&
+      weakTopicCount >= DAILY_CHALLENGE.weakTopics;
+    if (!ready) return false;
+    daily.completed = true;
+    if (!daily.bonusAwarded) {
+      daily.bonusAwarded = true;
+      state.xp += DAILY_CHALLENGE.bonusXp;
+      saveState();
+      return true;
+    }
+    return false;
+  }
+
+  function markDailyAnswered(count) {
+    const daily = ensureDailyChallenge();
+    daily.answered += count || 1;
+    if (!maybeCompleteDailyChallenge()) saveState();
+  }
+
+  function markDailyReviewRound() {
+    const daily = ensureDailyChallenge();
+    daily.reviewRounds += 1;
+    if (!maybeCompleteDailyChallenge()) saveState();
+  }
+
+  function markDailyWeakTopic(topicId) {
+    if (!topicId) return;
+    const daily = ensureDailyChallenge();
+    daily.weakTopics[String(topicId)] = true;
+    if (!maybeCompleteDailyChallenge()) saveState();
+  }
+
+  function getDailyChallengeSummary() {
+    const daily = ensureDailyChallenge();
+    return {
+      answered: daily.answered || 0,
+      reviewRounds: daily.reviewRounds || 0,
+      weakTopics: Object.keys(daily.weakTopics || {}).length,
+      completed: !!daily.completed,
+      bonusAwarded: !!daily.bonusAwarded,
+    };
+  }
+
+  function normalizeQuestionText(s) {
+    return String(s || "")
+      .trim()
+      .replace(/\s+/g, " ")
+      .slice(0, 180);
+  }
+
+  function getQuestionTopicId(q, fallbackTopicId) {
+    return String((q && (q.__topicId || q.topicId)) || fallbackTopicId || "unknown");
+  }
+
+  function getQuestionKey(q, fallbackTopicId) {
+    if (q && q.id != null) return String(q.id);
+    return `${getQuestionTopicId(q, fallbackTopicId)}::${normalizeQuestionText(
+      q && q.question
+    )}`;
+  }
+
+  function touchQuestionStats(topicId, questionKey) {
+    state.questionStats = state.questionStats || {};
+    state.questionStats[topicId] = state.questionStats[topicId] || {};
+    if (!state.questionStats[topicId][questionKey]) {
+      state.questionStats[topicId][questionKey] = {
+        seen: 0,
+        correct: 0,
+        wrongs: 0,
+        streak: 0,
+        mastery: 0,
+        lastSeenAt: 0,
+        lastCorrectAt: 0,
+        lastWrongAt: 0,
+        lastResult: null,
+      };
+    }
+    return state.questionStats[topicId][questionKey];
+  }
+
+  function readQuestionStats(q, fallbackTopicId) {
+    const topicId = getQuestionTopicId(q, fallbackTopicId);
+    const questionKey = getQuestionKey(q, fallbackTopicId);
+    const stats =
+      (state.questionStats &&
+        state.questionStats[topicId] &&
+        state.questionStats[topicId][questionKey]) || {
+        seen: 0,
+        correct: 0,
+        wrongs: 0,
+        streak: 0,
+        mastery: 0,
+        lastSeenAt: 0,
+        lastCorrectAt: 0,
+        lastWrongAt: 0,
+        lastResult: null,
+      };
+    return { topicId, questionKey, stats };
+  }
+
+  function getQuestionBucket(stats) {
+    if (!stats || stats.seen === 0) return "new";
+    if (
+      stats.lastResult === "wrong" ||
+      stats.lastResult === "timeout" ||
+      stats.mastery < 40
+    ) {
+      return "weak";
+    }
+    if (stats.mastery >= 85 && stats.streak >= 3) return "mastered";
+    if (stats.mastery >= 60) return "strong";
+    return "improving";
+  }
+
+  function getQuestionPriority(stats) {
+    let score = 50;
+    if (!stats || stats.seen === 0) score += 60;
+    score += Math.max(0, 60 - (stats ? stats.mastery : 0));
+    if (stats && stats.lastResult === "wrong") score += 30;
+    if (stats && stats.lastResult === "timeout") score += 35;
+    if (stats && stats.lastSeenAt) {
+      const staleMs = Date.now() - stats.lastSeenAt;
+      if (staleMs > 1000 * 60 * 60 * 24 * 3) score += 10;
+    }
+    if (stats && stats.mastery >= 85 && stats.streak >= 3) score -= 35;
+    return score;
+  }
+
+  function annotateQuizBank(bank, fallbackTopicId) {
+    return bank.map((q, i) => {
+      const enriched = { ...q, __topicId: q.__topicId || fallbackTopicId, _i: i };
+      const info = readQuestionStats(enriched, fallbackTopicId);
+      return {
+        q: enriched,
+        topicId: info.topicId,
+        questionKey: info.questionKey,
+        stats: info.stats,
+        bucket: getQuestionBucket(info.stats),
+        priority: getQuestionPriority(info.stats),
+      };
+    });
+  }
+
+  function getStoredTopicMastery(topicId) {
+    const items = Object.values(
+      (state.questionStats && state.questionStats[String(topicId)]) || {}
+    );
+    if (!items.length) return { label: "New", weakCount: 0, avgMastery: 0 };
+    const avgMastery =
+      items.reduce((sum, item) => sum + (item.mastery || 0), 0) / items.length;
+    const weakCount = items.filter(
+      (item) =>
+        item.lastResult === "wrong" ||
+        item.lastResult === "timeout" ||
+        (item.mastery || 0) < 40
+    ).length;
+    let label = "Improving";
+    if (avgMastery >= 85) label = "Mastered";
+    else if (avgMastery >= 60) label = "Strong";
+    return { label, weakCount, avgMastery };
   }
 
   function bumpStreak() {
@@ -244,6 +449,17 @@
     dock.hidden = true;
     const parts = [];
     let currentTheme = "";
+    const daily = getDailyChallengeSummary();
+    const dailyBanner = `
+      <div class="daily-card">
+        <div class="daily-title">Daily challenge${daily.bonusAwarded ? ` · +${DAILY_CHALLENGE.bonusXp} XP claimed` : ""}</div>
+        <div class="daily-progress">
+          <span class="quiz-chip">Quiz ${Math.min(daily.answered, DAILY_CHALLENGE.answered)}/${DAILY_CHALLENGE.answered}</span>
+          <span class="quiz-chip">Review ${Math.min(daily.reviewRounds, DAILY_CHALLENGE.reviewRounds)}/${DAILY_CHALLENGE.reviewRounds}</span>
+          <span class="quiz-chip">Weak topic ${Math.min(daily.weakTopics, DAILY_CHALLENGE.weakTopics)}/${DAILY_CHALLENGE.weakTopics}</span>
+          <span class="quiz-chip ${daily.completed ? "mastered" : ""}">${daily.completed ? "Completed" : "In progress"}</span>
+        </div>
+      </div>`;
     manifest.forEach((t) => {
       if (t.theme !== currentTheme) {
         currentTheme = t.theme;
@@ -259,6 +475,13 @@
         best != null
           ? `<span class="badge done">${best}% best</span>`
           : `<span class="badge">Study</span>`;
+      const mastery = getStoredTopicMastery(t.id);
+      const masteryBadge = `<span class="badge mastery">${escapeHtml(
+        mastery.label
+      )}</span>`;
+      const reviewBadge = mastery.weakCount
+        ? `<span class="badge review">${mastery.weakCount} weak</span>`
+        : "";
       parts.push(
         `<button type="button" class="topic-card ${
           unlocked ? "unlocked" : ""
@@ -267,7 +490,7 @@
         } title="${unlocked ? "" : "Locked — raise previous topic to 70% or enable Unlock all in settings"}">
           <span class="num">T${t.id}</span>
           <span class="title">${escapeHtml(t.title)}</span>
-          ${badge}
+          <span class="badge-row">${badge}${masteryBadge}${reviewBadge}</span>
         </button>`
       );
       const next = manifest[topicIndex(t.id) + 1];
@@ -303,6 +526,7 @@
     main.innerHTML = `
       <h1 class="dash-title">${escapeHtml(SUBJECT_TITLE)}</h1>
       <p class="dash-sub">Topics · Shop (spend XP on rewards) · Boss battles when a full theme is unlocked.</p>
+      ${dailyBanner}
       ${parts.join("")}
     `;
     main.querySelectorAll(".topic-card[data-topic]").forEach((btn) => {
@@ -580,12 +804,23 @@
   }
 
   function renderQuizPanel(t) {
-    const bank = getTopicQuizBank(t);
+    const insight = getTopicQuizInsights(t);
+    const daily = getDailyChallengeSummary();
     return `
       <div class="panel active" data-panel="quiz">
         <div id="quiz-start-wrap">
-          <p class="game-intro">Bank: ${bank.length} MCQs · each round: ${Math.min(QUIZ_PER_ROUND, bank.length)} random · timer · early wrong = health loss · 3 streak = combo.</p>
-          <button type="button" class="btn primary" id="quiz-start">Start quiz</button>
+          <p class="game-intro">Bank: ${insight.total} MCQs · each round: ${Math.min(QUIZ_PER_ROUND, insight.total)} adaptive · timer · early wrong = health loss · 3 streak = combo.</p>
+          <div class="quiz-insights">
+            <span class="quiz-chip">${escapeHtml(insight.label)}</span>
+            <span class="quiz-chip">Weak ${insight.weakCount}</span>
+            <span class="quiz-chip">New ${insight.unseenCount}</span>
+            <span class="quiz-chip">Mastered ${insight.masteredCount}</span>
+          </div>
+          <div class="quiz-start-actions">
+            <button type="button" class="btn primary" id="quiz-start">Start adaptive quiz</button>
+            <button type="button" class="btn" id="quiz-review" ${insight.weakCount ? "" : "disabled"}>Review weak questions${insight.weakCount ? ` (${insight.weakCount})` : ""}</button>
+          </div>
+          <p class="quiz-note">Daily: ${Math.min(daily.answered, DAILY_CHALLENGE.answered)}/${DAILY_CHALLENGE.answered} answered · ${Math.min(daily.reviewRounds, DAILY_CHALLENGE.reviewRounds)}/${DAILY_CHALLENGE.reviewRounds} review rounds · ${Math.min(daily.weakTopics, DAILY_CHALLENGE.weakTopics)}/${DAILY_CHALLENGE.weakTopics} weak topic.</p>
         </div>
         <div id="quiz-play" hidden></div>
       </div>`;
@@ -725,16 +960,27 @@
 
   function bindQuiz(t) {
     const start = document.getElementById("quiz-start");
+    const review = document.getElementById("quiz-review");
     const wrap = document.getElementById("quiz-start-wrap");
     const play = document.getElementById("quiz-play");
+    const insight = getTopicQuizInsights(t);
     start.onclick = () => {
+      if (insight.weakCount > 0) markDailyWeakTopic(t.id);
       wrap.hidden = true;
       play.hidden = false;
       runQuiz(t, play);
     };
+    if (review) {
+      review.onclick = () => {
+        if (insight.weakCount > 0) markDailyWeakTopic(t.id);
+        wrap.hidden = true;
+        play.hidden = false;
+        runQuiz(t, play, { review: true });
+      };
+    }
   }
 
-  function showExplain(title, body, then) {
+  function showExplain(title, body, then, note) {
     const root = document.getElementById("modal-root");
     const panelExplain = document.getElementById("panel-explain");
     const panelSettings = document.getElementById("panel-settings");
@@ -742,7 +988,10 @@
     panelSettings.hidden = true;
     if (panelShop) panelShop.hidden = true;
     document.getElementById("explain-title").textContent = title;
-    document.getElementById("explain-body").textContent = body;
+    const explainBody = document.getElementById("explain-body");
+    explainBody.innerHTML = `${escapeHtml(body)}${
+      note ? `<span class="explain-note">${escapeHtml(note)}</span>` : ""
+    }`;
     panelExplain.hidden = false;
     root.hidden = false;
     root.setAttribute("aria-hidden", "false");
@@ -761,7 +1010,7 @@
     const base = Array.isArray(t.quiz) ? t.quiz : [];
     const byTopic = window.EXTRA_QUIZ_BY_TOPIC || {};
     const extra = Array.isArray(byTopic[String(t.id)]) ? byTopic[String(t.id)] : [];
-    return base.concat(extra);
+    return base.concat(extra).map((q) => ({ ...q, __topicId: q.__topicId || t.id }));
   }
 
   function getThemeExtraQuiz(themeKey) {
@@ -774,15 +1023,173 @@
     return hitKey && Array.isArray(byTheme[hitKey]) ? byTheme[hitKey] : [];
   }
 
+  function getTopicQuizInsights(t) {
+    const annotated = annotateQuizBank(getTopicQuizBank(t), t.id);
+    const weakCount = annotated.filter((item) => item.bucket === "weak").length;
+    const unseenCount = annotated.filter((item) => item.bucket === "new").length;
+    const masteredCount = annotated.filter(
+      (item) => item.bucket === "mastered"
+    ).length;
+    const avgMastery = annotated.length
+      ? annotated.reduce(
+          (sum, item) => sum + (item.stats.mastery || 0),
+          0
+        ) / annotated.length
+      : 0;
+    let label = "New";
+    if (annotated.some((item) => item.stats.seen > 0)) {
+      label = "Improving";
+      if (avgMastery >= 85) label = "Mastered";
+      else if (avgMastery >= 60) label = "Strong";
+    }
+    return {
+      total: annotated.length,
+      weakCount,
+      unseenCount,
+      masteredCount,
+      avgMastery,
+      label,
+    };
+  }
+
+  function pickAdaptiveQuestions(t, opts) {
+    opts = opts || {};
+    const annotated = annotateQuizBank(getTopicQuizBank(t), t.id);
+    const n = Math.min(QUIZ_PER_ROUND, annotated.length);
+    const rank = (items) =>
+      items
+        .map((item) => ({ ...item, _rand: Math.random() }))
+        .sort((a, b) => b.priority - a.priority || a._rand - b._rand);
+    const weak = rank(annotated.filter((item) => item.bucket === "weak"));
+    const fresh = rank(annotated.filter((item) => item.bucket === "new"));
+    const normal = rank(
+      annotated.filter(
+        (item) => item.bucket === "improving" || item.bucket === "strong"
+      )
+    );
+    const mastered = rank(
+      annotated.filter((item) => item.bucket === "mastered")
+    );
+
+    if (opts.review) {
+      const reviewPool = weak.length ? weak : normal;
+      return reviewPool.slice(0, Math.min(n, reviewPool.length)).map((item) => ({
+        ...item.q,
+        __questionKey: item.questionKey,
+      }));
+    }
+
+    const selected = [];
+    const used = new Set();
+    const takeFrom = (items, count) => {
+      for (const item of items) {
+        if (selected.length >= n || count <= 0) break;
+        if (used.has(item.questionKey)) continue;
+        used.add(item.questionKey);
+        selected.push({ ...item.q, __questionKey: item.questionKey });
+        count--;
+      }
+    };
+
+    takeFrom(weak, Math.min(6, weak.length));
+    takeFrom(fresh, Math.min(5, fresh.length));
+    takeFrom(normal, Math.max(0, n - selected.length - Math.min(2, mastered.length)));
+    takeFrom(mastered, Math.min(2, mastered.length));
+    takeFrom(rank(annotated), n - selected.length);
+
+    return selected;
+  }
+
+  function recordQuestionOutcome(q, fallbackTopicId, outcome, elapsedSec) {
+    const topicId = getQuestionTopicId(q, fallbackTopicId);
+    const questionKey = q.__questionKey || getQuestionKey(q, fallbackTopicId);
+    const stats = touchQuestionStats(topicId, questionKey);
+    stats.seen += 1;
+    stats.lastSeenAt = Date.now();
+    stats.lastResult = outcome;
+    if (outcome === "correct") {
+      stats.correct += 1;
+      stats.streak += 1;
+      stats.lastCorrectAt = Date.now();
+      let gain = 10 + Math.min(10, stats.streak * 2);
+      if (elapsedSec <= QUESTION_MS / 1000 / 2) gain += 6;
+      stats.mastery = Math.min(100, stats.mastery + gain);
+    } else if (outcome === "wrong") {
+      stats.wrongs += 1;
+      stats.streak = 0;
+      stats.lastWrongAt = Date.now();
+      stats.mastery = Math.max(0, stats.mastery - 18);
+    } else if (outcome === "timeout") {
+      stats.wrongs += 1;
+      stats.streak = 0;
+      stats.lastWrongAt = Date.now();
+      stats.mastery = Math.max(0, stats.mastery - 24);
+    }
+    saveState();
+  }
+
+  function getQuestionConfidenceMeta(q, fallbackTopicId) {
+    const info = readQuestionStats(q, fallbackTopicId);
+    const stats = info.stats || {};
+    const mastery = Math.max(0, Math.min(100, Math.round(stats.mastery || 0)));
+    const bucket = getQuestionBucket(stats);
+    let label = "Building";
+    let reason = "Keep seeing this a little more until the pattern is stable.";
+    let tone = "building";
+
+    if (bucket === "new") {
+      label = "New";
+      tone = "new";
+      reason = "This is still new, so it will come back a few times to build memory.";
+    } else if (bucket === "weak") {
+      label = "Needs practice";
+      tone = "weak";
+      if (stats.lastResult === "timeout") {
+        reason = "This one is shown more often because time ran out recently.";
+      } else {
+        reason = "This one is shown more often because it was missed recently.";
+      }
+    } else if (bucket === "strong") {
+      label = "Strong";
+      tone = "strong";
+      reason = "You usually get this right, so it should appear less often now.";
+    } else if (bucket === "mastered") {
+      label = "Mastered";
+      tone = "mastered";
+      reason = "This should appear only occasionally now for spaced review.";
+    }
+
+    return { mastery, label, reason, tone };
+  }
+
+  function renderQuestionConfidenceHtml(q, fallbackTopicId) {
+    const meta = getQuestionConfidenceMeta(q, fallbackTopicId);
+    return `
+      <div class="question-confidence ${meta.tone}">
+        <div class="question-confidence-head">
+          <span class="question-confidence-label">${escapeHtml(meta.label)}</span>
+          <span class="question-confidence-pct">${meta.mastery}%</span>
+        </div>
+        <div class="question-confidence-bar"><div class="question-confidence-fill" style="width:${meta.mastery}%"></div></div>
+        <div class="question-confidence-reason">${escapeHtml(meta.reason)}</div>
+      </div>`;
+  }
+
   function runQuiz(t, container, opts) {
     opts = opts || {};
     const isBoss = !!opts.boss;
+    const isReview = !!opts.review;
     const healthMax = isBoss ? 1 : HEALTH_START;
     const questionMs = isBoss ? Math.round(QUESTION_MS * BOSS_QUESTION_MS_MULT) : QUESTION_MS;
-    const bank = getTopicQuizBank(t);
-    const pool = shuffle(bank.map((q, i) => ({ ...q, _i: i })));
-    const n = Math.min(QUIZ_PER_ROUND, pool.length);
-    const qs = pool.slice(0, n);
+    const qs = pickAdaptiveQuestions(t, opts);
+    if (!qs.length) {
+      container.innerHTML = `<div class="game-win"><h3>No questions ready</h3><p>${
+        isReview
+          ? "You do not have enough weak questions yet. Try a normal quiz first."
+          : "This topic does not have a quiz bank yet."
+      }</p></div>`;
+      return;
+    }
     let qi = 0;
     let score = 0;
     let combo = 0;
@@ -794,11 +1201,14 @@
       if (qi >= qs.length) {
         const pct = Math.round((score / (qs.length * 100)) * 100);
         const capped = Math.min(100, pct);
-        if (!isBoss && t.id) {
+        if (!isBoss && !isReview && t.id) {
           state.topicScores[t.id] = (state.topicScores[t.id] || 0) + 1;
           if ((state.topicBest[t.id] || 0) < capped)
             state.topicBest[t.id] = capped;
           state.xp += Math.round(capped * 2 + combo * 5);
+        } else if (isReview && t.id) {
+          state.xp += Math.max(10, Math.round(capped + combo * 2));
+          if (qs.length) markDailyReviewRound();
         } else if (isBoss && opts.themeId) {
           state.themeBossBeaten = state.themeBossBeaten || {};
           state.themeBossBeaten[opts.themeId] = true;
@@ -808,8 +1218,8 @@
         const bossMsg = isBoss ? `<p class="boss-reward">🏆 +${BOSS_XP} XP · Theme badge unlocked!</p>` : "";
         container.innerHTML = `
           <div class="game-win">
-            <h3>${isBoss ? "Boss defeated!" : "Round complete"}</h3>
-            <p>Score: ${score} · ~${capped}%${!isBoss && t.id ? " · Best saved: " + state.topicBest[t.id] + "%" : ""}</p>
+            <h3>${isBoss ? "Boss defeated!" : isReview ? "Review complete" : "Round complete"}</h3>
+            <p>Score: ${score} · ~${capped}%${!isBoss && !isReview && t.id ? " · Best saved: " + state.topicBest[t.id] + "%" : ""}</p>
             ${bossMsg}
             <button type="button" class="btn primary" id="quiz-again">${isBoss ? "Back to topics" : "Again"}</button>
           </div>`;
@@ -818,6 +1228,8 @@
           if (isBoss) {
             route = { view: "home" };
             renderHome();
+          } else if (isReview) {
+            runQuiz(t, container, { review: true });
           } else {
             runQuiz(t, container);
           }
@@ -826,12 +1238,11 @@
       }
 
       const q = qs[qi];
-      const opts = q.options.map((o, i) => ({ o, i }));
-      shuffle(opts);
+      const optionItems = shuffle(q.options.map((o, i) => ({ o, i })));
       container.innerHTML = `
         <div class="quiz-meta">
           <div class="timer-bar-wrap"><div class="timer-bar" id="q-timer"></div></div>
-          <span class="combo" id="q-combo">${combo >= COMBO_AT ? "🔥 COMBO x" + COMBO_MULT : ""}</span>
+          <span class="combo" id="q-combo">${isReview ? "Review mode" : combo >= COMBO_AT ? "🔥 COMBO x" + COMBO_MULT : ""}</span>
           <div class="health-bar" id="q-health">${Array(healthMax)
             .fill(0)
             .map(
@@ -845,6 +1256,7 @@
         <div class="quiz-q">${escapeHtml(q.question)}</div>
         <div class="quiz-options" id="q-opts"></div>
         <div class="quiz-score-line">Points this round: ${score}</div>
+        <div id="quiz-confidence"></div>
       `;
       const bar = document.getElementById("q-timer");
       bar.style.transition = "none";
@@ -857,7 +1269,7 @@
       timerId = setTimeout(() => finish(false, true), questionMs);
 
       const optEl = document.getElementById("q-opts");
-      opts.forEach(({ o, i }) => {
+      optionItems.forEach(({ o, i }) => {
         const b = document.createElement("button");
         b.type = "button";
         b.className = "quiz-opt";
@@ -881,6 +1293,8 @@
       const opts = document.querySelectorAll(".quiz-opt");
       opts.forEach((b) => (b.disabled = true));
       if (timeout) {
+        recordQuestionOutcome(q, t.id, "timeout", elapsed);
+        const confidenceMeta = getQuestionConfidenceMeta(q, t.id);
         if (isBoss) {
           health = Math.max(0, health - 1);
           if (health === 0) {
@@ -901,10 +1315,12 @@
           combo = 0;
           qi++;
           renderQ();
-        });
+        }, `${confidenceMeta.label} · ${confidenceMeta.reason}`);
         return;
       }
+      markDailyAnswered(1);
       if (correct) {
+        recordQuestionOutcome(q, t.id, "correct", elapsed);
         combo++;
         let pts = 100;
         const timeLeft = Math.max(0, 1 - elapsed / (QUESTION_MS / 1000));
@@ -915,11 +1331,17 @@
           if (Number(b.dataset.idx) === q.correctIndex)
             b.classList.add("correct");
         });
+        const confidence = document.getElementById("quiz-confidence");
+        if (confidence) {
+          confidence.innerHTML = renderQuestionConfidenceHtml(q, t.id);
+        }
         setTimeout(() => {
           qi++;
           renderQ();
-        }, 450);
+        }, 900);
       } else {
+        recordQuestionOutcome(q, t.id, "wrong", elapsed);
+        const confidenceMeta = getQuestionConfidenceMeta(q, t.id);
         if (elapsed < EARLY_WRONG_SEC || isBoss) {
           health = Math.max(0, health - 1);
         }
@@ -945,7 +1367,12 @@
             renderHome();
           };
         } else {
-          showExplain("Not quite", q.explanation, next);
+          showExplain(
+            "Not quite",
+            q.explanation,
+            next,
+            `${confidenceMeta.label} · ${confidenceMeta.reason}`
+          );
         }
       }
     }
