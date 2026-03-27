@@ -338,5 +338,85 @@ const QUIZ_DB = [
         "C": "Versioning is still possible, though consistency and skew are the bigger immediate risks.",
         "D": "REST APIs can serve preprocessed predictions; the issue is consistency, not API capability."
       }
+    },
+    {
+      "id": "L7-Q18",
+      "chapter": "l7",
+      "chapterTitle": "Lecture 7 — Model Deployment",
+      "text": "Which deployment design best supports both web UI and batch scoring with the same model behavior?",
+      "options": {
+        "A": "Load model separately in each client with duplicated preprocessing",
+        "B": "Expose one prediction API and call it from both UI and batch jobs",
+        "C": "Run only notebook cells manually before each prediction",
+        "D": "Use different model versions for each client type"
+      },
+      "correct": "B",
+      "explainCorrect": "A single serving endpoint centralizes model + preprocessing logic and avoids divergent behavior across channels.",
+      "explainOptions": {
+        "A": "Duplicated pipelines increase inconsistency risk.",
+        "B": "A single serving endpoint centralizes model + preprocessing logic and avoids divergent behavior across channels.",
+        "C": "Manual notebook execution is not robust deployment practice.",
+        "D": "Different versions by channel creates governance and consistency issues."
+      }
+    },
+    {
+      "id": "L7-Q19",
+      "chapter": "l7",
+      "chapterTitle": "Lecture 7 — Model Deployment",
+      "text": "Why log prediction input/output with timestamps in production?",
+      "options": {
+        "A": "Only to reduce latency",
+        "B": "To enable post-hoc error analysis, drift monitoring, and auditability",
+        "C": "To replace model evaluation datasets permanently",
+        "D": "To eliminate need for retraining"
+      },
+      "correct": "B",
+      "explainCorrect": "Structured logs support debugging, delayed-label evaluation, drift checks, and governance requirements.",
+      "explainOptions": {
+        "A": "Logging usually adds overhead; latency reduction is not its purpose.",
+        "B": "Structured logs support debugging, delayed-label evaluation, drift checks, and governance requirements.",
+        "C": "Logs complement, not replace, curated evaluation data.",
+        "D": "Logging informs retraining decisions; it does not remove retraining need."
+      }
+    },
+    {
+      "id": "L7-Q20",
+      "chapter": "l7",
+      "chapterTitle": "Lecture 7 — Model Deployment",
+      "text": "A deployment suddenly fails after platform runtime update. Most preventive control?",
+      "options": {
+        "A": "Pin runtime and dependency versions explicitly",
+        "B": "Increase dropout in the model",
+        "C": "Switch from API to CSV scoring",
+        "D": "Disable schema validation"
+      },
+      "correct": "A",
+      "explainCorrect": "Version pinning improves reproducibility and prevents accidental breakage from environment drift.",
+      "explainOptions": {
+        "A": "Version pinning improves reproducibility and prevents accidental breakage from environment drift.",
+        "B": "Model regularization does not solve environment compatibility failures.",
+        "C": "Format changes do not address runtime compatibility issues.",
+        "D": "Validation controls input integrity and is unrelated to runtime package breakage."
+      }
+    },
+    {
+      "id": "L7-Q21",
+      "chapter": "l7",
+      "chapterTitle": "Lecture 7 — Model Deployment",
+      "text": "What is a practical signal that concept drift may be occurring in production?",
+      "options": {
+        "A": "Stable input distribution and stable error rates",
+        "B": "Input distribution looks normal but prediction error rises on newly labeled outcomes",
+        "C": "Model file size increases slightly",
+        "D": "API response headers change"
+      },
+      "correct": "B",
+      "explainCorrect": "Concept drift means relationship between features and target changes; errors increase even if feature marginals appear similar.",
+      "explainOptions": {
+        "A": "This suggests stability rather than drift.",
+        "B": "Concept drift means relationship between features and target changes; errors increase even if feature marginals appear similar.",
+        "C": "File size is not a direct concept-drift indicator.",
+        "D": "Headers are operational metadata, not predictive performance signals."
+      }
     }
 ];

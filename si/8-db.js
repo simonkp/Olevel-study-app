@@ -338,5 +338,85 @@ const QUIZ_DB = [
         "C": "Drop rate is not increased at inference; dropout is turned off.",
         "D": "Dropout does not target activations by sign."
       }
+    },
+    {
+      "id": "L8-Q18",
+      "chapter": "l8",
+      "chapterTitle": "Lecture 8 — Neural Nets I",
+      "text": "Why can stacked linear layers without activation be simplified to one layer?",
+      "options": {
+        "A": "Because matrix multiplication of linear transforms remains linear",
+        "B": "Because dropout automatically introduces nonlinearity",
+        "C": "Because bias terms cancel out exactly",
+        "D": "Because hidden layers are ignored during backprop"
+      },
+      "correct": "A",
+      "explainCorrect": "Composing linear functions yields another linear function, so depth alone without activation does not increase representational nonlinearity.",
+      "explainOptions": {
+        "A": "Composing linear functions yields another linear function, so depth alone without activation does not increase representational nonlinearity.",
+        "B": "Dropout is a regularizer, not a replacement for activation nonlinearity.",
+        "C": "Biases do not generally cancel; they combine linearly.",
+        "D": "Backprop still traverses all layers."
+      }
+    },
+    {
+      "id": "L8-Q19",
+      "chapter": "l8",
+      "chapterTitle": "Lecture 8 — Neural Nets I",
+      "text": "What is the main role of ReLU in hidden layers of deep networks?",
+      "options": {
+        "A": "Convert logits into probabilities",
+        "B": "Introduce nonlinearity and maintain stronger gradients in positive regime",
+        "C": "Normalize each batch to zero mean",
+        "D": "Compute cross-entropy directly"
+      },
+      "correct": "B",
+      "explainCorrect": "ReLU enables nonlinear decision boundaries and avoids saturation for positive activations, improving optimization in deep nets.",
+      "explainOptions": {
+        "A": "Probability mapping is usually output-layer activation (e.g., sigmoid/softmax).",
+        "B": "ReLU enables nonlinear decision boundaries and avoids saturation for positive activations, improving optimization in deep nets.",
+        "C": "Batch normalization performs distribution normalization.",
+        "D": "Loss functions are computed separately from hidden activations."
+      }
+    },
+    {
+      "id": "L8-Q20",
+      "chapter": "l8",
+      "chapterTitle": "Lecture 8 — Neural Nets I",
+      "text": "For tabular data with high-cardinality categorical features, why are embeddings often preferred over one-hot?",
+      "options": {
+        "A": "Embeddings always require fewer samples",
+        "B": "Embeddings learn dense representations and can encode category similarity",
+        "C": "One-hot cannot be used with neural networks",
+        "D": "Embeddings eliminate need for train/validation split"
+      },
+      "correct": "B",
+      "explainCorrect": "Dense learned vectors reduce sparsity and allow semantically similar categories to occupy nearby regions in representation space.",
+      "explainOptions": {
+        "A": "Sample efficiency depends on task and model, not guaranteed solely by embeddings.",
+        "B": "Dense learned vectors reduce sparsity and allow semantically similar categories to occupy nearby regions in representation space.",
+        "C": "One-hot is compatible with NNs but can be inefficient for high cardinality.",
+        "D": "Validation strategy remains necessary regardless of encoding approach."
+      }
+    },
+    {
+      "id": "L8-Q21",
+      "chapter": "l8",
+      "chapterTitle": "Lecture 8 — Neural Nets I",
+      "text": "A model has low training loss but much worse validation loss. Which regularization action is most direct?",
+      "options": {
+        "A": "Increase model depth further",
+        "B": "Use dropout/early stopping and possibly reduce model complexity",
+        "C": "Remove validation set to reduce variance",
+        "D": "Switch all activations to sigmoid"
+      },
+      "correct": "B",
+      "explainCorrect": "This pattern indicates overfitting; regularization and capacity control are direct mitigations.",
+      "explainOptions": {
+        "A": "More depth may worsen overfitting if not constrained.",
+        "B": "This pattern indicates overfitting; regularization and capacity control are direct mitigations.",
+        "C": "Removing validation hides the issue instead of fixing it.",
+        "D": "Activation change alone is not a targeted overfitting remedy here."
+      }
     }
 ];

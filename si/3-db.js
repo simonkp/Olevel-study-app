@@ -238,5 +238,45 @@ const QUIZ_DB = [
         "C": "Regularization may matter, but leakage is the main reason for unrealistically high scores here.",
         "D": "Missing labels would prevent supervised evaluation, not inflate it this way."
       }
+    },
+    {
+      "id": "L3-Q25",
+      "chapter": "l3",
+      "chapterTitle": "Lecture 3 — Regression and Classification I",
+      "text": "In a logistic model, odds ratio for a feature is 0.70. Best interpretation?",
+      "options": {
+        "A": "Odds of the positive outcome increase by 70%",
+        "B": "Odds of the positive outcome decrease by 30% per unit increase in that feature",
+        "C": "Probability always decreases by exactly 30 percentage points",
+        "D": "Feature has no effect because OR is close to 1"
+      },
+      "correct": "B",
+      "explainCorrect": "OR below 1 indicates reduced odds; 0.70 corresponds to a 30% odds decrease, not a fixed probability-point change.",
+      "explainOptions": {
+        "A": "That interpretation would correspond to OR > 1.",
+        "B": "OR below 1 indicates reduced odds; 0.70 corresponds to a 30% odds decrease, not a fixed probability-point change.",
+        "C": "Odds-ratio interpretation is not equivalent to a constant probability-point shift.",
+        "D": "OR=1 indicates no effect; 0.70 indicates a meaningful negative association."
+      }
+    },
+    {
+      "id": "L3-Q26",
+      "chapter": "l3",
+      "chapterTitle": "Lecture 3 — Regression and Classification I",
+      "text": "A binary classifier reports precision = 0.40 and recall = 0.80 for positive class. Which trade-off is implied?",
+      "options": {
+        "A": "Model finds many positives but includes many false positives",
+        "B": "Model misses most positives but predictions are highly reliable",
+        "C": "Model has balanced precision and recall",
+        "D": "Metrics are inconsistent and impossible"
+      },
+      "correct": "A",
+      "explainCorrect": "High recall with low precision means the model captures many true positives but at the cost of many false alarms.",
+      "explainOptions": {
+        "A": "High recall with low precision means the model captures many true positives but at the cost of many false alarms.",
+        "B": "Missing most positives would correspond to low recall, not high recall.",
+        "C": "Precision and recall differ substantially here.",
+        "D": "This combination is common when thresholds favor sensitivity."
+      }
     }
 ];

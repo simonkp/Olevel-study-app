@@ -338,5 +338,85 @@ const QUIZ_DB = [
         "C": "Underfitting is not the primary issue implied by pre-split normalization.",
         "D": "Scaling does not create class imbalance; leakage is the main risk here."
       }
+    },
+    {
+      "id": "L4-Q18",
+      "chapter": "l4",
+      "chapterTitle": "Lecture 4 — Regression and Classification II",
+      "text": "In Random Forest, why does averaging many de-correlated trees usually help?",
+      "options": {
+        "A": "It increases bias intentionally to avoid variance",
+        "B": "It reduces variance by averaging unstable individual trees",
+        "C": "It removes need for train/test split",
+        "D": "It guarantees perfect calibration"
+      },
+      "correct": "B",
+      "explainCorrect": "Single deep trees have high variance; averaging many diverse trees stabilizes predictions and improves generalization.",
+      "explainOptions": {
+        "A": "RF primarily targets variance reduction while keeping bias reasonably low.",
+        "B": "Single deep trees have high variance; averaging many diverse trees stabilizes predictions and improves generalization.",
+        "C": "Evaluation separation is still required.",
+        "D": "RF can still be miscalibrated and may need calibration methods."
+      }
+    },
+    {
+      "id": "L4-Q19",
+      "chapter": "l4",
+      "chapterTitle": "Lecture 4 — Regression and Classification II",
+      "text": "Which is the clearest target leakage example in churn modeling?",
+      "options": {
+        "A": "Customer tenure at prediction time",
+        "B": "A flag computed using cancellation date that occurs after prediction cutoff",
+        "C": "Region and age features",
+        "D": "Order count from historical period before cutoff"
+      },
+      "correct": "B",
+      "explainCorrect": "Any feature using future information (post-cutoff outcomes/events) leaks label information into training.",
+      "explainOptions": {
+        "A": "If measured at cutoff, tenure is a valid predictor.",
+        "B": "Any feature using future information (post-cutoff outcomes/events) leaks label information into training.",
+        "C": "These are common non-leaky baseline features when time-aligned properly.",
+        "D": "Historical pre-cutoff aggregates are generally valid."
+      }
+    },
+    {
+      "id": "L4-Q20",
+      "chapter": "l4",
+      "chapterTitle": "Lecture 4 — Regression and Classification II",
+      "text": "For highly imbalanced binary classification, which metric often gives more actionable insight than ROC-AUC?",
+      "options": {
+        "A": "PR-AUC",
+        "B": "R²",
+        "C": "MSE",
+        "D": "Explained variance"
+      },
+      "correct": "A",
+      "explainCorrect": "Precision-Recall behavior emphasizes positive-class retrieval quality and false positives, which is critical under severe imbalance.",
+      "explainOptions": {
+        "A": "Precision-Recall behavior emphasizes positive-class retrieval quality and false positives, which is critical under severe imbalance.",
+        "B": "R² is a regression metric.",
+        "C": "MSE is not a primary classification ranking metric.",
+        "D": "Explained variance is also regression-oriented."
+      }
+    },
+    {
+      "id": "L4-Q21",
+      "chapter": "l4",
+      "chapterTitle": "Lecture 4 — Regression and Classification II",
+      "text": "Why should preprocessing and model be packaged in one pipeline object for deployment?",
+      "options": {
+        "A": "To reduce file size only",
+        "B": "To enforce identical train/inference transforms and reduce training-serving skew",
+        "C": "To remove need for feature validation",
+        "D": "To guarantee best hyperparameters"
+      },
+      "correct": "B",
+      "explainCorrect": "A single pipeline preserves transform order/parameters and prevents drift caused by duplicated or inconsistent preprocessing code.",
+      "explainOptions": {
+        "A": "Size can vary; consistency is the main deployment reason.",
+        "B": "A single pipeline preserves transform order/parameters and prevents drift caused by duplicated or inconsistent preprocessing code.",
+        "C": "Input validation is still needed.",
+        "D": "Pipeline packaging does not automatically optimize hyperparameters."
+      }
     }
 ];

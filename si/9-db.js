@@ -338,5 +338,85 @@ const QUIZ_DB = [
         "C": "AR order tuning alone does not solve non-stationarity.",
         "D": "Random splitting causes leakage in time series and does not fix non-stationarity."
       }
+    },
+    {
+      "id": "L9-Q18",
+      "chapter": "l9",
+      "chapterTitle": "Lecture 9 — RNN & LSTM",
+      "text": "In an RNN, what is shared across timesteps?",
+      "options": {
+        "A": "Input values only",
+        "B": "Model parameters (weights) while hidden state evolves",
+        "C": "Different network architecture at each step",
+        "D": "Separate optimizer for each timestep"
+      },
+      "correct": "B",
+      "explainCorrect": "RNN applies the same cell parameters repeatedly over sequence positions; memory is carried by hidden/cell states, not by changing weights per step.",
+      "explainOptions": {
+        "A": "Inputs change per timestep; parameters are what remain shared.",
+        "B": "RNN applies the same cell parameters repeatedly over sequence positions; memory is carried by hidden/cell states, not by changing weights per step.",
+        "C": "Architecture and parameters are reused, not redesigned per timestep.",
+        "D": "Optimization is global for model parameters, not one optimizer per timestep."
+      }
+    },
+    {
+      "id": "L9-Q19",
+      "chapter": "l9",
+      "chapterTitle": "Lecture 9 — RNN & LSTM",
+      "text": "Why is random shuffle split usually invalid for time-series forecasting?",
+      "options": {
+        "A": "Because it always decreases training size",
+        "B": "Because it can leak future information into training and inflate metrics",
+        "C": "Because ARIMA requires equal class balance",
+        "D": "Because sequence models cannot handle shuffled data at all"
+      },
+      "correct": "B",
+      "explainCorrect": "Temporal ordering must be respected for realistic forecasting; shuffling can violate causal chronology in evaluation.",
+      "explainOptions": {
+        "A": "Shuffle policy is about chronology/leakage, not necessarily sample count.",
+        "B": "Temporal ordering must be respected for realistic forecasting; shuffling can violate causal chronology in evaluation.",
+        "C": "Class balance is not the core issue in many forecasting tasks.",
+        "D": "Models can technically train on shuffled batches, but evaluation split must preserve time order."
+      }
+    },
+    {
+      "id": "L9-Q20",
+      "chapter": "l9",
+      "chapterTitle": "Lecture 9 — RNN & LSTM",
+      "text": "In LSTM, which gate controls retention of old cell-state information?",
+      "options": {
+        "A": "Input gate",
+        "B": "Forget gate",
+        "C": "Output gate",
+        "D": "Softmax gate"
+      },
+      "correct": "B",
+      "explainCorrect": "Forget gate scales prior cell-state contribution; values near 1 keep memory, near 0 discard it.",
+      "explainOptions": {
+        "A": "Input gate controls how much new candidate information is added.",
+        "B": "Forget gate scales prior cell-state contribution; values near 1 keep memory, near 0 discard it.",
+        "C": "Output gate controls what portion of cell state is exposed as hidden state.",
+        "D": "There is no standard LSTM 'softmax gate'."
+      }
+    },
+    {
+      "id": "L9-Q21",
+      "chapter": "l9",
+      "chapterTitle": "Lecture 9 — RNN & LSTM",
+      "text": "A model using teacher forcing trains stably but accumulates errors during multi-step rollout. Most relevant mitigation?",
+      "options": {
+        "A": "Use scheduled sampling or mixed teacher forcing during training",
+        "B": "Disable hidden states entirely",
+        "C": "Replace sequence input with shuffled independent rows",
+        "D": "Use larger batch size only"
+      },
+      "correct": "A",
+      "explainCorrect": "Reducing train-inference mismatch (exposure bias) via scheduled sampling can improve robustness during autoregressive rollout.",
+      "explainOptions": {
+        "A": "Reducing train-inference mismatch (exposure bias) via scheduled sampling can improve robustness during autoregressive rollout.",
+        "B": "Removing hidden states defeats sequence memory modeling.",
+        "C": "Shuffling independent rows breaks temporal dependency structure.",
+        "D": "Batch size alone does not directly address exposure bias."
+      }
     }
   ];

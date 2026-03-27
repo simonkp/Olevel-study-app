@@ -178,5 +178,85 @@ const QUIZ_DB = [
         "C": "Course policy treats unacknowledged AI-assisted content as academic dishonesty equivalent to unattributed lifting/paraphrasing.",
         "D": "Acknowledgement rules apply to written content as well, not only code."
       }
+    },
+    {
+      "id": "L1-Q19",
+      "chapter": "l1",
+      "chapterTitle": "Lecture 1 — Course Introduction",
+      "text": "A manager wants to compare average order values between two groups, but 17% of outcome values are missing. Which statement is most accurate?",
+      "options": {
+        "A": "Simple mean imputation is always unbiased for inference",
+        "B": "Multiple Imputation is generally preferred over simple imputation for inference at this missingness level",
+        "C": "Missingness below 20% can be ignored safely",
+        "D": "Drop all missing rows because it never biases estimates"
+      },
+      "correct": "B",
+      "explainCorrect": "For inferential tasks with moderate missingness, Multiple Imputation better preserves uncertainty and reduces bias risk compared with simple fill methods.",
+      "explainOptions": {
+        "A": "Simple mean fill tends to reduce variance artificially and can bias inferential conclusions.",
+        "B": "For inferential tasks with moderate missingness, Multiple Imputation better preserves uncertainty and reduces bias risk compared with simple fill methods.",
+        "C": "Ignoring missingness can still bias inference depending on mechanism and pattern.",
+        "D": "Listwise deletion may be convenient but can reduce power and introduce bias."
+      }
+    },
+    {
+      "id": "L1-Q20",
+      "chapter": "l1",
+      "chapterTitle": "Lecture 1 — Course Introduction",
+      "text": "Why is data quality usually treated as an early-stage priority in analytics pipelines?",
+      "options": {
+        "A": "Because model choice no longer matters when data quality is high",
+        "B": "Because poor data quality propagates and amplifies downstream errors in modeling and decisions",
+        "C": "Because data quality checks are only needed for visualization",
+        "D": "Because storage cost decreases when quality checks are skipped"
+      },
+      "correct": "B",
+      "explainCorrect": "Upstream data issues contaminate features, labels, and metrics, making later model improvements less meaningful.",
+      "explainOptions": {
+        "A": "Model choice still matters; quality is necessary but not sufficient.",
+        "B": "Upstream data issues contaminate features, labels, and metrics, making later model improvements less meaningful.",
+        "C": "Data quality affects the full pipeline, not only visualization.",
+        "D": "Skipping checks may reduce effort short term but usually increases downstream rework."
+      }
+    },
+    {
+      "id": "L1-Q21",
+      "chapter": "l1",
+      "chapterTitle": "Lecture 1 — Course Introduction",
+      "text": "A sentiment analysis report uses only reviews with comments (41% of total), because the rest are blank. Best reporting practice?",
+      "options": {
+        "A": "Present findings as fully representative of all customers",
+        "B": "Label results as exploratory and state the effective coverage explicitly",
+        "C": "Impute missing comments with neutral text to claim full coverage",
+        "D": "Hide missingness percentage to avoid confusion"
+      },
+      "correct": "B",
+      "explainCorrect": "Transparency about coverage and generalizability is essential when a large portion of the target field is missing.",
+      "explainOptions": {
+        "A": "This overstates generalizability beyond observed data.",
+        "B": "Transparency about coverage and generalizability is essential when a large portion of the target field is missing.",
+        "C": "Fabricating text content introduces artificial assumptions and can distort conclusions.",
+        "D": "Concealing missingness undermines credibility and interpretation."
+      }
+    },
+    {
+      "id": "L1-Q22",
+      "chapter": "l1",
+      "chapterTitle": "Lecture 1 — Course Introduction",
+      "text": "Which pair below both belongs to the six data quality dimensions discussed in class?",
+      "options": {
+        "A": "Timeliness and Uniqueness",
+        "B": "Recall and Precision",
+        "C": "Skewness and Kurtosis",
+        "D": "Drift and Leakage"
+      },
+      "correct": "A",
+      "explainCorrect": "The six dimensions include Completeness, Uniqueness, Validity, Consistency, Timeliness, and Accuracy.",
+      "explainOptions": {
+        "A": "The six dimensions include Completeness, Uniqueness, Validity, Consistency, Timeliness, and Accuracy.",
+        "B": "Recall and precision are model performance metrics, not data quality dimensions.",
+        "C": "Skewness and kurtosis describe distributions, not data quality dimensions.",
+        "D": "Drift and leakage are modeling/ML pipeline risks, not core data quality dimensions."
+      }
     }
 ];

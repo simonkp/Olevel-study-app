@@ -338,5 +338,85 @@ const QUIZ_DB = [
         "C": "Silhouette around 0 implies similar distance to own cluster and nearest neighboring cluster, indicating boundary ambiguity.",
         "D": "K-Means does not automatically remove noise points."
       }
+    },
+    {
+      "id": "L5-Q18",
+      "chapter": "l5",
+      "chapterTitle": "Lecture 5 — Unsupervised Learning",
+      "text": "Why is K-Means often run on standardized features?",
+      "options": {
+        "A": "Because K-Means requires integer features",
+        "B": "Because Euclidean distance is scale-sensitive and large-scale features can dominate clustering",
+        "C": "Because standardization automatically selects optimal k",
+        "D": "Because it converts K-Means into density-based clustering"
+      },
+      "correct": "B",
+      "explainCorrect": "K-Means minimizes Euclidean distance, so variable scaling affects cluster assignment if features are on different ranges.",
+      "explainOptions": {
+        "A": "K-Means works on continuous numeric features, not specifically integers.",
+        "B": "K-Means minimizes Euclidean distance, so variable scaling affects cluster assignment if features are on different ranges.",
+        "C": "Standardization helps distance comparability but does not choose k.",
+        "D": "K-Means remains centroid-based, not density-based."
+      }
+    },
+    {
+      "id": "L5-Q19",
+      "chapter": "l5",
+      "chapterTitle": "Lecture 5 — Unsupervised Learning",
+      "text": "BERTopic uses c-TF-IDF mainly to:",
+      "options": {
+        "A": "Generate embeddings",
+        "B": "Assign topic labels by finding words distinctive to each cluster",
+        "C": "Estimate optimal number of clusters directly",
+        "D": "Replace UMAP in dimensionality reduction"
+      },
+      "correct": "B",
+      "explainCorrect": "After clustering, c-TF-IDF highlights class-distinctive terms to name/interpret topics.",
+      "explainOptions": {
+        "A": "Embeddings are produced earlier by sentence-transformer style models.",
+        "B": "After clustering, c-TF-IDF highlights class-distinctive terms to name/interpret topics.",
+        "C": "Cluster count is not directly optimized by c-TF-IDF.",
+        "D": "UMAP is still used for embedding-space reduction before clustering."
+      }
+    },
+    {
+      "id": "L5-Q20",
+      "chapter": "l5",
+      "chapterTitle": "Lecture 5 — Unsupervised Learning",
+      "text": "Compared with K-Means, HDBSCAN is especially useful when:",
+      "options": {
+        "A": "Clusters are roughly spherical and equal-sized",
+        "B": "Cluster density varies and some points should be marked as noise",
+        "C": "You want deterministic centroids for every cluster",
+        "D": "You need to force every point into a cluster"
+      },
+      "correct": "B",
+      "explainCorrect": "HDBSCAN handles variable-density structure and can label outliers/noise, unlike K-Means’ forced assignment.",
+      "explainOptions": {
+        "A": "That scenario generally suits K-Means well.",
+        "B": "HDBSCAN handles variable-density structure and can label outliers/noise, unlike K-Means’ forced assignment.",
+        "C": "HDBSCAN is not centroid-forcing like K-Means.",
+        "D": "HDBSCAN can intentionally leave points as noise (-1)."
+      }
+    },
+    {
+      "id": "L5-Q21",
+      "chapter": "l5",
+      "chapterTitle": "Lecture 5 — Unsupervised Learning",
+      "text": "In RFM segmentation, a customer with high Frequency and Monetary but very high Recency (days since last order) is best interpreted as:",
+      "options": {
+        "A": "Potentially valuable but currently at risk of churn",
+        "B": "A brand-new customer",
+        "C": "An obvious low-value customer",
+        "D": "Guaranteed loyal long-term active customer"
+      },
+      "correct": "A",
+      "explainCorrect": "High historical value with long inactivity often indicates a formerly strong segment now requiring reactivation strategy.",
+      "explainOptions": {
+        "A": "High historical value with long inactivity often indicates a formerly strong segment now requiring reactivation strategy.",
+        "B": "New customers typically have low frequency history.",
+        "C": "High F and M indicate substantial historical value.",
+        "D": "Very high recency suggests inactivity, not currently active loyalty."
+      }
     }
 ];

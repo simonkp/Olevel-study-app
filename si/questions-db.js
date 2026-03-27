@@ -1,7 +1,7 @@
 // IS5126 Quiz — merged loader for split DB files.
 // Each file (1-db.js, 2-db.js, ... 9-db.js except 6) defines `const QUIZ_DB = [...]`.
 
-const DB_CHUNK_VERSION = "2026-03-17-2";
+const DB_CHUNK_VERSION = "2026-03-17-3";
 const db_files = ["1-db.js", "2-db.js", "3-db.js", "4-db.js", "5-db.js", "7-db.js", "8-db.js", "9-db.js"];
 let QUIZ_DB = [];
 

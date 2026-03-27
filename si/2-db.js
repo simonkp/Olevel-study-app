@@ -558,5 +558,85 @@ const QUIZ_DB = [
         "C": "Sorting does not change row cardinality; duplicates remain duplicates.",
         "D": "Averaging IDs does not represent order counts and does not correct duplication."
       }
+    },
+    {
+      "id": "L2-Q18",
+      "chapter": "l2",
+      "chapterTitle": "Lecture 2 — Data Processing, Storage & Retrieval",
+      "text": "A LEFT JOIN between 12,000 orders and reviews returns 12,000 rows. For orders without reviews, what should appear in review columns?",
+      "options": {
+        "A": "NULL values",
+        "B": "0 for numeric and empty string for text by SQL default",
+        "C": "Rows are omitted entirely",
+        "D": "Duplicate values from nearest matching order"
+      },
+      "correct": "A",
+      "explainCorrect": "LEFT JOIN preserves all left-table rows and fills right-table attributes with NULL when no match exists.",
+      "explainOptions": {
+        "A": "LEFT JOIN preserves all left-table rows and fills right-table attributes with NULL when no match exists.",
+        "B": "SQL does not auto-fill unmatched right columns with business defaults.",
+        "C": "That behavior corresponds to INNER JOIN, not LEFT JOIN.",
+        "D": "SQL joins do not copy nearest records unless explicitly specified."
+      }
+    },
+    {
+      "id": "L2-Q19",
+      "chapter": "l2",
+      "chapterTitle": "Lecture 2 — Data Processing, Storage & Retrieval",
+      "text": "You need monthly GMV by state from order data and item-level prices/freight. Which strategy avoids aggregation mistakes?",
+      "options": {
+        "A": "Aggregate at item level directly and divide later by orders",
+        "B": "Aggregate at order level first, then roll up to month/state",
+        "C": "Use DISTINCT on price to remove duplicates",
+        "D": "Join only reviews and orders, then sum"
+      },
+      "correct": "B",
+      "explainCorrect": "Order-level aggregation first prevents one-to-many inflation and preserves clean business-grain metrics before higher-level rollups.",
+      "explainOptions": {
+        "A": "Item-level direct aggregation can inflate metrics tied to order grain.",
+        "B": "Order-level aggregation first prevents one-to-many inflation and preserves clean business-grain metrics before higher-level rollups.",
+        "C": "DISTINCT on measure values is not a valid fix for grain mismatch.",
+        "D": "Ignoring order_items loses the needed price/freight components for GMV."
+      }
+    },
+    {
+      "id": "L2-Q20",
+      "chapter": "l2",
+      "chapterTitle": "Lecture 2 — Data Processing, Storage & Retrieval",
+      "text": "Why is HAVING used instead of WHERE for conditions like COUNT(*) > 20?",
+      "options": {
+        "A": "WHERE runs after aggregation and can reference aggregates directly",
+        "B": "HAVING filters grouped results, while WHERE filters rows before grouping",
+        "C": "HAVING is only faster on indexed tables",
+        "D": "WHERE cannot be used with GROUP BY queries at all"
+      },
+      "correct": "B",
+      "explainCorrect": "Aggregate conditions are evaluated after grouping, so they belong in HAVING rather than WHERE.",
+      "explainOptions": {
+        "A": "WHERE is evaluated before aggregation.",
+        "B": "Aggregate conditions are evaluated after grouping, so they belong in HAVING rather than WHERE.",
+        "C": "Clause choice here is semantic/logical, not primarily an index-speed rule.",
+        "D": "WHERE can be used with GROUP BY for pre-aggregation row filters."
+      }
+    },
+    {
+      "id": "L2-Q21",
+      "chapter": "l2",
+      "chapterTitle": "Lecture 2 — Data Processing, Storage & Retrieval",
+      "text": "A recommendation feature requires traversing customer→product→category relationships repeatedly. Best-fitting data model?",
+      "options": {
+        "A": "Graph model for efficient relationship traversal",
+        "B": "Flat CSV files for simpler deployment",
+        "C": "Key-value store without edge semantics",
+        "D": "Document store with no references"
+      },
+      "correct": "A",
+      "explainCorrect": "Graph structures are optimized for multi-hop relationship traversal and neighborhood queries.",
+      "explainOptions": {
+        "A": "Graph structures are optimized for multi-hop relationship traversal and neighborhood queries.",
+        "B": "CSV lacks efficient relational traversal semantics.",
+        "C": "Key-value stores are efficient for lookup, not graph-style traversal.",
+        "D": "Pure document blobs are less natural for repeated many-hop relationship logic."
+      }
     }
 ];
