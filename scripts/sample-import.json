@@ -1,0 +1,20 @@
+{
+  "subjectCode": "chemistry",
+  "topicCode": "1",
+  "sourceRef": "Guidebook-Ch1",
+  "questions": [
+    {
+      "prompt": "Which variable is deliberately changed in an experiment?",
+      "options": [
+        "Dependent variable",
+        "Independent variable",
+        "Control variable",
+        "Random variable"
+      ],
+      "correctIndex": 1,
+      "explanation": "Independent variable is the one intentionally changed.",
+      "difficultyLevel": 1,
+      "conceptCodes": ["variables"]
+    }
+  ]
+}

@@ -1,0 +1,283 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  PARENT
+  CHILD
+}
+
+enum AttemptMode {
+  PRACTICE
+  SCORED
+}
+
+enum ExplanationSource {
+  TEMPLATE
+  LLM
+}
+
+enum RedemptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  role          UserRole  @default(CHILD)
+  childProfile  ChildProfile?
+  parentProfile ParentProfile?
+  accounts      Account[]
+  sessions      Session[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model ParentProfile {
+  id       String   @id @default(cuid())
+  userId   String   @unique
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  children ChildProfile[]
+}
+
+model ChildProfile {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  parentId       String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent         ParentProfile @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  level          Int      @default(1)
+  xp             Int      @default(0)
+  streakDays     Int      @default(0)
+  lastStudyDate  DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  masteryStates  MasteryState[]
+  attempts       Attempt[]
+  sessions       StudySession[]
+  rewardRequests RewardRedemption[]
+}
+
+model Subject {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  title       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  topics      Topic[]
+}
+
+model Topic {
+  id             String   @id @default(cuid())
+  subjectId      String
+  code           String
+  title          String
+  difficultyBand Int      @default(1)
+  orderIndex     Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  subject        Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  concepts       Concept[]
+  questions      QuestionBank[]
+  masteryStates  MasteryState[]
+
+  @@unique([subjectId, code])
+}
+
+model Concept {
+  id             String   @id @default(cuid())
+  topicId        String
+  code           String
+  title          String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  topic          Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  questions      QuestionBankConcept[]
+  masteryStates  MasteryState[]
+
+  @@unique([topicId, code])
+}
+
+model QuestionBank {
+  id                 String   @id @default(cuid())
+  topicId            String
+  prompt             String
+  optionsJson        Json
+  correctIndex       Int
+  explanation        String
+  difficultyLevel    Int
+  source             String   @default("manual")
+  sourceRef          String?
+  conceptVersion     Int      @default(1)
+  generatedByAi      Boolean  @default(false)
+  needsReview        Boolean  @default(false)
+  active             Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  topic              Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  conceptLinks       QuestionBankConcept[]
+  attempts           Attempt[]
+  explanationCache   ExplanationCache[]
+  generationEvents   GenerationEvent[]
+
+  @@index([topicId, difficultyLevel, active])
+}
+
+model QuestionBankConcept {
+  questionId String
+  conceptId  String
+  question   QuestionBank @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  concept    Concept      @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, conceptId])
+}
+
+model StudySession {
+  id                  String   @id @default(cuid())
+  childProfileId      String
+  topicId             String?
+  mode                AttemptMode @default(SCORED)
+  startedAt           DateTime @default(now())
+  endedAt             DateTime?
+  interactionCount    Int      @default(0)
+  suspiciousIdleScore Int      @default(0)
+  childProfile        ChildProfile @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
+  attempts            Attempt[]
+
+  @@index([childProfileId, startedAt])
+}
+
+model Attempt {
+  id                 String   @id @default(cuid())
+  childProfileId     String
+  questionId         String
+  sessionId          String?
+  mode               AttemptMode @default(SCORED)
+  selectedIndex      Int
+  correct            Boolean
+  latencyMs          Int
+  noveltyScore       Float    @default(1)
+  xpAwarded          Int      @default(0)
+  createdAt          DateTime @default(now())
+  childProfile       ChildProfile @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
+  question           QuestionBank  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  session            StudySession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  @@index([childProfileId, createdAt])
+  @@index([questionId, createdAt])
+}
+
+model MasteryState {
+  id                String   @id @default(cuid())
+  childProfileId    String
+  topicId           String?
+  conceptId         String?
+  masteryScore      Float    @default(0)
+  confidenceScore   Float    @default(0)
+  delayedRecallScore Float   @default(0)
+  mixedReviewScore  Float    @default(0)
+  lastReviewedAt    DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  childProfile      ChildProfile @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
+  topic             Topic?   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  concept           Concept? @relation(fields: [conceptId], references: [id], onDelete: Cascade)
+
+  @@unique([childProfileId, topicId, conceptId])
+}
+
+model RewardCatalog {
+  id          String   @id @default(cuid())
+  code        String   @unique
+  label       String
+  xpCost      Int
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  redemptions RewardRedemption[]
+}
+
+model RewardRedemption {
+  id             String   @id @default(cuid())
+  childProfileId String
+  rewardId       String
+  status         RedemptionStatus @default(PENDING)
+  requestedAt    DateTime @default(now())
+  resolvedAt     DateTime?
+  childProfile   ChildProfile @relation(fields: [childProfileId], references: [id], onDelete: Cascade)
+  reward         RewardCatalog @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+}
+
+model ExplanationCache {
+  id               String   @id @default(cuid())
+  questionId       String
+  wrongOptionIndex Int
+  difficultyLevel  Int
+  conceptVersion   Int
+  explanation      String
+  source           ExplanationSource @default(TEMPLATE)
+  promptHash       String?
+  createdAt        DateTime @default(now())
+  question         QuestionBank @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([questionId, wrongOptionIndex, difficultyLevel, conceptVersion])
+}
+
+model GenerationEvent {
+  id           String   @id @default(cuid())
+  questionId   String
+  triggerType  String
+  triggerMeta  Json
+  createdAt    DateTime @default(now())
+  question     QuestionBank @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+  user               User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionToken])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@id([identifier, token])
+}
