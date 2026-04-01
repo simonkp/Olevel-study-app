@@ -20,6 +20,20 @@
   const QUIZ_PER_ROUND = 20;
   const BOSS_QUESTION_MS_MULT = 0.8;
   const BOSS_XP = 800;
+  const STATE_VERSION = 2;
+  const QUESTION_MASTERY_COOLDOWN_MS = 1000 * 60 * 60 * 24 * 5;
+  const TOPIC_MASTERY_COOLDOWN_MS = 1000 * 60 * 60 * 24 * 5;
+  const PURCHASE_EVIDENCE_WINDOW_MS = 1000 * 60 * 60 * 24 * 7;
+  const PURCHASE_REPEAT_COOLDOWN_MS = 1000 * 60 * 60 * 24;
+  const DEFAULT_REWARD_DAILY_MAX = 1;
+  const XP_RATE_LIMITS = {
+    flash: { windowMs: 1000 * 60 * 10, maxXp: 25 },
+    game_match: { windowMs: 1000 * 60 * 10, maxXp: 25 },
+    game_sequence: { windowMs: 1000 * 60 * 10, maxXp: 25 },
+    game_tf: { windowMs: 1000 * 60 * 10, maxXp: 25 },
+    quiz: { windowMs: 1000 * 60 * 10, maxXp: 45 },
+    quiz_review: { windowMs: 1000 * 60 * 10, maxXp: 35 },
+  };
   const loadScriptPromises = {};
 
   // Boss themes are derived from each topic's `theme` field in the manifest.
@@ -92,13 +106,14 @@
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return { ...defaultState(), ...JSON.parse(raw) };
+      if (raw) return normalizeState({ ...defaultState(), ...JSON.parse(raw) });
     } catch (_) {}
-    return defaultState();
+    return normalizeState(defaultState());
   }
 
   function defaultState() {
     return {
+      schemaVersion: STATE_VERSION,
       xp: 0,
       lastStudyDate: null,
       streak: 0,
@@ -111,7 +126,14 @@
       themeBossBeaten: {},
       studyTimeMsByTopicTab: {},
       timeXpEarnedByTopicTab: {},
+      xpLedger: [],
+      purchaseLedger: [],
       questionStats: {},
+      topicStats: {},
+      syncShape: {
+        schema: "study-audit-v1",
+        studentId: `local-${SUBJECT_ID}`,
+      },
       dailyChallenge: {
         date: "",
         answered: 0,
@@ -123,9 +145,32 @@
     };
   }
 
+  function normalizeState(s) {
+    const next = { ...defaultState(), ...(s || {}) };
+    next.schemaVersion = STATE_VERSION;
+    next.studyTimeMsByTopicTab = next.studyTimeMsByTopicTab || {};
+    next.timeXpEarnedByTopicTab = next.timeXpEarnedByTopicTab || {};
+    next.questionStats = next.questionStats || {};
+    next.topicStats = next.topicStats || {};
+    next.xpLedger = Array.isArray(next.xpLedger) ? next.xpLedger : [];
+    next.purchaseLedger = Array.isArray(next.purchaseLedger)
+      ? next.purchaseLedger
+      : [];
+    next.syncShape = next.syncShape || {
+      schema: "study-audit-v1",
+      studentId: `local-${SUBJECT_ID}`,
+    };
+    next.dailyChallenge = {
+      ...defaultState().dailyChallenge,
+      ...(next.dailyChallenge || {}),
+      weakTopics: (next.dailyChallenge && next.dailyChallenge.weakTopics) || {},
+    };
+    return next;
+  }
+
   function portableState() {
     return {
-      version: 1,
+      version: STATE_VERSION,
       xp: state.xp,
       lastStudyDate: state.lastStudyDate,
       streak: state.streak,
@@ -138,7 +183,11 @@
       themeBossBeaten: state.themeBossBeaten,
       studyTimeMsByTopicTab: state.studyTimeMsByTopicTab,
       timeXpEarnedByTopicTab: state.timeXpEarnedByTopicTab,
+      xpLedger: state.xpLedger,
+      purchaseLedger: state.purchaseLedger,
       questionStats: state.questionStats,
+      topicStats: state.topicStats,
+      syncShape: state.syncShape,
       dailyChallenge: state.dailyChallenge,
     };
   }
@@ -159,12 +208,18 @@
       payload.studyTimeMsByTopicTab || state.studyTimeMsByTopicTab;
     state.timeXpEarnedByTopicTab =
       payload.timeXpEarnedByTopicTab || state.timeXpEarnedByTopicTab;
+    state.xpLedger = payload.xpLedger || state.xpLedger;
+    state.purchaseLedger = payload.purchaseLedger || state.purchaseLedger;
     state.questionStats = payload.questionStats || state.questionStats;
+    state.topicStats = payload.topicStats || state.topicStats;
+    state.syncShape = payload.syncShape || state.syncShape;
     state.dailyChallenge = payload.dailyChallenge || state.dailyChallenge;
+    state = normalizeState(state);
     saveState();
   }
 
   function saveState() {
+    state = normalizeState(state);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     updateTopbar();
   }
@@ -182,6 +237,7 @@
       state.studyTimeMsByTopicTab[topicId] || {};
     state.studyTimeMsByTopicTab[topicId][tab] =
       (state.studyTimeMsByTopicTab[topicId][tab] || 0) + elapsedMs;
+    touchTopicStats(topicId).lastStudiedAt = Date.now();
 
     const rule = TIME_XP[tab];
     if (!rule || rule.msPerXp <= 0 || rule.capXp <= 0) {
@@ -196,13 +252,20 @@
       state.timeXpEarnedByTopicTab[topicId] || {};
     const earned = state.timeXpEarnedByTopicTab[topicId][tab] || 0;
     const remaining = Math.max(0, rule.capXp - earned);
-    const addXp = Math.min(rawXp, remaining);
+    const earnedXp = Math.min(rawXp, remaining);
 
-    if (addXp > 0) {
-      state.xp += addXp;
-      state.timeXpEarnedByTopicTab[topicId][tab] = earned + addXp;
-      saveState();
+    if (earnedXp > 0) {
+      state.timeXpEarnedByTopicTab[topicId][tab] = earned + earnedXp;
+      addXp(earnedXp, {
+        topicId,
+        tab,
+        activityType: `time_${tab}`,
+        sourceId: `time:${topicId}:${tab}`,
+        reason: `time_${tab}`,
+      });
+      return;
     }
+    saveState();
   }
 
   function startTime(topicId, tab) {
@@ -242,8 +305,12 @@
     daily.completed = true;
     if (!daily.bonusAwarded) {
       daily.bonusAwarded = true;
-      state.xp += DAILY_CHALLENGE.bonusXp;
-      saveState();
+      addXp(DAILY_CHALLENGE.bonusXp, {
+        tab: route.tab || "quiz",
+        activityType: "daily",
+        sourceId: `daily:${daily.date}`,
+        reason: "daily_bonus",
+      });
       return true;
     }
     return false;
@@ -279,6 +346,252 @@
     };
   }
 
+  function isCooldownActive(untilTs) {
+    return Number(untilTs || 0) > Date.now();
+  }
+
+  function formatShortDate(ts) {
+    if (!ts) return "";
+    try {
+      return new Date(ts).toISOString().slice(0, 10);
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function getTopicMeta(topicId) {
+    return manifest.find((m) => String(m.id) === String(topicId)) || null;
+  }
+
+  function touchTopicStats(topicId) {
+    const key = String(topicId);
+    state.topicStats = state.topicStats || {};
+    state.topicStats[key] = {
+      mastery: 0,
+      lastStudiedAt: 0,
+      lastQuizAt: 0,
+      masteredUntil: 0,
+      errorFreeRounds: 0,
+      totalQuestionsSeen: 0,
+      totalWrong: 0,
+      rounds: 0,
+      reviewRounds: 0,
+      ...(state.topicStats[key] || {}),
+    };
+    return state.topicStats[key];
+  }
+
+  function summarizeRecentStudyEvidence(windowMs) {
+    const cutoff = Date.now() - (windowMs || PURCHASE_EVIDENCE_WINDOW_MS);
+    const grouped = {};
+    (state.xpLedger || []).forEach((entry) => {
+      if (!entry || entry.deltaXp <= 0 || entry.ts < cutoff) return;
+      const key = `${entry.subjectId || SUBJECT_ID}|${entry.topicId || "general"}|${
+        entry.activityType || "study"
+      }`;
+      if (!grouped[key]) {
+        grouped[key] = {
+          subjectId: entry.subjectId || SUBJECT_ID,
+          topicId: entry.topicId || null,
+          theme: entry.theme || "",
+          activityType: entry.activityType || "study",
+          totalXp: 0,
+          count: 0,
+        };
+      }
+      grouped[key].totalXp += entry.deltaXp;
+      grouped[key].count += 1;
+    });
+    return Object.values(grouped)
+      .sort((a, b) => b.totalXp - a.totalXp)
+      .slice(0, 10);
+  }
+
+  function getXpRateLimit(activityType) {
+    if (XP_RATE_LIMITS[activityType]) return XP_RATE_LIMITS[activityType];
+    if (String(activityType || "").startsWith("game_")) return XP_RATE_LIMITS.game_tf;
+    return null;
+  }
+
+  function sumRecentXpBy(predicate, windowMs) {
+    const cutoff = Date.now() - windowMs;
+    return (state.xpLedger || []).reduce((sum, entry) => {
+      if (!entry || entry.ts < cutoff || entry.deltaXp <= 0) return sum;
+      if (!predicate(entry)) return sum;
+      return sum + entry.deltaXp;
+    }, 0);
+  }
+
+  function getRepeatAttemptMultiplier(meta) {
+    if (!meta || meta.topicId == null) return 1;
+    const activity = String((meta && meta.activityType) || "");
+    if (!activity.startsWith("quiz")) return 1;
+    const topicId = String(meta.topicId);
+    const recentTopicXp = sumRecentXpBy(
+      (entry) =>
+        String(entry.topicId || "") === topicId &&
+        String(entry.activityType || "").startsWith("quiz"),
+      1000 * 60 * 60
+    );
+    if (recentTopicXp >= 120) return 0.2;
+    if (recentTopicXp >= 60) return 0.5;
+    return 1;
+  }
+
+  function getRecentActivityCoverage(windowMs) {
+    const cutoff = Date.now() - windowMs;
+    const seen = { quiz: false, flash: false, game: false };
+    let distinctTopics = new Set();
+    (state.xpLedger || []).forEach((entry) => {
+      if (!entry || entry.deltaXp <= 0 || entry.ts < cutoff) return;
+      const a = String(entry.activityType || "");
+      if (a.startsWith("quiz")) seen.quiz = true;
+      else if (a.startsWith("flash")) seen.flash = true;
+      else if (a.startsWith("game_")) seen.game = true;
+      if (entry.topicId) distinctTopics.add(String(entry.topicId));
+    });
+    return { ...seen, topicCount: distinctTopics.size };
+  }
+
+  function canPurchaseReward() {
+    const cov = getRecentActivityCoverage(1000 * 60 * 60 * 24);
+    const ok = cov.quiz && (cov.flash || cov.game) && cov.topicCount >= 2;
+    return { ok, cov };
+  }
+
+  function getTodayIsoDate() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function getRewardDailyMax(reward) {
+    const raw = reward && reward.dailyMax;
+    const n = Number(raw);
+    if (Number.isFinite(n) && n >= 0) return Math.floor(n);
+    return DEFAULT_REWARD_DAILY_MAX;
+  }
+
+  function getRewardPurchasesOnDate(couponId, isoDate) {
+    const day = String(isoDate || getTodayIsoDate());
+    return (state.purchaseLedger || []).filter(
+      (p) =>
+        String(p.couponId || "") === String(couponId) &&
+        String((p.date || "").slice(0, 10)) === day
+    ).length;
+  }
+
+  function addXp(deltaXp, meta) {
+    if (!deltaXp) return;
+    if (meta && meta.topicId != null) {
+      touchTopicStats(meta.topicId).lastStudiedAt = Date.now();
+    }
+    const entry = {
+      ts: Date.now(),
+      subjectId: SUBJECT_ID,
+      topicId: meta && meta.topicId != null ? String(meta.topicId) : null,
+      theme:
+        (meta && meta.theme) ||
+        ((meta && meta.topicId != null && getTopicMeta(meta.topicId)) || {})
+          .theme ||
+        "",
+      tab: (meta && meta.tab) || route.tab || null,
+      activityType: (meta && meta.activityType) || "study",
+      sourceId: (meta && meta.sourceId) || null,
+      deltaXp: 0,
+      reason: (meta && meta.reason) || "manual",
+    };
+    let adjusted = deltaXp;
+    const requestedMult =
+      meta && typeof meta.xpMultiplier === "number"
+        ? Math.max(0, meta.xpMultiplier)
+        : 1;
+    if (requestedMult !== 1 && adjusted > 0) {
+      adjusted = Math.max(1, Math.round(adjusted * requestedMult));
+    }
+    const repeatMult = getRepeatAttemptMultiplier(meta);
+    if (repeatMult < 1 && adjusted > 0) {
+      adjusted = Math.max(1, Math.round(adjusted * repeatMult));
+      entry.reason += "_repeat_reduced";
+    }
+    const rateLimit = getXpRateLimit(entry.activityType);
+    if (rateLimit && adjusted > 0) {
+      const gainedRecently = sumRecentXpBy(
+        (item) => String(item.activityType || "") === String(entry.activityType || ""),
+        rateLimit.windowMs
+      );
+      const remaining = Math.max(0, rateLimit.maxXp - gainedRecently);
+      adjusted = Math.min(adjusted, remaining);
+      if (remaining === 0) entry.reason += "_cap_blocked";
+      else if (adjusted < deltaXp) entry.reason += "_cap_reduced";
+    }
+    if (adjusted <= 0) return;
+    entry.deltaXp = adjusted;
+    state.xp += adjusted;
+    state.xpLedger.push(entry);
+    saveState();
+  }
+
+  function spendXp(deltaXp, meta) {
+    if (!deltaXp) return;
+    const entry = {
+      ts: Date.now(),
+      subjectId: SUBJECT_ID,
+      topicId: meta && meta.topicId != null ? String(meta.topicId) : null,
+      theme: (meta && meta.theme) || "",
+      tab: (meta && meta.tab) || route.tab || null,
+      activityType: (meta && meta.activityType) || "purchase",
+      sourceId: (meta && meta.sourceId) || null,
+      deltaXp: -Math.abs(deltaXp),
+      reason: (meta && meta.reason) || "purchase",
+    };
+    state.xp -= Math.abs(deltaXp);
+    state.xpLedger.push(entry);
+    saveState();
+  }
+
+  function recordPurchaseEntry(purchaseMeta) {
+    const date = getTodayIsoDate();
+    const balanceBefore = state.xp;
+    const studyEvidenceWindow = summarizeRecentStudyEvidence(
+      PURCHASE_EVIDENCE_WINDOW_MS
+    );
+    return {
+      id: `purchase-${Date.now()}`,
+      ts: Date.now(),
+      date,
+      couponId: purchaseMeta.id,
+      label: purchaseMeta.label,
+      xpSpent: purchaseMeta.xp,
+      balanceBefore,
+      balanceAfter: balanceBefore - purchaseMeta.xp,
+      subjectId: SUBJECT_ID,
+      studyEvidenceWindow,
+    };
+  }
+
+  function getPurchaseCooldownRemainingMs(couponId) {
+    if (!couponId) return 0;
+    const last = (state.purchaseLedger || [])
+      .filter((p) => String(p.couponId || "") === String(couponId))
+      .sort((a, b) => b.ts - a.ts)[0];
+    if (!last) return 0;
+    return Math.max(0, Number(last.ts || 0) + PURCHASE_REPEAT_COOLDOWN_MS - Date.now());
+  }
+
+  function buildSyncSnapshot() {
+    return {
+      schema: "study-audit-v1",
+      student: {
+        id: state.syncShape.studentId,
+        subjectId: SUBJECT_ID,
+      },
+      xpLedger: state.xpLedger || [],
+      purchases: state.purchaseLedger || [],
+      questionStats: state.questionStats || {},
+      topicStats: state.topicStats || {},
+      dailyChallenge: state.dailyChallenge || {},
+    };
+  }
+
   function normalizeQuestionText(s) {
     return String(s || "")
       .trim()
@@ -300,19 +613,21 @@
   function touchQuestionStats(topicId, questionKey) {
     state.questionStats = state.questionStats || {};
     state.questionStats[topicId] = state.questionStats[topicId] || {};
-    if (!state.questionStats[topicId][questionKey]) {
-      state.questionStats[topicId][questionKey] = {
-        seen: 0,
-        correct: 0,
-        wrongs: 0,
-        streak: 0,
-        mastery: 0,
-        lastSeenAt: 0,
-        lastCorrectAt: 0,
-        lastWrongAt: 0,
-        lastResult: null,
-      };
-    }
+    state.questionStats[topicId][questionKey] = {
+      seen: 0,
+      correct: 0,
+      wrongs: 0,
+      streak: 0,
+      recentCorrectRun: 0,
+      mastery: 0,
+      masteredUntil: 0,
+      lastSeenAt: 0,
+      lastAskedAt: 0,
+      lastCorrectAt: 0,
+      lastWrongAt: 0,
+      lastResult: null,
+      ...(state.questionStats[topicId][questionKey] || {}),
+    };
     return state.questionStats[topicId][questionKey];
   }
 
@@ -327,8 +642,11 @@
         correct: 0,
         wrongs: 0,
         streak: 0,
+        recentCorrectRun: 0,
         mastery: 0,
+        masteredUntil: 0,
         lastSeenAt: 0,
+        lastAskedAt: 0,
         lastCorrectAt: 0,
         lastWrongAt: 0,
         lastResult: null,
@@ -338,6 +656,7 @@
 
   function getQuestionBucket(stats) {
     if (!stats || stats.seen === 0) return "new";
+    if (isCooldownActive(stats.masteredUntil)) return "mastered";
     if (
       stats.lastResult === "wrong" ||
       stats.lastResult === "timeout" ||
@@ -354,6 +673,7 @@
     let score = 50;
     if (!stats || stats.seen === 0) score += 60;
     score += Math.max(0, 60 - (stats ? stats.mastery : 0));
+    if (stats && isCooldownActive(stats.masteredUntil)) score -= 100;
     if (stats && stats.lastResult === "wrong") score += 30;
     if (stats && stats.lastResult === "timeout") score += 35;
     if (stats && stats.lastSeenAt) {
@@ -383,7 +703,15 @@
     const items = Object.values(
       (state.questionStats && state.questionStats[String(topicId)]) || {}
     );
-    if (!items.length) return { label: "New", weakCount: 0, avgMastery: 0 };
+    const topicStats = touchTopicStats(topicId);
+    if (!items.length) {
+      return {
+        label: isCooldownActive(topicStats.masteredUntil) ? "Cooling down" : "New",
+        weakCount: 0,
+        avgMastery: 0,
+        masteredUntil: topicStats.masteredUntil || 0,
+      };
+    }
     const avgMastery =
       items.reduce((sum, item) => sum + (item.mastery || 0), 0) / items.length;
     const weakCount = items.filter(
@@ -393,9 +721,15 @@
         (item.mastery || 0) < 40
     ).length;
     let label = "Improving";
-    if (avgMastery >= 85) label = "Mastered";
+    if (isCooldownActive(topicStats.masteredUntil)) label = "Cooling down";
+    else if (avgMastery >= 85) label = "Mastered";
     else if (avgMastery >= 60) label = "Strong";
-    return { label, weakCount, avgMastery };
+    return {
+      label,
+      weakCount,
+      avgMastery,
+      masteredUntil: topicStats.masteredUntil || 0,
+    };
   }
 
   function bumpStreak() {
@@ -482,6 +816,11 @@
       const reviewBadge = mastery.weakCount
         ? `<span class="badge review">${mastery.weakCount} weak</span>`
         : "";
+      const cooldownBadge = isCooldownActive(mastery.masteredUntil)
+        ? `<span class="badge cooldown">Ready ${escapeHtml(
+            formatShortDate(mastery.masteredUntil)
+          )}</span>`
+        : "";
       parts.push(
         `<button type="button" class="topic-card ${
           unlocked ? "unlocked" : ""
@@ -490,7 +829,7 @@
         } title="${unlocked ? "" : "Locked — raise previous topic to 70% or enable Unlock all in settings"}">
           <span class="num">T${t.id}</span>
           <span class="title">${escapeHtml(t.title)}</span>
-          <span class="badge-row">${badge}${masteryBadge}${reviewBadge}</span>
+          <span class="badge-row">${badge}${masteryBadge}${reviewBadge}${cooldownBadge}</span>
         </button>`
       );
       const next = manifest[topicIndex(t.id) + 1];
@@ -806,6 +1145,7 @@
   function renderQuizPanel(t) {
     const insight = getTopicQuizInsights(t);
     const daily = getDailyChallengeSummary();
+    const topicCooling = isCooldownActive(insight.topicMasteredUntil);
     return `
       <div class="panel active" data-panel="quiz">
         <div id="quiz-start-wrap">
@@ -815,12 +1155,19 @@
             <span class="quiz-chip">Weak ${insight.weakCount}</span>
             <span class="quiz-chip">New ${insight.unseenCount}</span>
             <span class="quiz-chip">Mastered ${insight.masteredCount}</span>
+            <span class="quiz-chip">Cooling ${insight.coolingCount}</span>
           </div>
           <div class="quiz-start-actions">
-            <button type="button" class="btn primary" id="quiz-start">Start adaptive quiz</button>
-            <button type="button" class="btn" id="quiz-review" ${insight.weakCount ? "" : "disabled"}>Review weak questions${insight.weakCount ? ` (${insight.weakCount})` : ""}</button>
+            <button type="button" class="btn primary" id="quiz-start" ${topicCooling ? "disabled" : ""}>${topicCooling ? "Adaptive quiz cooling down" : "Start adaptive quiz"}</button>
+            <button type="button" class="btn" id="quiz-review" ${insight.total ? "" : "disabled"}>${insight.weakCount ? `Review weak questions (${insight.weakCount})` : "Review topic"}</button>
           </div>
-          <p class="quiz-note">Daily: ${Math.min(daily.answered, DAILY_CHALLENGE.answered)}/${DAILY_CHALLENGE.answered} answered · ${Math.min(daily.reviewRounds, DAILY_CHALLENGE.reviewRounds)}/${DAILY_CHALLENGE.reviewRounds} review rounds · ${Math.min(daily.weakTopics, DAILY_CHALLENGE.weakTopics)}/${DAILY_CHALLENGE.weakTopics} weak topic.</p>
+          <p class="quiz-note">${
+            topicCooling
+              ? `Mastered recently — adaptive quiz returns on ${escapeHtml(
+                  formatShortDate(insight.topicMasteredUntil)
+                )}. Review mode still works.`
+              : `Daily: ${Math.min(daily.answered, DAILY_CHALLENGE.answered)}/${DAILY_CHALLENGE.answered} answered · ${Math.min(daily.reviewRounds, DAILY_CHALLENGE.reviewRounds)}/${DAILY_CHALLENGE.reviewRounds} review rounds · ${Math.min(daily.weakTopics, DAILY_CHALLENGE.weakTopics)}/${DAILY_CHALLENGE.weakTopics} weak topic.`
+          }</p>
         </div>
         <div id="quiz-play" hidden></div>
       </div>`;
@@ -871,16 +1218,38 @@
     let flashCompleted = false;
     let hadReviewRound = false;
     let actionLock = false;
-    const MIN_FLASH_READ_MS = 2000;
+    const MIN_FLASH_TOTAL_MS = 3500;
+    const MIN_FLASH_FRONT_MS = 1500;
+    const MIN_FLASH_BACK_MS = 1200;
     const deckSize = pool.length;
     let cardShownAt = 0;
     let sawBackForCard = false;
+    let firstBackShownAt = 0;
+    let backVisibleSince = 0;
+    let backReadAccumMs = 0;
     const validatedCards = typeof WeakSet !== "undefined" ? new WeakSet() : null;
     let validatedCount = 0;
     const front = document.getElementById("flash-front");
     const back = document.getElementById("flash-back");
     const card = document.getElementById("flash-card");
     const prog = document.getElementById("flash-count");
+    const progLabel = document.getElementById("flash-progress");
+
+    function getReadState(nowTs) {
+      const now = nowTs || Date.now();
+      const elapsed = Math.max(0, now - cardShownAt);
+      const backLive = backVisibleSince ? now - backVisibleSince : 0;
+      const backReadMs = backReadAccumMs + backLive;
+      const frontReadMs = firstBackShownAt
+        ? Math.max(0, firstBackShownAt - cardShownAt)
+        : Math.max(0, elapsed - backReadMs);
+      const validRead =
+        sawBackForCard &&
+        elapsed >= MIN_FLASH_TOTAL_MS &&
+        frontReadMs >= MIN_FLASH_FRONT_MS &&
+        backReadMs >= MIN_FLASH_BACK_MS;
+      return { elapsed, frontReadMs, backReadMs, validRead };
+    }
 
     function show() {
       if (idx >= pool.length) {
@@ -893,8 +1262,18 @@
           const baseBonus = hadReviewRound ? 18 : 10;
           const ratio = deckSize > 0 ? validatedCount / deckSize : 0;
           const bonus = Math.floor(baseBonus * ratio);
-          if (bonus > 0) state.xp += bonus;
-          saveState();
+          if (bonus > 0) {
+            addXp(bonus, {
+              topicId: t.id,
+              theme: t.theme,
+              tab: "flash",
+              activityType: "flash",
+              sourceId: `flash:${t.id}:deck`,
+              reason: "flash_deck_complete",
+            });
+          } else {
+            saveState();
+          }
           front.textContent = "Deck cleared — open another tab or redo.";
           back.textContent = "Nice.";
           card.classList.remove("flipped");
@@ -909,27 +1288,51 @@
       prog.textContent = `${idx + 1} / ${pool.length}`;
       cardShownAt = Date.now();
       sawBackForCard = false;
+      firstBackShownAt = 0;
+      backVisibleSince = 0;
+      backReadAccumMs = 0;
+      if (progLabel) {
+        progLabel.textContent =
+          "Read both sides for XP: 1.5s front + 1.2s back (3.5s total)";
+      }
     }
 
     card.onclick = () => {
+      const now = Date.now();
+      const wasBack = card.classList.contains("flipped");
       card.classList.toggle("flipped");
-      sawBackForCard = card.classList.contains("flipped");
+      sawBackForCard = card.classList.contains("flipped") || sawBackForCard;
+      if (!wasBack) {
+        if (!firstBackShownAt) firstBackShownAt = now;
+        backVisibleSince = now;
+      } else if (backVisibleSince) {
+        backReadAccumMs += now - backVisibleSince;
+        backVisibleSince = 0;
+      }
     };
     document.getElementById("flash-got").onclick = () => {
       if (flashCompleted || actionLock) return;
       actionLock = true;
       const currentCard = pool[idx];
-      const elapsed = Date.now() - cardShownAt;
-      const validRead = elapsed >= MIN_FLASH_READ_MS && sawBackForCard;
+      const readState = getReadState(Date.now());
       idx++;
-      if (validRead) {
+      if (readState.validRead) {
         const already = validatedCards ? validatedCards.has(currentCard) : false;
         if (!already) {
-          state.xp += 2;
+          addXp(2, {
+            topicId: t.id,
+            theme: t.theme,
+            tab: "flash",
+            activityType: "flash",
+            sourceId: `${t.id}::${normalizeQuestionText(currentCard.front)}`,
+            reason: "flash_got_it",
+          });
           if (validatedCards) validatedCards.add(currentCard);
           validatedCount++;
-          saveState();
         }
+      } else if (progLabel) {
+        progLabel.textContent =
+          "Too fast for XP on this card. XP only counts after real read time on both sides.";
       }
       actionLock = false;
       show();
@@ -938,19 +1341,27 @@
       if (flashCompleted || actionLock) return;
       actionLock = true;
       const currentCard = pool[idx];
-      const elapsed = Date.now() - cardShownAt;
-      const validRead = elapsed >= MIN_FLASH_READ_MS && sawBackForCard;
+      const readState = getReadState(Date.now());
       review.push(pool[idx]);
       idx++;
       hadReviewRound = true;
-      if (validRead) {
+      if (readState.validRead) {
         const already = validatedCards ? validatedCards.has(currentCard) : false;
         if (!already) {
-          state.xp += 1;
+          addXp(1, {
+            topicId: t.id,
+            theme: t.theme,
+            tab: "flash",
+            activityType: "flash",
+            sourceId: `${t.id}::${normalizeQuestionText(currentCard.front)}`,
+            reason: "flash_review_marked",
+          });
           if (validatedCards) validatedCards.add(currentCard);
           validatedCount++;
-          saveState();
         }
+      } else if (progLabel) {
+        progLabel.textContent =
+          "Too fast for XP on this card. XP only counts after real read time on both sides.";
       }
       actionLock = false;
       show();
@@ -965,6 +1376,7 @@
     const play = document.getElementById("quiz-play");
     const insight = getTopicQuizInsights(t);
     start.onclick = () => {
+      if (isCooldownActive(insight.topicMasteredUntil)) return;
       if (insight.weakCount > 0) markDailyWeakTopic(t.id);
       wrap.hidden = true;
       play.hidden = false;
@@ -1025,10 +1437,14 @@
 
   function getTopicQuizInsights(t) {
     const annotated = annotateQuizBank(getTopicQuizBank(t), t.id);
+    const topicStats = touchTopicStats(t.id);
     const weakCount = annotated.filter((item) => item.bucket === "weak").length;
     const unseenCount = annotated.filter((item) => item.bucket === "new").length;
     const masteredCount = annotated.filter(
       (item) => item.bucket === "mastered"
+    ).length;
+    const coolingCount = annotated.filter((item) =>
+      isCooldownActive(item.stats.masteredUntil)
     ).length;
     const avgMastery = annotated.length
       ? annotated.reduce(
@@ -1047,32 +1463,45 @@
       weakCount,
       unseenCount,
       masteredCount,
+      coolingCount,
       avgMastery,
       label,
+      topicMasteredUntil: topicStats.masteredUntil || 0,
     };
   }
 
   function pickAdaptiveQuestions(t, opts) {
     opts = opts || {};
     const annotated = annotateQuizBank(getTopicQuizBank(t), t.id);
-    const n = Math.min(QUIZ_PER_ROUND, annotated.length);
+    const topicStats = touchTopicStats(t.id);
+    if (!opts.review && isCooldownActive(topicStats.masteredUntil)) {
+      return [];
+    }
+    const eligible = opts.review
+      ? annotated
+      : annotated.filter((item) => !isCooldownActive(item.stats.masteredUntil));
+    const n = Math.min(QUIZ_PER_ROUND, eligible.length);
     const rank = (items) =>
       items
         .map((item) => ({ ...item, _rand: Math.random() }))
         .sort((a, b) => b.priority - a.priority || a._rand - b._rand);
-    const weak = rank(annotated.filter((item) => item.bucket === "weak"));
-    const fresh = rank(annotated.filter((item) => item.bucket === "new"));
+    const weak = rank(eligible.filter((item) => item.bucket === "weak"));
+    const fresh = rank(eligible.filter((item) => item.bucket === "new"));
     const normal = rank(
-      annotated.filter(
+      eligible.filter(
         (item) => item.bucket === "improving" || item.bucket === "strong"
       )
     );
     const mastered = rank(
-      annotated.filter((item) => item.bucket === "mastered")
+      eligible.filter((item) => item.bucket === "mastered")
     );
 
     if (opts.review) {
-      const reviewPool = weak.length ? weak : normal;
+      const reviewPool = weak.length
+        ? weak
+        : normal.length
+          ? normal
+          : rank(annotated);
       return reviewPool.slice(0, Math.min(n, reviewPool.length)).map((item) => ({
         ...item.q,
         __questionKey: item.questionKey,
@@ -1095,7 +1524,7 @@
     takeFrom(fresh, Math.min(5, fresh.length));
     takeFrom(normal, Math.max(0, n - selected.length - Math.min(2, mastered.length)));
     takeFrom(mastered, Math.min(2, mastered.length));
-    takeFrom(rank(annotated), n - selected.length);
+    takeFrom(rank(eligible), n - selected.length);
 
     return selected;
   }
@@ -1104,26 +1533,41 @@
     const topicId = getQuestionTopicId(q, fallbackTopicId);
     const questionKey = q.__questionKey || getQuestionKey(q, fallbackTopicId);
     const stats = touchQuestionStats(topicId, questionKey);
+    const topic = touchTopicStats(topicId);
     stats.seen += 1;
     stats.lastSeenAt = Date.now();
+    stats.lastAskedAt = Date.now();
     stats.lastResult = outcome;
+    topic.lastStudiedAt = Date.now();
+    topic.lastQuizAt = Date.now();
+    topic.totalQuestionsSeen += 1;
     if (outcome === "correct") {
       stats.correct += 1;
       stats.streak += 1;
+      stats.recentCorrectRun += 1;
       stats.lastCorrectAt = Date.now();
       let gain = 10 + Math.min(10, stats.streak * 2);
       if (elapsedSec <= QUESTION_MS / 1000 / 2) gain += 6;
       stats.mastery = Math.min(100, stats.mastery + gain);
+      if (stats.mastery >= 85 && stats.recentCorrectRun >= 3) {
+        stats.masteredUntil = Date.now() + QUESTION_MASTERY_COOLDOWN_MS;
+      }
     } else if (outcome === "wrong") {
       stats.wrongs += 1;
       stats.streak = 0;
+      stats.recentCorrectRun = 0;
+      stats.masteredUntil = 0;
       stats.lastWrongAt = Date.now();
       stats.mastery = Math.max(0, stats.mastery - 18);
+      topic.totalWrong += 1;
     } else if (outcome === "timeout") {
       stats.wrongs += 1;
       stats.streak = 0;
+      stats.recentCorrectRun = 0;
+      stats.masteredUntil = 0;
       stats.lastWrongAt = Date.now();
       stats.mastery = Math.max(0, stats.mastery - 24);
+      topic.totalWrong += 1;
     }
     saveState();
   }
@@ -1156,7 +1600,9 @@
     } else if (bucket === "mastered") {
       label = "Mastered";
       tone = "mastered";
-      reason = "This should appear only occasionally now for spaced review.";
+      reason = isCooldownActive(stats.masteredUntil)
+        ? `Cooling down until ${formatShortDate(stats.masteredUntil)} because it has been answered correctly several times in a row.`
+        : "This should appear only occasionally now for spaced review.";
     }
 
     return { mastery, label, reason, tone };
@@ -1175,18 +1621,85 @@
       </div>`;
   }
 
+  function getQuestionXpMeta(bucket, opts) {
+    opts = opts || {};
+    const isReview = !!opts.review;
+    const cooled = !!opts.cooled;
+    if (cooled) {
+      return {
+        delta: 1,
+        reason: isReview
+          ? "quiz_correct_mastered_review_reduced"
+          : "quiz_correct_mastered_reduced",
+      };
+    }
+    if (bucket === "new") return { delta: 10, reason: "quiz_correct_new" };
+    if (bucket === "weak") {
+      return {
+        delta: isReview ? 12 : 11,
+        reason: isReview
+          ? "quiz_correct_weak_review"
+          : "quiz_correct_weak_recovered",
+      };
+    }
+    if (bucket === "improving") {
+      return { delta: isReview ? 5 : 7, reason: "quiz_correct_improving" };
+    }
+    if (bucket === "strong") {
+      return {
+        delta: isReview ? 3 : 4,
+        reason: isReview ? "quiz_correct_strong_review" : "quiz_correct_strong",
+      };
+    }
+    return { delta: isReview ? 2 : 2, reason: "quiz_correct_mastered_reduced" };
+  }
+
+  function recordTopicRoundResult(t, meta) {
+    if (!t || !t.id) return;
+    const topicStats = touchTopicStats(t.id);
+    const insight = getTopicQuizInsights(t);
+    topicStats.rounds += meta.review ? 0 : 1;
+    topicStats.reviewRounds += meta.review ? 1 : 0;
+    topicStats.lastStudiedAt = Date.now();
+    topicStats.lastQuizAt = Date.now();
+    topicStats.mastery = Math.max(
+      0,
+      Math.min(100, Math.round(insight.avgMastery || 0))
+    );
+    if (meta.review) {
+      if (meta.wrongCount > 0) topicStats.masteredUntil = 0;
+      saveState();
+      return;
+    }
+    if (meta.wrongCount === 0 && meta.totalQuestions >= 10) {
+      topicStats.errorFreeRounds += 1;
+      if (topicStats.errorFreeRounds >= 2 && topicStats.mastery >= 85) {
+        topicStats.masteredUntil = Date.now() + TOPIC_MASTERY_COOLDOWN_MS;
+      }
+    } else {
+      topicStats.errorFreeRounds = 0;
+      if (meta.wrongCount > 0) topicStats.masteredUntil = 0;
+    }
+    saveState();
+  }
+
   function runQuiz(t, container, opts) {
     opts = opts || {};
     const isBoss = !!opts.boss;
     const isReview = !!opts.review;
     const healthMax = isBoss ? 1 : HEALTH_START;
     const questionMs = isBoss ? Math.round(QUESTION_MS * BOSS_QUESTION_MS_MULT) : QUESTION_MS;
+    const topicStats = !isBoss && t.id ? touchTopicStats(t.id) : null;
     const qs = pickAdaptiveQuestions(t, opts);
     if (!qs.length) {
       container.innerHTML = `<div class="game-win"><h3>No questions ready</h3><p>${
         isReview
           ? "You do not have enough weak questions yet. Try a normal quiz first."
-          : "This topic does not have a quiz bank yet."
+          : topicStats && isCooldownActive(topicStats.masteredUntil)
+            ? `Adaptive quiz is cooling down until ${formatShortDate(
+                topicStats.masteredUntil
+              )}. Use review mode if you still want a quick check.`
+            : "This topic does not have a quiz bank yet."
       }</p></div>`;
       return;
     }
@@ -1196,6 +1709,7 @@
     let health = healthMax;
     let timerId = null;
     let qStart = 0;
+    let wrongCount = 0;
 
     function renderQ() {
       if (qi >= qs.length) {
@@ -1205,16 +1719,45 @@
           state.topicScores[t.id] = (state.topicScores[t.id] || 0) + 1;
           if ((state.topicBest[t.id] || 0) < capped)
             state.topicBest[t.id] = capped;
-          state.xp += Math.round(capped * 2 + combo * 5);
+          addXp(Math.max(12, Math.round(capped * 0.8 + combo * 3)), {
+            topicId: t.id,
+            theme: t.theme,
+            tab: "quiz",
+            activityType: "quiz",
+            sourceId: `round:${t.id}:${Date.now()}`,
+            reason: "quiz_round_complete",
+          });
         } else if (isReview && t.id) {
-          state.xp += Math.max(10, Math.round(capped + combo * 2));
+          addXp(Math.max(8, Math.round(capped * 0.45 + combo * 2)), {
+            topicId: t.id,
+            theme: t.theme,
+            tab: "quiz",
+            activityType: "quiz_review",
+            sourceId: `review:${t.id}:${Date.now()}`,
+            reason: "review_round_complete",
+          });
           if (qs.length) markDailyReviewRound();
         } else if (isBoss && opts.themeId) {
           state.themeBossBeaten = state.themeBossBeaten || {};
           state.themeBossBeaten[opts.themeId] = true;
-          state.xp += BOSS_XP;
+          addXp(BOSS_XP, {
+            theme: opts.themeId,
+            tab: "quiz",
+            activityType: "boss",
+            sourceId: `boss:${opts.themeId}`,
+            reason: "boss_win",
+          });
         }
-        saveState();
+        if (!isBoss && t.id) {
+          recordTopicRoundResult(t, {
+            review: isReview,
+            wrongCount,
+            totalQuestions: qs.length,
+            pct: capped,
+          });
+        } else {
+          saveState();
+        }
         const bossMsg = isBoss ? `<p class="boss-reward">🏆 +${BOSS_XP} XP · Theme badge unlocked!</p>` : "";
         container.innerHTML = `
           <div class="game-win">
@@ -1290,9 +1833,13 @@
       }
       const q = qs[qi];
       const elapsed = (Date.now() - qStart) / 1000;
+      const preInfo = readQuestionStats(q, t.id);
+      const preBucket = getQuestionBucket(preInfo.stats);
+      const wasCooled = isCooldownActive(preInfo.stats.masteredUntil);
       const opts = document.querySelectorAll(".quiz-opt");
       opts.forEach((b) => (b.disabled = true));
       if (timeout) {
+        wrongCount++;
         recordQuestionOutcome(q, t.id, "timeout", elapsed);
         const confidenceMeta = getQuestionConfidenceMeta(q, t.id);
         if (isBoss) {
@@ -1321,6 +1868,22 @@
       markDailyAnswered(1);
       if (correct) {
         recordQuestionOutcome(q, t.id, "correct", elapsed);
+        if (!isBoss) {
+          const reward = getQuestionXpMeta(preBucket, {
+            review: isReview,
+            cooled: wasCooled,
+          });
+          const fastGuess = elapsed < 1.2;
+          addXp(reward.delta, {
+            topicId: getQuestionTopicId(q, t.id),
+            theme: t.theme,
+            tab: "quiz",
+            activityType: isReview ? "quiz_review" : "quiz",
+            sourceId: q.__questionKey || getQuestionKey(q, t.id),
+            reason: fastGuess ? `${reward.reason}_very_fast` : reward.reason,
+            xpMultiplier: fastGuess ? 0.4 : 1,
+          });
+        }
         combo++;
         let pts = 100;
         const timeLeft = Math.max(0, 1 - elapsed / (QUESTION_MS / 1000));
@@ -1340,6 +1903,7 @@
           renderQ();
         }, 900);
       } else {
+        wrongCount++;
         recordQuestionOutcome(q, t.id, "wrong", elapsed);
         const confidenceMeta = getQuestionConfidenceMeta(q, t.id);
         if (elapsed < EARLY_WRONG_SEC || isBoss) {
@@ -1400,8 +1964,14 @@
     function show() {
       if (i >= pool.length) {
         const xp = correct * 3 + (correct === pool.length ? 15 : 0);
-        state.xp += xp;
-        saveState();
+        addXp(xp, {
+          topicId: t.id,
+          theme: t.theme,
+          tab: "game",
+          activityType: "game_tf",
+          sourceId: `tf:${t.id}`,
+          reason: "game_true_false_complete",
+        });
         area.innerHTML = `<div class="game-win"><h3>Round done</h3><p>${correct}/${pool.length} correct · +${xp} XP</p></div>`;
         return;
       }
@@ -1525,8 +2095,14 @@
           sel = null;
           matched += 2;
           if (matched === arranged.length) {
-            state.xp += 25;
-            saveState();
+            addXp(25, {
+              topicId: t.id,
+              theme: t.theme,
+              tab: "game",
+              activityType: "game_match",
+              sourceId: `match:${t.id}`,
+              reason: "game_match_complete",
+            });
             document.getElementById("match-status").textContent =
               "Cleared! +25 XP";
           }
@@ -1602,8 +2178,14 @@
     document.getElementById("seq-check").onclick = () => {
       const ok = order.every((text, i) => text === t.orderGame[i]);
       if (ok) {
-        state.xp += 40;
-        saveState();
+        addXp(40, {
+          topicId: t.id,
+          theme: t.theme,
+          tab: "game",
+          activityType: "game_sequence",
+          sourceId: `sequence:${t.id}`,
+          reason: "game_sequence_complete",
+        });
         area.innerHTML =
           '<div class="game-win"><h3>Perfect order</h3><p>+40 XP</p></div>';
       } else {
@@ -1658,38 +2240,467 @@
     };
   }
 
+  function formatMinutes(ms) {
+    const mins = Math.round((ms || 0) / 60000);
+    return `${mins} min`;
+  }
+
+  function buildStudyReport() {
+    const xpByTopic = {};
+    const recentXp = (state.xpLedger || [])
+      .slice()
+      .sort((a, b) => b.ts - a.ts);
+    recentXp.forEach((entry) => {
+      if (!entry || entry.deltaXp <= 0) return;
+      const topicId = entry.topicId || "general";
+      const topicMeta = topicId === "general" ? null : getTopicMeta(topicId);
+      const label = topicMeta ? `T${topicId} ${topicMeta.title}` : "General";
+      if (!xpByTopic[label]) {
+        xpByTopic[label] = { label, totalXp: 0, byActivity: {} };
+      }
+      xpByTopic[label].totalXp += entry.deltaXp;
+      const activity = entry.activityType || "study";
+      xpByTopic[label].byActivity[activity] =
+        (xpByTopic[label].byActivity[activity] || 0) + entry.deltaXp;
+    });
+    const xpTopicRows = Object.values(xpByTopic)
+      .sort((a, b) => b.totalXp - a.totalXp)
+      .slice(0, 10);
+
+    const missRows = [];
+    Object.keys(state.questionStats || {}).forEach((topicId) => {
+      const topicMeta = getTopicMeta(topicId);
+      Object.entries(state.questionStats[topicId] || {}).forEach(([key, stats]) => {
+        if (!stats || !stats.wrongs) return;
+        missRows.push({
+          topicId,
+          topicTitle: topicMeta ? topicMeta.title : topicId,
+          questionKey: key,
+          wrongs: stats.wrongs || 0,
+          mastery: Math.round(stats.mastery || 0),
+        });
+      });
+    });
+    missRows.sort((a, b) => b.wrongs - a.wrongs || a.mastery - b.mastery);
+
+    const topicRows = Object.keys(state.topicStats || {})
+      .map((topicId) => {
+        const stats = touchTopicStats(topicId);
+        const meta = getTopicMeta(topicId);
+        return {
+          topicId,
+          title: meta ? meta.title : topicId,
+          mastery: Math.round(stats.mastery || 0),
+          lastStudiedAt: stats.lastStudiedAt || 0,
+          masteredUntil: stats.masteredUntil || 0,
+          errorFreeRounds: stats.errorFreeRounds || 0,
+          totalWrong: stats.totalWrong || 0,
+        };
+      })
+      .sort(
+        (a, b) =>
+          Number(isCooldownActive(b.masteredUntil)) -
+            Number(isCooldownActive(a.masteredUntil)) ||
+          b.mastery - a.mastery
+      );
+
+    const studyTimeRows = Object.keys(state.studyTimeMsByTopicTab || {})
+      .map((topicId) => {
+        const perTab = state.studyTimeMsByTopicTab[topicId] || {};
+        const totalMs = Object.values(perTab).reduce((sum, v) => sum + (v || 0), 0);
+        const meta = getTopicMeta(topicId);
+        return {
+          topicId,
+          title: meta ? meta.title : topicId,
+          totalMs,
+          perTab,
+        };
+      })
+      .sort((a, b) => b.totalMs - a.totalMs)
+      .slice(0, 10);
+
+    const purchases = (state.purchaseLedger || [])
+      .slice()
+      .sort((a, b) => b.ts - a.ts);
+
+    const anomalyFlags = [];
+    const last24hXp = sumRecentXpBy(() => true, 1000 * 60 * 60 * 24);
+    const last24hQuizXp = sumRecentXpBy(
+      (entry) => String(entry.activityType || "").startsWith("quiz"),
+      1000 * 60 * 60 * 24
+    );
+    const masteredAnswered = Object.values(state.questionStats || {}).reduce(
+      (sum, byQ) =>
+        sum +
+        Object.values(byQ || {}).filter(
+          (s) => (s && s.recentCorrectRun >= 3 && (s.mastery || 0) >= 85) || isCooldownActive(s.masteredUntil)
+        ).length,
+      0
+    );
+    if (last24hXp >= 220 && last24hQuizXp < 50) {
+      anomalyFlags.push("High XP but low quiz contribution in last 24h.");
+    }
+    if (masteredAnswered >= 25) {
+      anomalyFlags.push("Many mastered questions repeated recently; possible farming loop.");
+    }
+    const fastGuessCount = (state.xpLedger || []).filter(
+      (e) =>
+        e &&
+        e.deltaXp > 0 &&
+        e.ts >= Date.now() - 1000 * 60 * 60 * 24 &&
+        String(e.reason || "").includes("_very_fast")
+    ).length;
+    if (fastGuessCount >= 15) {
+      anomalyFlags.push("Many very-fast quiz answers in last 24h; XP was auto-reduced.");
+    }
+    const dominantTopic = reportDominantTopicFromLedger();
+    if (dominantTopic && dominantTopic.share >= 0.75 && dominantTopic.totalXp >= 120) {
+      anomalyFlags.push(
+        `XP highly concentrated in one topic (${dominantTopic.topicLabel}, ${Math.round(
+          dominantTopic.share * 100
+        )}%).`
+      );
+    }
+
+    return {
+      generatedAt: new Date().toISOString(),
+      subjectId: SUBJECT_ID,
+      xpBalance: state.xp || 0,
+      ledgerCount: (state.xpLedger || []).length,
+      purchaseCount: purchases.length,
+      xpTopicRows,
+      missRows: missRows.slice(0, 12),
+      topicRows,
+      studyTimeRows,
+      purchases,
+      recentXp: recentXp.slice(0, 20),
+      anomalyFlags,
+      dailyChallenge: getDailyChallengeSummary(),
+      syncSnapshot: buildSyncSnapshot(),
+    };
+  }
+
+  function reportDominantTopicFromLedger() {
+    const recent = (state.xpLedger || []).filter(
+      (e) => e && e.deltaXp > 0 && e.ts >= Date.now() - 1000 * 60 * 60 * 24
+    );
+    const totals = {};
+    let totalXp = 0;
+    recent.forEach((entry) => {
+      const key = String(entry.topicId || "general");
+      totals[key] = (totals[key] || 0) + entry.deltaXp;
+      totalXp += entry.deltaXp;
+    });
+    if (!totalXp) return null;
+    const top = Object.entries(totals).sort((a, b) => b[1] - a[1])[0];
+    if (!top) return null;
+    const meta = top[0] === "general" ? null : getTopicMeta(top[0]);
+    return {
+      topicId: top[0],
+      topicLabel: meta ? `T${top[0]} ${meta.title}` : "General",
+      totalXp: top[1],
+      share: top[1] / totalXp,
+    };
+  }
+
+  function renderStudyReportHtml(report) {
+    const xpList = report.xpTopicRows.length
+      ? `<ol class="report-list">${report.xpTopicRows
+          .map(
+            (row) =>
+              `<li><strong>${escapeHtml(row.label)}</strong> · ${row.totalXp} XP · ${escapeHtml(
+                Object.entries(row.byActivity)
+                  .map(([k, v]) => `${k} ${v}`)
+                  .join(" · ")
+              )}</li>`
+          )
+          .join("")}</ol>`
+      : "<p class='hint'>No XP entries yet.</p>";
+
+    const missList = report.missRows.length
+      ? `<ol class="report-list">${report.missRows
+          .map(
+            (row) =>
+              `<li><strong>T${escapeHtml(row.topicId)} ${escapeHtml(
+                row.topicTitle
+              )}</strong> · wrong ${row.wrongs} · mastery ${row.mastery}% · ${escapeHtml(
+                row.questionKey.split("::").slice(1).join("::") || row.questionKey
+              )}</li>`
+          )
+          .join("")}</ol>`
+      : "<p class='hint'>No repeated misses yet.</p>";
+
+    const topicList = report.topicRows.length
+      ? `<ol class="report-list">${report.topicRows
+          .map(
+            (row) =>
+              `<li><strong>T${escapeHtml(row.topicId)} ${escapeHtml(
+                row.title
+              )}</strong> · mastery ${row.mastery}% · wrong ${row.totalWrong} · ${
+                isCooldownActive(row.masteredUntil)
+                  ? `cooling until ${escapeHtml(formatShortDate(row.masteredUntil))}`
+                  : `last studied ${escapeHtml(
+                      formatShortDate(row.lastStudiedAt) || "n/a"
+                    )}`
+              }</li>`
+          )
+          .join("")}</ol>`
+      : "<p class='hint'>No topic stats yet.</p>";
+
+    const timeList = report.studyTimeRows.length
+      ? `<ol class="report-list">${report.studyTimeRows
+          .map(
+            (row) =>
+              `<li><strong>T${escapeHtml(row.topicId)} ${escapeHtml(
+                row.title
+              )}</strong> · ${formatMinutes(row.totalMs)} · ${escapeHtml(
+                Object.entries(row.perTab)
+                  .map(([tab, ms]) => `${tab} ${formatMinutes(ms)}`)
+                  .join(" · ")
+              )}</li>`
+          )
+          .join("")}</ol>`
+      : "<p class='hint'>No tracked study time yet.</p>";
+
+    const purchaseList = report.purchases.length
+      ? `<ol class="report-list">${report.purchases
+          .map(
+            (purchase) =>
+              `<li><strong>${escapeHtml(purchase.label)}</strong> · spent ${
+                purchase.xpSpent
+              } XP · balance ${purchase.balanceBefore} → ${
+                purchase.balanceAfter
+              } · evidence ${escapeHtml(
+                ((purchase.studyEvidenceWindow || []).slice(0, 3) || [])
+                  .map((item) =>
+                    `${item.topicId ? "T" + item.topicId : "general"} ${
+                      item.activityType
+                    } ${item.totalXp} XP`
+                  )
+                  .join(" | ") || "none"
+              )}</li>`
+          )
+          .join("")}</ol>`
+      : "<p class='hint'>No purchases yet.</p>";
+
+    const recentList = report.recentXp.length
+      ? `<ol class="report-list">${report.recentXp
+          .map(
+            (entry) =>
+              `<li>${escapeHtml(formatShortDate(entry.ts))} · ${
+                entry.deltaXp > 0 ? "+" : ""
+              }${entry.deltaXp} XP · ${escapeHtml(entry.reason || entry.activityType || "study")} · ${
+                entry.topicId ? "T" + escapeHtml(entry.topicId) : "general"
+              }</li>`
+          )
+          .join("")}</ol>`
+      : "<p class='hint'>No recent activity yet.</p>";
+    const anomalyList = report.anomalyFlags && report.anomalyFlags.length
+      ? `<ul class="report-list">${report.anomalyFlags
+          .map((item) => `<li>${escapeHtml(item)}</li>`)
+          .join("")}</ul>`
+      : "<p class='hint'>No anomaly flags detected.</p>";
+
+    return `
+      <div class="report-grid">
+        <div class="report-card">
+          <h3>Overview</h3>
+          <div class="report-statline">
+            <span class="report-chip">XP balance ${report.xpBalance}</span>
+            <span class="report-chip">XP events ${report.ledgerCount}</span>
+            <span class="report-chip">Purchases ${report.purchaseCount}</span>
+            <span class="report-chip">Daily quiz ${report.dailyChallenge.answered}/${DAILY_CHALLENGE.answered}</span>
+          </div>
+        </div>
+        <div class="report-card">
+          <h3>XP By Topic And Activity</h3>
+          ${xpList}
+        </div>
+        <div class="report-card">
+          <h3>Most Missed Questions</h3>
+          ${missList}
+        </div>
+        <div class="report-card">
+          <h3>Mastery And Cooldowns</h3>
+          ${topicList}
+        </div>
+        <div class="report-card">
+          <h3>Study Time</h3>
+          ${timeList}
+        </div>
+        <div class="report-card">
+          <h3>Purchases And Evidence</h3>
+          ${purchaseList}
+        </div>
+        <div class="report-card">
+          <h3>Recent Activity</h3>
+          ${recentList}
+        </div>
+        <div class="report-card">
+          <h3>Anomaly Flags</h3>
+          ${anomalyList}
+        </div>
+      </div>`;
+  }
+
+  function buildStudyReportText(report) {
+    const lines = [
+      `Study report for ${SUBJECT_TITLE}`,
+      `Generated: ${report.generatedAt}`,
+      `XP balance: ${report.xpBalance}`,
+      `XP events: ${report.ledgerCount}`,
+      `Purchases: ${report.purchaseCount}`,
+      "",
+      "Top XP sources:",
+    ];
+    report.xpTopicRows.forEach((row) => {
+      lines.push(`- ${row.label}: ${row.totalXp} XP`);
+    });
+    lines.push("", "Most missed questions:");
+    report.missRows.forEach((row) => {
+      lines.push(
+        `- T${row.topicId} ${row.topicTitle}: wrong ${row.wrongs}, mastery ${row.mastery}%`
+      );
+    });
+    lines.push("", "Topic cooldowns:");
+    report.topicRows
+      .filter((row) => isCooldownActive(row.masteredUntil))
+      .forEach((row) => {
+        lines.push(
+          `- T${row.topicId} ${row.title}: cooling until ${formatShortDate(
+            row.masteredUntil
+          )}`
+        );
+      });
+    lines.push("", "Purchases:");
+    report.purchases.forEach((purchase) => {
+      lines.push(
+        `- ${purchase.label}: spent ${purchase.xpSpent} XP, balance ${purchase.balanceBefore} -> ${purchase.balanceAfter}`
+      );
+    });
+    lines.push("", "Anomaly flags:");
+    if (report.anomalyFlags && report.anomalyFlags.length) {
+      report.anomalyFlags.forEach((flag) => lines.push(`- ${flag}`));
+    } else {
+      lines.push("- none");
+    }
+    return lines.join("\n");
+  }
+
+  function openReport() {
+    const root = document.getElementById("modal-root");
+    document.getElementById("panel-settings").hidden = true;
+    document.getElementById("panel-shop").hidden = true;
+    document.getElementById("panel-explain").hidden = true;
+    const panel = document.getElementById("panel-report");
+    const report = buildStudyReport();
+    document.getElementById("report-body").innerHTML = renderStudyReportHtml(report);
+    document.getElementById("report-export-output").value = "";
+    panel.hidden = false;
+    root.hidden = false;
+    root.setAttribute("aria-hidden", "false");
+
+    document.getElementById("btn-report-text").onclick = () => {
+      document.getElementById("report-export-output").value =
+        buildStudyReportText(buildStudyReport());
+    };
+    document.getElementById("btn-report-json").onclick = () => {
+      document.getElementById("report-export-output").value = JSON.stringify(
+        buildStudyReport(),
+        null,
+        2
+      );
+    };
+  }
+
   function openShop() {
     const root = document.getElementById("modal-root");
     const panelExplain = document.getElementById("panel-explain");
     const panelSettings = document.getElementById("panel-settings");
+    const panelReport = document.getElementById("panel-report");
     if (!panelExplain.hidden) return;
     panelSettings.hidden = true;
+    if (panelReport) panelReport.hidden = true;
     panelExplain.hidden = true;
     const panelShop = document.getElementById("panel-shop");
     panelShop.hidden = false;
     root.hidden = false;
     root.setAttribute("aria-hidden", "false");
     const rewards = window.SHOP_REWARDS || [];
+    const purchaseGate = canPurchaseReward();
     const list = document.getElementById("shop-rewards-list");
     list.innerHTML = rewards
       .map(
-        (r) => `
+        (r) => {
+          const cooldownMs = getPurchaseCooldownRemainingMs(r.id);
+          const cooldownHrs = Math.ceil(cooldownMs / (1000 * 60 * 60));
+          const dailyMax = getRewardDailyMax(r);
+          const todayCount = getRewardPurchasesOnDate(r.id, getTodayIsoDate());
+          const dailyRemaining = Math.max(0, dailyMax - todayCount);
+          const disabled = state.xp < r.xp || cooldownMs > 0 || !purchaseGate.ok;
+          const disabledByDailyMax = dailyRemaining <= 0;
+          const reallyDisabled = disabled || disabledByDailyMax;
+          const title =
+            cooldownMs > 0
+              ? `Cooldown active (${cooldownHrs}h left)`
+              : disabledByDailyMax
+                ? `Daily max reached (${dailyMax}/day)`
+              : !purchaseGate.ok
+                ? "Need mixed study in last 24h (quiz + flash/game across 2 topics)"
+              : state.xp < r.xp
+                ? "Not enough XP"
+                : "Buy";
+          return `
         <div class="shop-item">
           <span class="shop-label">${escapeHtml(r.label)}</span>
-          <span class="shop-xp">${r.xp} XP</span>
-          <button type="button" class="btn primary shop-buy" data-id="${escapeHtml(r.id)}" data-xp="${r.xp}" data-label="${escapeHtml(r.label)}" ${state.xp < r.xp ? "disabled" : ""}>Buy</button>
-        </div>`
+          <span class="shop-xp">${r.xp} XP · ${dailyRemaining}/${dailyMax} left today</span>
+          <button type="button" class="btn primary shop-buy" title="${escapeHtml(title)}" data-id="${escapeHtml(r.id)}" data-xp="${r.xp}" data-label="${escapeHtml(r.label)}" data-daily-max="${dailyMax}" ${reallyDisabled ? "disabled" : ""}>${
+            cooldownMs > 0
+              ? `Cooldown ${cooldownHrs}h`
+              : disabledByDailyMax
+                ? "Daily max reached"
+                : "Buy"
+          }</button>
+        </div>`;
+        }
       )
       .join("");
+    if (!purchaseGate.ok) {
+      const gateNote = document.createElement("p");
+      gateNote.className = "hint";
+      gateNote.textContent =
+        `Purchase gate: last 24h needs quiz + flash/game and 2 topics (now: quiz ${
+          purchaseGate.cov.quiz ? "yes" : "no"
+        }, flash ${purchaseGate.cov.flash ? "yes" : "no"}, game ${
+          purchaseGate.cov.game ? "yes" : "no"
+        }, topics ${purchaseGate.cov.topicCount}).`;
+      list.prepend(gateNote);
+    }
     list.querySelectorAll(".shop-buy").forEach((btn) => {
       btn.onclick = () => {
         const xp = Number(btn.dataset.xp);
         const label = btn.dataset.label;
         const id = btn.dataset.id;
+        const dailyMax = Number(btn.dataset.dailyMax || DEFAULT_REWARD_DAILY_MAX);
         if (state.xp < xp) return;
-        state.xp -= xp;
+        if (getPurchaseCooldownRemainingMs(id) > 0) return;
+        if (!canPurchaseReward().ok) return;
+        if (getRewardPurchasesOnDate(id, getTodayIsoDate()) >= dailyMax) return;
+        const purchase = recordPurchaseEntry({ id, label, xp });
+        spendXp(xp, {
+          activityType: "purchase",
+          sourceId: id,
+          reason: "reward_purchase",
+        });
         state.coupons = state.coupons || [];
-        state.coupons.push({ id, label, xp, date: new Date().toISOString().slice(0, 10) });
+        state.purchaseLedger.push(purchase);
+        state.coupons.push({
+          id,
+          label,
+          xp,
+          date: new Date().toISOString().slice(0, 10),
+          purchaseId: purchase.id,
+        });
         saveState();
         openShop();
       };
@@ -1717,8 +2728,7 @@
     // return to the subject picker (root index.html). If not, behave like "home".
     const isSubjectShell = !!window.SUBJECT_ID;
     if (isSubjectShell) {
-      const to = window.SUBJECT_ID === "physics" ? "../index.html" : "index.html";
-      window.location.href = to;
+      window.location.href = "index.html";
       return;
     }
     route = { view: "home" };
@@ -1867,13 +2877,17 @@
   if (exportBtn) exportBtn.onclick = () => { handleExportProgress(); };
   const importBtn = document.getElementById("btn-import-progress");
   if (importBtn) importBtn.onclick = () => { handleImportProgress(); };
+  const reportBtn = document.getElementById("btn-open-report");
+  if (reportBtn) reportBtn.onclick = () => { openReport(); };
 
   document.getElementById("btn-settings").onclick = () => {
     const panelExplain = document.getElementById("panel-explain");
     const panelShop = document.getElementById("panel-shop");
+    const panelReport = document.getElementById("panel-report");
     if (!panelExplain.hidden) return;
     const root = document.getElementById("modal-root");
     if (panelShop) panelShop.hidden = true;
+    if (panelReport) panelReport.hidden = true;
     document.getElementById("opt-unlock-all").checked = state.unlockAll;
     document.getElementById("opt-challenge").checked = state.challengeMode;
     document.getElementById("panel-settings").hidden = false;
@@ -1891,6 +2905,17 @@
     root.setAttribute("aria-hidden", "true");
     if (route.view === "home") renderHome();
   };
+
+  const closeReportBtn = document.getElementById("btn-close-report");
+  if (closeReportBtn) {
+    closeReportBtn.onclick = () => {
+      const root = document.getElementById("modal-root");
+      document.getElementById("panel-report").hidden = true;
+      root.hidden = true;
+      root.setAttribute("aria-hidden", "true");
+      if (route.view === "home") renderHome();
+    };
+  }
 
   dock.querySelectorAll("button").forEach((b) => {
     b.addEventListener("click", () => {

@@ -134,6 +134,15 @@
           </button>
           <p class="hint" id="sync-status"></p>
         </div>
+        <div class="export-block">
+          <h3 class="export-title">Parent study report</h3>
+          <p class="hint">
+            View a readable study audit or export the raw local data.
+          </p>
+          <button type="button" class="btn" id="btn-open-report">
+            Open study report
+          </button>
+        </div>
         <button type="button" class="btn primary" id="btn-close-settings">
           Done
         </button>
@@ -157,6 +166,29 @@
         <button type="button" class="btn primary" id="btn-close-shop">
           Done
         </button>
+      </div>
+
+      <div class="modal modal-report" id="panel-report" hidden>
+        <h2>Study Report</h2>
+        <div id="report-body"></div>
+        <div class="report-actions">
+          <button type="button" class="btn" id="btn-report-text">
+            Export text summary
+          </button>
+          <button type="button" class="btn" id="btn-report-json">
+            Export JSON
+          </button>
+          <button type="button" class="btn primary" id="btn-close-report">
+            Done
+          </button>
+        </div>
+        <textarea
+          id="report-export-output"
+          class="progress-code report-export"
+          rows="8"
+          readonly
+          placeholder="Report export will appear here."
+        ></textarea>
       </div>
     </div>
 
