@@ -117,3 +117,90 @@ Subject shell must inject (with cache-busting `?v=`):
 ## Progress
 
 Stored in `localStorage` (`levelup_chem_v1`). **Settings → Transfer progress** for encrypted copy/paste between browsers.
+
+## Supabase setup (required for central progress + parent dashboard)
+
+This app supports hybrid persistence:
+- local cache in `localStorage` (offline/fallback)
+- central sync to Supabase (scores, XP/events, purchases, parent analytics)
+
+### 1) Create/run database schema
+
+Run this script in Supabase SQL Editor:
+
+- `supabase/study_app_phase1.sql`
+
+The script includes:
+- core tables + study tables
+- RLS policies
+- student identity (`student_id`) support
+- idempotent event/purchase upsert indexes
+- reward purchase RPC
+- parent dashboard RPC + parent code setup function
+- profile data clear function
+
+### 2) Configure client keys in app
+
+On first load, the app prompts for:
+- `SUPABASE_URL` (Project URL)
+- `SUPABASE_ANON_KEY` (anon/public API key)
+
+They are stored in browser `localStorage`.
+
+You can re-open setup prompts with:
+- `?setupSupabase=1` (for Supabase keys)
+- `?setupStudent=1` (for student profile)
+
+Or from console:
+- `window.configureSupabaseKeys()`
+- `window.configureStudentProfile()`
+
+Important:
+- Do **not** use DB connection string or service role in browser.
+- Use only Project URL + anon/public key.
+
+### 3) Student identity
+
+Student profile setup asks for:
+- student display name
+- student id (stable identifier across devices)
+
+With same student id + same Supabase project, multiple devices map to the same logical student profile.
+
+### 4) Parent dashboard
+
+Open:
+- `parent.html`
+
+Before first use, set a parent code in SQL:
+
+```sql
+select public.study_set_parent_code('study-app', 'your-parent-pin');
+```
+
+Then enter project code + parent PIN in `parent.html`.
+
+Optional:
+- `Remember 30 days` stores only a SHA-256 token in browser storage (not plain PIN).
+
+### 5) Clear one student/profile data
+
+Delete one student's data (and optionally profile row):
+
+```sql
+select public.study_clear_profile_data(
+  p_project_code => 'study-app',
+  p_student_id => 'carol-1',
+  p_delete_profile => true
+);
+```
+
+### 6) Troubleshooting
+
+- `401 Unauthorized` on `/rest/v1/...`:
+  - wrong key type or wrong project key
+  - verify URL + anon key pair from the same project
+- `permission denied for schema public`:
+  - grants missing; rerun `supabase/study_app_phase1.sql`
+- upsert `400` on `on_conflict` for XP/purchase:
+  - rerun script to ensure non-partial unique indexes exist

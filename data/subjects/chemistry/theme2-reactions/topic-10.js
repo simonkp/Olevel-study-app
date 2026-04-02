@@ -115,7 +115,16 @@
     {question:"Which anion test uses limewater turning milky?",options:["Sulfate","Chloride","Carbonate (acidified)","Nitrate only"],correctIndex:2,explanation:"CO₂ from carbonate + acid turns limewater milky."},
     {question:"Clean nichrome wire with conc. HCl before a flame test to:",options:["Make the flame hotter","Remove previous metal ions that could give false colours","Dissolve the wire","Generate Cl₂ for safety"],correctIndex:1,explanation:"Contamination gives misleading flame colours."},
     {question:"Cu²⁺ in very high [Cl⁻] can appear greener/yellow due to:",options:["Only precipitation","Formation of chloro-complexes shifting colour","Oxidation to Cu⁺ only","Reduction to Cu metal always"],correctIndex:1,explanation:"Ligand environment changes the observed colour."},
-    {question:"A reducing gas that turns acidified dichromate(VI) green is often:",options:["CO₂","SO₂","O₂","N₂"],correctIndex:1,explanation:"SO₂ reduces Cr(VI) to Cr(III) (green)."}
+    {question:"A reducing gas that turns acidified dichromate(VI) green is often:",options:["CO₂","SO₂","O₂","N₂"],correctIndex:1,explanation:"SO₂ reduces Cr(VI) to Cr(III) (green)."},
+    {id:"chem-T10-201",question:"When testing for NH₄⁺(aq), a student adds NaOH(aq) and gently warms. The gas that turns damp red litmus blue is:",options:["Cl₂","HCl","NH₃","CO₂"],correctIndex:2,explanation:"Ammonia gas from ammonium + hydroxide."},
+    {id:"chem-T10-202",question:"Acidified AgNO₃ (after HNO₃) with Cl⁻ gives:",options:["Cream precipitate","White precipitate","Yellow precipitate","No precipitate"],correctIndex:1,explanation:"AgCl is white."},
+    {id:"chem-T10-203",question:"Br⁻(aq) + Ag⁺(aq) under acidified conditions gives:",options:["White AgCl","Cream AgBr","Yellow AgI","Soluble complex only"],correctIndex:1,explanation:"Silver bromide is cream."},
+    {id:"chem-T10-204",question:"A flame test for Na⁺ often shows:",options:["Lilac through cobalt glass","Persistent yellow","Brick red","Green"],correctIndex:1,explanation:"Sodium yellow flame."},
+    {id:"chem-T10-205",question:"To distinguish CO₃²⁻ from SO₃²⁻ in the lab with acid, one practical difference is:",options:["Both never give gas","CO₂ turns limewater milky; SO₂ may turn dichromate green and has a sharp smell","They are identical","Only carbonate exists"],correctIndex:1,explanation:"Different gases and follow-up tests."},
+    {id:"chem-T10-206",question:"Pb²⁺(aq) + 2I⁻(aq) → PbI₂(s) is used as a test because:",options:["PbI₂ is soluble","PbI₂ is a yellow precipitate","No colour change","Gas forms"],correctIndex:1,explanation:"Characteristic yellow precipitate."},
+    {id:"chem-T10-207",question:"Before adding acidified BaCl₂ to test for sulfate, the solution is often acidified to remove interference from:",options:["Na⁺","Carbonate ions that could form BaCO₃ precipitate","All metals","Water only"],correctIndex:1,explanation:"Carbonate gives false positive white ppt with Ba²⁺."},
+    {id:"chem-T10-208",question:"A gas that relights a glowing splint is:",options:["H₂","CO₂","O₂","N₂"],correctIndex:2,explanation:"Oxygen supports combustion."},
+    {id:"chem-T10-209",question:"In qualitative analysis, ‘no visible reaction’ with a reagent does not always mean:",options:["No ions are present","The ion concentration is too low or wrong conditions","The student is colour-blind","Water is always pure"],correctIndex:1,explanation:"Sensitivity and conditions matter."}
     ],
     trueFalse: [
     {statement:"AgBr is more soluble than AgCl in water.",correct:true,explain:"Ksp larger."},

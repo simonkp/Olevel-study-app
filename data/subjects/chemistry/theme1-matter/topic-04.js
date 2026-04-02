@@ -27,6 +27,14 @@
                 "**Valence electrons** — outer shell; drive bonding.",
                 "Group number (main) ≈ valence e⁻ for groups 1–2, 7–0 pattern context."
             ]
+        },
+        {
+            "title": "Shielding & size",
+            "points": [
+                "**Shielding** — inner electrons reduce the full nuclear charge felt by outer electrons (effective nuclear charge).",
+                "**Isoelectronic species** — same electron count; smaller radius with higher nuclear charge.",
+                "**Second ionisation energy** removes the next electron after the first — much larger for removing a core-like electron."
+            ]
         }
     ],
     infographics: [
@@ -128,7 +136,16 @@
     {question:"Which statement about γ-radiation from a nucleus is correct?",options:["It changes atomic number by 2","It carries no rest mass charge","It is slow helium nuclei","It always increases mass number"],correctIndex:1,explanation:"Gamma is electromagnetic radiation; no change to Z or A."},
     {question:"A ²³⁸U atom undergoes α-decay. The daughter nucleus has mass number:",options:["234","238","242","236"],correctIndex:0,explanation:"α is ⁴He; A decreases by 4 → 234."},
     {question:"Why is the atomic radius of a Na atom larger than a Mg atom in Period 3?",options:["Mg has fewer protons","Mg’s higher nuclear charge pulls the same-shell electrons closer","Na has more valence electrons","Mg always has d-electrons"],correctIndex:1,explanation:"Across a period, increasing Z contracts the radius for the same shell."},
-    {question:"Relative atomic mass is rarely a whole number for many elements because:",options:["Electrons have mass 1 u","Elements are mixtures of isotopes","Protons have fractional charge","The periodic table uses molar volume"],correctIndex:1,explanation:"Ar is a weighted mean of isotopic masses and abundances."}
+    {question:"Relative atomic mass is rarely a whole number for many elements because:",options:["Electrons have mass 1 u","Elements are mixtures of isotopes","Protons have fractional charge","The periodic table uses molar volume"],correctIndex:1,explanation:"Ar is a weighted mean of isotopic masses and abundances."},
+    {id:"chem-T4-201",question:"Between isoelectronic S²⁻, Cl⁻ and K⁺, the smallest ionic radius is expected for:",options:["S²⁻","Cl⁻","K⁺","All same radius"],correctIndex:2,explanation:"Same electron count; highest nuclear charge pulls electrons in most."},
+    {id:"chem-T4-202",question:"The second ionisation energy of sodium is much larger than the first mainly because:",options:["The second electron is removed from a higher shell","The second electron is removed from the same shell as the first","The second electron is removed from a noble-gas-like core configuration","Sodium becomes a diatomic molecule"],correctIndex:2,explanation:"After Na → Na⁺, the next electron comes from a stable 2,8 shell."},
+    {id:"chem-T4-203",question:"Across Period 3, atomic radius decreases mainly because:",options:["More shells are added","Nuclear charge increases while electrons are added to the same principal shell","Metallic bonding strengthens","Neutron number decreases"],correctIndex:1,explanation:"Same-shell screening; increasing Z pulls electrons in."},
+    {id:"chem-T4-204",question:"Which statement about a ¹²C atom and a ¹³C atom is correct?",options:["They have different chemical properties in all reactions","They have the same number of protons but different numbers of neutrons","They have different atomic numbers","They have different numbers of electrons in any state"],correctIndex:1,explanation:"Isotopes: same Z, different A."},
+    {id:"chem-T4-205",question:"A species with 18 electrons and 17 protons is:",options:["Cl atom","Cl⁻ ion","Ar atom","K⁺ ion"],correctIndex:1,explanation:"17 protons = Cl; 18 electrons → −1 charge."},
+    {id:"chem-T4-206",question:"The mass spectrum peak intensity of an isotope is related to:",options:["Its nuclear charge only","Its relative abundance in the sample","Its colour","Its boiling point"],correctIndex:1,explanation:"Taller peak usually means more abundant isotope."},
+    {id:"chem-T4-207",question:"When comparing first ionisation energy of Mg and Al in Period 3, Mg is often higher than Al because:",options:["Al has fewer protons","Al’s 3p electron is slightly easier to remove due to subshell penetration/shielding effects","Mg is always a gas","Ionisation energy does not vary across a period"],correctIndex:1,explanation:"The 3s electron in Mg can be held more tightly than Al’s 3p in the simple trend."},
+    {id:"chem-T4-208",question:"γ-emission from an excited nucleus:",options:["Increases mass number by 4","Does not change Z or A","Converts a neutron to a proton","Always ejects an α particle"],correctIndex:1,explanation:"Gamma is electromagnetic radiation from nucleus de-excitation."},
+    {id:"chem-T4-209",question:"The atomic number of an element is defined by:",options:["The number of neutrons","The number of protons in the nucleus","The mass number","The number of electrons in any ion"],correctIndex:1,explanation:"Z identifies the element."}
     ],
     trueFalse: [
     {statement:"All atoms of an element must have the same mass number.",correct:false,explain:"Isotopes."},

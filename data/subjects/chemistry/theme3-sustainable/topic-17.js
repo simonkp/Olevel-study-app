@@ -26,6 +26,13 @@
                 "Complete → CO₂ + H₂O; incomplete → CO/C + lower O₂.",
                 "Alkenes more sooty than alkanes (higher C:H ratio)."
             ]
+        },
+        {
+            "title": "Crude oil & cracking",
+            "points": [
+                "**Fractional distillation** separates crude by boiling point into refinery fractions (petrol, diesel, bitumen…).",
+                "**Cracking** breaks long alkanes to shorter alkanes + alkenes (fuels + chemical feedstock)."
+            ]
         }
     ],
     infographics: [
@@ -126,7 +133,16 @@
     {question:"A main reason long-chain alkanes are cracked in refineries is to produce:",options:["Only heavier bitumen","Smaller alkanes and alkenes for fuels and feedstocks","Pure oxygen","Diamond"],correctIndex:1,explanation:"Break C–C bonds to useful shorter molecules."},
     {question:"Why do alkenes decolourise bromine water under ordinary lab conditions more readily than alkanes?",options:["Alkanes are always ionic","The C=C π bond is an electron-rich addition site","Alkanes are lighter","Bromine cannot add to any carbon"],correctIndex:1,explanation:"Electrophilic addition across the double bond."},
     {question:"Structural isomers with formula C₄H₁₀ include:",options:["Only n-butane","Butane and methylpropane","Butane and but-1-ene","Ethane and propane"],correctIndex:1,explanation:"Same molecular formula, different connectivity."},
-    {question:"Incomplete combustion of a hydrocarbon in limited air can produce:",options:["Only CO₂","CO and/or carbon (soot) among other products","Only H₂O","N₂ only"],correctIndex:1,explanation:"Insufficient O₂ favours CO and elemental carbon."}
+    {question:"Incomplete combustion of a hydrocarbon in limited air can produce:",options:["Only CO₂","CO and/or carbon (soot) among other products","Only H₂O","N₂ only"],correctIndex:1,explanation:"Insufficient O₂ favours CO and elemental carbon."},
+    {id:"chem-T17-201",question:"Fractional distillation of crude oil separates fractions mainly by:",options:["Atomic number","Boiling point (volatility)","Electronegativity","Density of water"],correctIndex:1,explanation:"Different chain lengths → different boiling points."},
+    {id:"chem-T17-202",question:"Compared with many catalytic routes, simple thermal cracking at very high temperature is often:",options:["More selective toward one alkene only","Less selective — broader mixture of fragments and alkenes","Impossible in industry","Only physical distillation"],correctIndex:1,explanation:"High-temperature scission is less controlled than zeolite-catalysed cracking (syllabus-level contrast)."},
+    {id:"chem-T17-203",question:"But-1-ene and but-2-ene (both C₄H₈) are examples of:",options:["Structural isomers only","Positional isomerism among alkenes (same formula, different C=C position)","Functional group isomers with alkanes","Polymers"],correctIndex:1,explanation:"Same molecular formula; double-bond position differs."},
+    {id:"chem-T17-204",question:"When propan-1-ol is oxidised with acidified dichromate under distillation (removing product as it forms), the organic product collected first is often:",options:["Propanoic acid","Propanal","Propane","Propanone"],correctIndex:1,explanation:"Distillation favours stopping at the aldehyde."},
+    {id:"chem-T17-205",question:"Ethene reacts with steam (acid catalyst) to form ethanol. This is best classed as:",options:["Substitution","Electrophilic addition / hydration across C=C","Cracking","Neutralisation"],correctIndex:1,explanation:"π bond opens; –OH adds."},
+    {id:"chem-T17-206",question:"A student tests an unknown with sodium carbonate: vigorous bubbling. This supports:",options:["Presence of an alcohol","Presence of a carboxylic acid (or strong acid)","Presence of an alkene","Presence of an ester only"],correctIndex:1,explanation:"Acid + carbonate → CO₂."},
+    {id:"chem-T17-207",question:"Why does ethanoic acid have a lower electrical conductivity than HCl at the same concentration?",options:["Ethanoic acid is a strong acid","Ethanoic acid is weak — fewer ions per dm³","HCl has no ions","Ethanoic acid is a gas"],correctIndex:1,explanation:"Partial ionisation."},
+    {id:"chem-T17-208",question:"The general formula for a non-cyclic alkane is:",options:["CₙH₂ₙ","CₙH₂ₙ₊₂","CₙH₂ₙ₋₂","CₙHₙO₂"],correctIndex:1,explanation:"Saturated acyclic alkanes."},
+    {id:"chem-T17-209",question:"Methylpropane and butane both have formula C₄H₁₀. Their relationship is:",options:["Same empirical formula only","Structural isomers","Cis–trans isomers","Allotropes"],correctIndex:1,explanation:"Different connectivity — structural isomerism."}
     ],
     trueFalse: [
     {statement:"All alkenes have the same empirical formula CH₂.",correct:true,explain:"CₙH₂ₙ → CH₂."},

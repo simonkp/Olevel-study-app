@@ -27,6 +27,15 @@
                 "Many nitrates soluble; group 1 salts often soluble.",
                 "AgCl, BaSO₄, CaCO₃ common insoluble examples in tests."
             ]
+        },
+        {
+            "title": "Gas collection & purity",
+            "points": [
+                "**Over water** — for gases sparingly soluble in water; not for very soluble gases (e.g. NH₃, HCl).",
+                "**Upward/downward delivery** — gas density vs air (not the only factor; use safety data).",
+                "**Purity tests** — sharp melting point or fixed boiling point for a pure substance under fixed pressure.",
+                "**Dry gases** — pass through a suitable drying agent (e.g. anhydrous CaCl₂) if the gas is compatible."
+            ]
         }
     ],
     infographics: [ { image: "data/subjects/chemistry/images/matter-02-purification.jpg", caption: "Distillation and chromatography" } ],
@@ -124,7 +133,16 @@
     {question:"After hot filtration, a solution sometimes deposits crystals as it cools because:",options:["Water evaporates completely first","Solubility usually decreases on cooling","Crystals need light","Filtration increases solubility"],correctIndex:1,explanation:"Cooling drives supersaturated solutions toward equilibrium."},
     {question:"Steam distillation is useful for:",options:["Only ionic solids","Heat-sensitive organics with appreciable vapour pressure","Separating two ionic salts","Drying gases"],correctIndex:1,explanation:"Steam carries volatile components at lower effective temperatures."},
     {question:"If two components have identical boiling points, fractional distillation:",options:["Always gives pure components in one cut","Cannot separate by boiling point alone","Always forms an azeotrope","Requires filtration"],correctIndex:1,explanation:"No bp difference means no vapour enrichment by distillation."},
-    {question:"Green solvent choice in chromatography might prioritise:",options:["Maximum toxicity","Low toxicity and lower environmental impact","Only the brightest colour","Highest boiling point always"],correctIndex:1,explanation:"Safety and waste matter in practical chemistry."}
+    {question:"Green solvent choice in chromatography might prioritise:",options:["Maximum toxicity","Low toxicity and lower environmental impact","Only the brightest colour","Highest boiling point always"],correctIndex:1,explanation:"Safety and waste matter in practical chemistry."},
+    {id:"chem-T2-201",question:"Collecting ammonia gas by displacement of water is usually unsuitable mainly because:",options:["Ammonia is denser than air","Ammonia is highly soluble in water","Ammonia does not react","Water freezes"],correctIndex:1,explanation:"Very soluble gases dissolve extensively in the water collection system."},
+    {id:"chem-T2-202",question:"A solid sample is suspected impure. A quick test that strongly suggests purity is:",options:["It looks white","A sharp, narrow melting range close to literature value","It dissolves in water","It has a smell"],correctIndex:1,explanation:"Pure solids typically melt sharply; impurities broaden the range."},
+    {id:"chem-T2-203",question:"Mixed melting point of a sample with known pure compound is depressed if:",options:["The sample is the same pure compound","The sample contains an impurity","The heating is slow","The sample is dry"],correctIndex:1,explanation:"Impurities lower and broaden melting point."},
+    {id:"chem-T2-204",question:"Suction filtration (Büchner) is used mainly to:",options:["Increase boiling point","Separate filtrate faster and dry solids more effectively than gravity filtration","Measure Rf","Remove all ions from water"],correctIndex:1,explanation:"Faster filtration and better solid recovery for many precipitates."},
+    {id:"chem-T2-205",question:"Washing a filtered precipitate with cold distilled water aims to:",options:["Dissolve the product completely","Remove soluble impurities while minimising product loss","Increase crystal size","Change colour only"],correctIndex:1,explanation:"Cold wash reduces solubility loss of product."},
+    {id:"chem-T2-206",question:"Percentage yield compares:",options:["Moles of catalyst to product","Actual mass obtained to theoretical maximum from stoichiometry","Volume of solvent to mass","Rf before and after"],correctIndex:1,explanation:"Yield = (actual / theoretical) × 100%."},
+    {id:"chem-T2-207",question:"Percentage purity of a sample compares:",options:["Mass of pure desired substance to total sample mass","Volume of solvent to solute","Time to temperature","Rf to 1"],correctIndex:0,explanation:"Purity is about mass fraction of the desired component."},
+    {id:"chem-T2-208",question:"Concentrated sulfuric acid is a poor drying agent for ammonia gas because:",options:["Ammonia is not basic","They react to form a salt","Ammonia is too light","Sulfuric acid is not hygroscopic"],correctIndex:1,explanation:"Acid-base neutralisation consumes the gas rather than simply drying it."},
+    {id:"chem-T2-209",question:"In a separating funnel, the lower layer is:",options:["Always water","The denser liquid","Always organic","Always aqueous"],correctIndex:1,explanation:"Density determines which layer is lower."}
     ],
     trueFalse: [
     {statement:"Rf can be greater than 1.",correct:false,explain:"By definition ratio ≤ 1."},

@@ -37,6 +37,15 @@
                 "Control measures: goggles, fume cupboard, low concentration.",
                 "Step-by-step method so others can repeat."
             ]
+        },
+        {
+            "title": "Physical quantities & measurement",
+            "points": [
+                "**Consistent units** — SI base units; convert before calculations.",
+                "**Significant figures** — report to the precision of the limiting measurement.",
+                "**Parallax** — view scale perpendicularly to avoid systematic reading error.",
+                "**Volumetric glassware** — read burette/pipette meniscus at eye level."
+            ]
         }
     ],
     infographics: [ { image: "data/subjects/chemistry/images/matter-01-experimental-design.jpg", caption: "Fair test: variables and apparatus" } ],
@@ -134,7 +143,16 @@
     {question:"Validity of a conclusion is threatened most when:",options:["Random error is small","The method answers a different question than claimed","Sample size is large","Results are reproducible"],correctIndex:1,explanation:"Validity is whether the evidence actually supports the claim."},
     {question:"Calibration of a balance with standard masses mainly reduces:",options:["Random error in a single reading","Systematic error from incorrect scale","The need to repeat","Human reaction time"],correctIndex:1,explanation:"Calibration corrects consistent offsets."},
     {question:"An operational definition is important so that:",options:["The experiment uses expensive kit","The dependent variable is measured the same way each time","The hypothesis becomes unfalsifiable","The risk assessment is shorter"],correctIndex:1,explanation:"It makes the measurement explicit and comparable."},
-    {question:"Using a line of best fit rather than joining every point mainly helps:",options:["Remove the need for units","Show overall trend and reduce noise from scatter","Guarantee a straight line","Increase systematic error"],correctIndex:1,explanation:"Trend lines summarise data; anomalies stand out."}
+    {question:"Using a line of best fit rather than joining every point mainly helps:",options:["Remove the need for units","Show overall trend and reduce noise from scatter","Guarantee a straight line","Increase systematic error"],correctIndex:1,explanation:"Trend lines summarise data; anomalies stand out."},
+    {id:"chem-T1-201",question:"A student reads a burette meniscus from above while the liquid is still draining. This mainly introduces:",options:["A random error that averages to zero","A systematic parallax / timing error","No error if the titre is repeated","Only random error from temperature"],correctIndex:1,explanation:"Viewing angle and premature reading bias results consistently; repeats may not fix systematic bias."},
+    {id:"chem-T1-202",question:"Multiplying 2.3 cm × 4.56 cm gives an area that should be reported as:",options:["10.488 cm²","10.5 cm²","10 cm²","10.49 cm²"],correctIndex:1,explanation:"The product cannot be more precise than the least precise factor (2.3 has 2 s.f.)."},
+    {id:"chem-T1-203",question:"Random allocation of participants/samples to experimental groups mainly reduces:",options:["Systematic zero error","Selection bias from non-random assignment","The need for a control group","Instrument resolution"],correctIndex:1,explanation:"Randomisation spreads confounding factors evenly."},
+    {id:"chem-T1-204",question:"A double-blind experiment means:",options:["Two observers time each trial","Neither subject nor key assessor knows who received which treatment","Two independent variables are tested","Two repeats are done"],correctIndex:1,explanation:"Reduces expectation bias on both sides."},
+    {id:"chem-T1-205",question:"Internal validity of a study refers to:",options:["Whether results apply worldwide","Whether the measured effect is genuinely caused by the intended factor","Whether the sample size is large","Whether the graph is printed in colour"],correctIndex:1,explanation:"Internal validity = causal claim is supported within the setup."},
+    {id:"chem-T1-206",question:"External validity refers to:",options:["How far conclusions generalise beyond the specific conditions tested","Whether the thermometer is calibrated","Whether random error is small","Whether the hypothesis is long"],correctIndex:0,explanation:"Generalisable to other contexts."},
+    {id:"chem-T1-207",question:"When plotting a quantity that spans 10^4–10^8 on a wide range, a log scale is often used because:",options:["It removes all systematic error","It compresses wide ranges so trends are easier to see","It makes all relationships linear","It is required by SI"],correctIndex:1,explanation:"Log scales help visualise multiplicative change across orders of magnitude."},
+    {id:"chem-T1-208",question:"A systematic error that is proportional to the measured value (e.g. a wrongly calibrated 2% high scale) will:",options:["Affect only one reading","Shift all readings by a consistent percentage or offset pattern","Disappear if you repeat once","Average out over many repeats"],correctIndex:1,explanation:"Repeats stay biased; calibration is needed."},
+    {id:"chem-T1-209",question:"The best reason to plot error bars on a graph is to:",options:["Make the graph colourful","Show uncertainty in each measured point","Force the line to be straight","Replace a table"],correctIndex:1,explanation:"Error bars communicate uncertainty visually."}
     ],
     trueFalse: [
     {statement:"More repeats always remove systematic error.",correct:false,explain:"Repeats reduce random error; systematic needs calibration/fix."},

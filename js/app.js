@@ -1,6 +1,10 @@
 (function () {
   const SUBJECT_ID = window.SUBJECT_ID || "chemistry";
   const SUBJECT_TITLE = window.SUBJECT_TITLE || "O-Level Chemistry";
+  const STUDENT_ID =
+    window.LEVELUP_STUDENT_ID || localStorage.getItem("LEVELUP_STUDENT_ID") || `local-${SUBJECT_ID}`;
+  const STUDENT_NAME =
+    window.LEVELUP_STUDENT_NAME || localStorage.getItem("LEVELUP_STUDENT_NAME") || "Student";
   const STORAGE_KEY = "levelup_" + SUBJECT_ID + "_v1";
   const APP_VERSION = window.APP_VERSION || "dev";
   const QUESTION_MS = 26000;
@@ -82,6 +86,7 @@
   const main = document.getElementById("main");
   const dock = document.getElementById("dock");
   let state = loadState();
+  const progressStore = window.ProgressStore || null;
   let route = { view: "home", topicId: null, tab: "cheat" };
   let quizSession = null;
   let flashSession = null;
@@ -132,7 +137,8 @@
       topicStats: {},
       syncShape: {
         schema: "study-audit-v1",
-        studentId: `local-${SUBJECT_ID}`,
+        studentId: STUDENT_ID,
+        studentName: STUDENT_NAME,
       },
       dailyChallenge: {
         date: "",
@@ -158,7 +164,8 @@
       : [];
     next.syncShape = next.syncShape || {
       schema: "study-audit-v1",
-      studentId: `local-${SUBJECT_ID}`,
+      studentId: STUDENT_ID,
+      studentName: STUDENT_NAME,
     };
     next.dailyChallenge = {
       ...defaultState().dailyChallenge,
@@ -221,6 +228,10 @@
   function saveState() {
     state = normalizeState(state);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (progressStore && progressStore.hasClient()) {
+      progressStore.scheduleSnapshot(portableState());
+      progressStore.scheduleTopicStats(state.topicStats || {});
+    }
     updateTopbar();
   }
 
@@ -485,6 +496,7 @@
       touchTopicStats(meta.topicId).lastStudiedAt = Date.now();
     }
     const entry = {
+      clientEventId: `xp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       ts: Date.now(),
       subjectId: SUBJECT_ID,
       topicId: meta && meta.topicId != null ? String(meta.topicId) : null,
@@ -527,12 +539,16 @@
     entry.deltaXp = adjusted;
     state.xp += adjusted;
     state.xpLedger.push(entry);
+    if (progressStore && progressStore.hasClient()) {
+      progressStore.recordXp(entry);
+    }
     saveState();
   }
 
   function spendXp(deltaXp, meta) {
     if (!deltaXp) return;
     const entry = {
+      clientEventId: `xp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       ts: Date.now(),
       subjectId: SUBJECT_ID,
       topicId: meta && meta.topicId != null ? String(meta.topicId) : null,
@@ -545,6 +561,9 @@
     };
     state.xp -= Math.abs(deltaXp);
     state.xpLedger.push(entry);
+    if (progressStore && progressStore.hasClient()) {
+      progressStore.recordXp(entry);
+    }
     saveState();
   }
 
@@ -2587,26 +2606,49 @@
     return lines.join("\n");
   }
 
-  function openReport() {
+  async function openReport() {
     const root = document.getElementById("modal-root");
     document.getElementById("panel-settings").hidden = true;
     document.getElementById("panel-shop").hidden = true;
     document.getElementById("panel-explain").hidden = true;
     const panel = document.getElementById("panel-report");
-    const report = buildStudyReport();
+    let report = buildStudyReport();
+    if (progressStore && progressStore.hasClient()) {
+      const merged = await progressStore.fetchReportWithFallback(
+        report,
+        (topicId) => getTopicMeta(topicId)
+      );
+      if (merged && merged.report) report = merged.report;
+    }
     document.getElementById("report-body").innerHTML = renderStudyReportHtml(report);
     document.getElementById("report-export-output").value = "";
     panel.hidden = false;
     root.hidden = false;
     root.setAttribute("aria-hidden", "false");
 
-    document.getElementById("btn-report-text").onclick = () => {
+    document.getElementById("btn-report-text").onclick = async () => {
+      let latest = buildStudyReport();
+      if (progressStore && progressStore.hasClient()) {
+        const merged = await progressStore.fetchReportWithFallback(
+          latest,
+          (topicId) => getTopicMeta(topicId)
+        );
+        if (merged && merged.report) latest = merged.report;
+      }
       document.getElementById("report-export-output").value =
-        buildStudyReportText(buildStudyReport());
+        buildStudyReportText(latest);
     };
-    document.getElementById("btn-report-json").onclick = () => {
+    document.getElementById("btn-report-json").onclick = async () => {
+      let latest = buildStudyReport();
+      if (progressStore && progressStore.hasClient()) {
+        const merged = await progressStore.fetchReportWithFallback(
+          latest,
+          (topicId) => getTopicMeta(topicId)
+        );
+        if (merged && merged.report) latest = merged.report;
+      }
       document.getElementById("report-export-output").value = JSON.stringify(
-        buildStudyReport(),
+        latest,
         null,
         2
       );
@@ -2677,7 +2719,7 @@
       list.prepend(gateNote);
     }
     list.querySelectorAll(".shop-buy").forEach((btn) => {
-      btn.onclick = () => {
+      btn.onclick = async () => {
         const xp = Number(btn.dataset.xp);
         const label = btn.dataset.label;
         const id = btn.dataset.id;
@@ -2686,6 +2728,21 @@
         if (getPurchaseCooldownRemainingMs(id) > 0) return;
         if (!canPurchaseReward().ok) return;
         if (getRewardPurchasesOnDate(id, getTodayIsoDate()) >= dailyMax) return;
+        let rpcCouponCode = null;
+        if (progressStore && progressStore.hasClient()) {
+          const rpcResult = await progressStore.purchaseRewardServer({
+            id,
+            label,
+            xp,
+            dailyMax,
+          });
+          if (!rpcResult || !rpcResult.ok) {
+            const reason = (rpcResult && rpcResult.error) || "purchase_blocked";
+            alert(`Purchase blocked by server: ${reason}`);
+            return;
+          }
+          rpcCouponCode = rpcResult.coupon_code || null;
+        }
         const purchase = recordPurchaseEntry({ id, label, xp });
         spendXp(xp, {
           activityType: "purchase",
@@ -2694,12 +2751,20 @@
         });
         state.coupons = state.coupons || [];
         state.purchaseLedger.push(purchase);
+        if (progressStore && progressStore.hasClient()) {
+          progressStore.recordPurchase({
+            ...purchase,
+            couponCode: rpcCouponCode,
+            clientPurchaseId: purchase.id,
+          });
+        }
         state.coupons.push({
           id,
           label,
           xp,
           date: new Date().toISOString().slice(0, 10),
           purchaseId: purchase.id,
+          couponCode: rpcCouponCode,
         });
         saveState();
         openShop();
@@ -2926,4 +2991,22 @@
 
   updateTopbar();
   renderHome();
+
+  if (progressStore) {
+    progressStore.init({ subjectId: SUBJECT_ID, storageKey: STORAGE_KEY });
+    progressStore.ensureReady().then((result) => {
+      const syncStatus = document.getElementById("sync-status");
+      if (syncStatus) {
+        if (result && result.ok) {
+          syncStatus.textContent = `Supabase connected (${result.context.studentName || "Student"} · ${result.context.studentId || ""}).`;
+        } else {
+          syncStatus.textContent = `Supabase not connected: ${(result && result.error) || progressStore.getLastError() || "unknown error"}`;
+        }
+      }
+      progressStore.migrateFromLocalState(portableState()).then(() => {
+        progressStore.scheduleSnapshot(portableState());
+        progressStore.scheduleTopicStats(state.topicStats || {});
+      });
+    });
+  }
 })();

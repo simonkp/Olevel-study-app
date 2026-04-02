@@ -1,0 +1,1 @@
+select public.study_set_parent_code('study-app', 'your-parent-pin');

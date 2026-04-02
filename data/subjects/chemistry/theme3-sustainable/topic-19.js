@@ -22,6 +22,13 @@
             ]
         },
         {
+            "title": "Carbon cycle vs fossil CO₂",
+            "points": [
+                "**Fast cycle**: photosynthesis ↔ respiration/decay moves carbon without net geological burial.",
+                "**Fossil fuels** release carbon fixed millions of years ago — faster than sinks can absorb → rising atmospheric CO₂."
+            ]
+        },
+        {
             "title": "Control",
             "points": [
                 "**Catalytic converter**: CO + hydrocarbons → CO₂ + H₂O; NOₓ → N₂.",
@@ -128,7 +135,16 @@
     {question:"The Montreal Protocol chiefly limits:",options:["Only fossil CO₂","Ozone-depleting substances (e.g. CFCs)","Only PM₂.₅","Only radon"],correctIndex:1,explanation:"International phase-out of ODS."},
     {question:"Ocean acidification is driven mainly by:",options:["Extra CO₂ dissolving and shifting carbonate equilibria","Only SO₂ scrubbing","Stratospheric O₃ loss","Argon buildup"],correctIndex:0,explanation:"CO₂ → H⁺ affects seawater pH."},
     {question:"High combustion temperatures in engines favour NO formation because:",options:["N₂ + O₂ in air can react","Fuel is pure nitrogen","Catalysts add NO","O₂ is removed"],correctIndex:0,explanation:"Thermal NOₓ from hot air."},
-    {question:"Wet flue-gas desulfurisation in power stations primarily cuts:",options:["CO emissions","SO₂ emissions","O₂ in air","Argon"],correctIndex:1,explanation:"Scrubbing sulfur oxides from stack gases."}
+    {question:"Wet flue-gas desulfurisation in power stations primarily cuts:",options:["CO emissions","SO₂ emissions","O₂ in air","Argon"],correctIndex:1,explanation:"Scrubbing sulfur oxides from stack gases."},
+    {id:"chem-T19-201",question:"Photosynthesis removes CO₂ from the atmosphere mainly by:",options:["Combustion","Fixing carbon into biomass (simplified: CO₂ + H₂O → glucose + O₂ in light)","Releasing SO₂","Ozone destruction"],correctIndex:1,explanation:"Biological carbon sink."},
+    {id:"chem-T19-202",question:"Burning fossil carbon adds CO₂ that was:",options:["Always in the fast carbon cycle","Locked away for geological timescales — net addition to active atmosphere/ocean pool","Removed last week by photosynthesis only","Never underground"],correctIndex:1,explanation:"Fossil vs biogenic carbon timescale argument."},
+    {id:"chem-T19-203",question:"Radon indoors can be hazardous mainly because:",options:["It is a strong acid","It is an alpha-emitting noble gas that can accumulate in poorly ventilated spaces","It destroys the ozone layer","It is visible smog"],correctIndex:1,explanation:"Radioactive indoor air risk."},
+    {id:"chem-T19-204",question:"Secondary PM can form in air when:",options:["Only CO₂ condenses","Gases such as SO₂/NOₓ oxidise and nucleate as fine particles/sulfate/nitrate aerosols","O₂ disappears","N₂ becomes liquid"],correctIndex:1,explanation:"Gas-to-particle conversion."},
+    {id:"chem-T19-205",question:"A catalytic converter works best once:",options:["The engine is cold forever","The catalyst is hot enough for efficient redox on the surface","All fuel is removed","Only diesel is used"],correctIndex:1,explanation:"Light-off temperature — cold start emissions issue."},
+    {id:"chem-T19-206",question:"Acid rain can leach aluminium from soils into waterways partly because:",options:["Al is a noble metal","Lower pH increases mobility of some metal ions from minerals","Al dissolves only in bases","Rain has no ions"],correctIndex:1,explanation:"Soil/water chemistry nuance."},
+    {id:"chem-T19-207",question:"Methane’s high global warming potential in short horizons is mainly because:",options:["It does not absorb IR","It absorbs outgoing IR strongly per molecule vs CO₂ (different lifetime and potency)","It is heavier than CO₂ always","It is not a gas"],correctIndex:1,explanation:"GWP concept — per molecule radiative efficiency × time."},
+    {id:"chem-T19-208",question:"Ground-level ozone harms health mainly by:",options:["Blocking UV like stratospheric O₃","Irritating and oxidising lung tissue (respiratory effects)","Increasing haemoglobin O₂ carry","Being odourless and inert"],correctIndex:1,explanation:"Toxic oxidant at breathing level."},
+    {id:"chem-T19-209",question:"Indoor air quality can be worse than outdoor in some homes because:",options:["O₂ is banned indoors","VOCs from furnishings + limited ventilation can accumulate","N₂ disappears","CO₂ is always zero indoors"],correctIndex:1,explanation:"Source strength vs dilution."}
     ],
     trueFalse: [
     {statement:"Stratospheric ozone is a pollutant in the same sense as ground-level ozone.",correct:false,explain:"Location matters."},

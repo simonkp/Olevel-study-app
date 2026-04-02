@@ -26,6 +26,14 @@
                 "Higher T at constant V → higher **pressure** (more violent collisions).",
                 "**Diffusion** — gases mix; rate ∝ speed of particles; lighter molecules often faster."
             ]
+        },
+        {
+            "title": "Changes of state (heating curves)",
+            "points": [
+                "**Melting / freezing** — solid ↔ liquid at melting point; latent heat of fusion.",
+                "**Boiling / condensing** — liquid ↔ gas at boiling point; latent heat of vaporisation.",
+                "During a **phase change at constant pressure**, temperature stays constant while energy breaks or forms intermolecular attractions."
+            ]
         }
     ],
     infographics: [
@@ -126,7 +134,16 @@
     {question:"Which change most increases the proportion of molecules with kinetic energy ≥ Ea?",options:["Doubling pressure at constant T","Raising temperature","Halving volume at constant T","Adding an inert gas at constant V and T"],correctIndex:1,explanation:"The Maxwell–Boltzmann tail shifts most strongly with T."},
     {question:"Diffusion of KMnO₄ in water is slower than in air mainly because:",options:["KMnO₄ is not soluble","Liquid-phase collisions are denser and slower than gas-phase motion","Gravity stops diffusion in liquids","Water has no kinetic energy"],correctIndex:1,explanation:"Slower random motion and closer packing reduce mixing speed."},
     {question:"Sublimation is endothermic because:",options:["It releases lattice energy","Energy is needed to overcome forces holding the solid together","Solids have no kinetic energy","It only occurs at 0 K"],correctIndex:1,explanation:"Breaking intermolecular (or lattice) interactions requires energy input."},
-    {question:"If a fixed mass of gas is compressed isothermally, the average kinetic energy of its molecules:",options:["Increases","Stays the same","Becomes zero","Doubles"],correctIndex:1,explanation:"Temperature is unchanged in an isothermal process, so average KE is unchanged."}
+    {question:"If a fixed mass of gas is compressed isothermally, the average kinetic energy of its molecules:",options:["Increases","Stays the same","Becomes zero","Doubles"],correctIndex:1,explanation:"Temperature is unchanged in an isothermal process, so average KE is unchanged."},
+    {id:"chem-T3-201",question:"During boiling of a pure liquid at constant atmospheric pressure, the temperature of the liquid:",options:["Rises until all liquid is gone","Stays constant while both liquid and vapour coexist","Drops as vapour forms","Oscillates randomly"],correctIndex:1,explanation:"Energy input goes into latent heat of vaporisation at the boiling point."},
+    {id:"chem-T3-202",question:"The energy required to turn 1 kg of liquid at its boiling point completely to vapour (at the same pressure) is called:",options:["Specific latent heat of fusion","Specific latent heat of vaporisation","Specific heat capacity","Activation energy"],correctIndex:1,explanation:"Vaporisation is liquid to gas."},
+    {id:"chem-T3-203",question:"When a gas condenses to a liquid at constant pressure, the surroundings:",options:["Do work on the gas only","Receive energy (process is exothermic for the condensing substance)","Neither gain nor lose energy","Always cool to 0 K"],correctIndex:1,explanation:"Condensation releases latent heat to the surroundings."},
+    {id:"chem-T3-204",question:"Effusion of a gas through a tiny hole differs from diffusion mainly in that:",options:["Effusion requires liquids","Effusion is directed escape through an orifice; diffusion is mixing by random motion","They are identical","Effusion only happens in vacuum"],correctIndex:1,explanation:"Graham’s law often quoted for effusion through a pinhole."},
+    {id:"chem-T3-205",question:"At the same temperature, the root-mean-square speed of gas molecules is:",options:["The same for every molecule at an instant","A statistical measure; individual speeds vary widely","Always zero","Independent of molar mass"],correctIndex:1,explanation:"Maxwell–Boltzmann distribution of speeds."},
+    {id:"chem-T3-206",question:"When ice melts to water at 0 °C (at constant pressure), energy absorbed is used mainly to:",options:["Raise the kinetic energy of molecules only","Break some lattice structure while maintaining the melting temperature","Decrease the volume always","Ionise the water"],correctIndex:1,explanation:"Latent heat goes into overcoming intermolecular forces in the solid."},
+    {id:"chem-T3-207",question:"Liquid water is densest at about 4 °C mainly because:",options:["Ice is ionic","Hydrogen bonding opens an open structure in ice so liquid can pack more tightly above 0 °C","Water has no molecular motion at 4 °C","Gases dissolve more at 4 °C"],correctIndex:1,explanation:"Ice floats — open structure; liquid water can be denser."},
+    {id:"chem-T3-208",question:"If the temperature of a gas in Kelvin is doubled (at moderate conditions), the average translational kinetic energy of its molecules:",options:["Halves","Approximately doubles","Stays constant","Becomes zero"],correctIndex:1,explanation:"Average KE is proportional to absolute temperature for an ideal gas."},
+    {id:"chem-T3-209",question:"Deposition (gas → solid) on a cold surface releases energy because:",options:["Particles gain speed","Gas particles lose KE forming the solid lattice","Volume always increases","It is always endothermic"],correctIndex:1,explanation:"Forming stronger attractions in the solid releases energy."}
     ],
     trueFalse: [
     {statement:"All particles in a gas have exactly the same speed at a given temperature.",correct:false,explain:"Maxwell-Boltzmann distribution — range of speeds."},

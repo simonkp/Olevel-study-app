@@ -24,6 +24,14 @@
                 "**Sea of delocalised electrons** + fixed cations.",
                 "Conduct heat/electricity, malleable."
             ]
+        },
+        {
+            "title": "Elements, compounds, mixtures",
+            "points": [
+                "**Element** — one type of atom (e.g. O₂ is still element oxygen).",
+                "**Compound** — fixed composition by chemical bonding (e.g. H₂O).",
+                "**Mixture** — variable composition; can often be separated physically (filtration, distillation)."
+            ]
         }
     ],
     infographics: [
@@ -125,7 +133,16 @@
     {question:"Which is a giant covalent structure at room temperature?",options:["I₂","SiO₂","CO₂","H₂O"],correctIndex:1,explanation:"Quartz is a continuous network solid."},
     {question:"A ‘polar molecule’ must have:",options:["Only ionic bonds","An overall dipole from bond polarity and shape","Equal sharing in all bonds","No lone pairs"],correctIndex:1,explanation:"Vector sum of bond dipoles can be non-zero (e.g. H₂O)."},
     {question:"When NaCl dissolves in water, the main driving factor is:",options:["Covalent bond formation between Na and Cl","Ion–dipole interactions and hydration stabilising separated ions","NaCl becomes metallic","Water oxidises Na⁺"],correctIndex:1,explanation:"Hydration stabilises ions in solution."},
-    {question:"Graphite conducts electricity but diamond does not mainly because:",options:["Diamond has fewer carbons","Graphite has delocalised π electrons between layers","Diamond is ionic","Graphite is a gas"],correctIndex:1,explanation:"Mobile electrons exist in graphite’s layered structure."}
+    {question:"Graphite conducts electricity but diamond does not mainly because:",options:["Diamond has fewer carbons","Graphite has delocalised π electrons between layers","Diamond is ionic","Graphite is a gas"],correctIndex:1,explanation:"Mobile electrons exist in graphite’s layered structure."},
+    {id:"chem-T5-201",question:"A sample of air is best described as:",options:["A compound","An element","A mixture","A single molecule"],correctIndex:2,explanation:"Variable composition of gases."},
+    {id:"chem-T5-202",question:"Which statement about a pure molecular substance (e.g. dry ice, CO₂) is most accurate?",options:["It must be a single atom","It consists of CO₂ molecules with covalent bonds; weak forces between molecules","It has a giant ionic lattice","It cannot sublime"],correctIndex:1,explanation:"Simple molecular — strong covalent bonds within molecules."},
+    {id:"chem-T5-203",question:"Covalent character in a bond increases when:",options:["Electronegativity difference is very large","Electronegativity difference is very small","Ions are very large","Temperature is always 0 K"],correctIndex:1,explanation:"Very polar bonds approach ionic; small ΔEN → more covalent character."},
+    {id:"chem-T5-204",question:"Compared to a single bond between the same atoms, a double bond is typically:",options:["Longer and weaker","Shorter and stronger","Same length and strength","Only found in ionic solids"],correctIndex:1,explanation:"More shared electron density pulls nuclei closer."},
+    {id:"chem-T5-205",question:"Carbon nanotubes are structurally related to:",options:["Diamond only","Graphite layers rolled into cylinders","NaCl lattice","Liquid water"],correctIndex:1,explanation:"sp² carbon networks with exceptional strength along the tube."},
+    {id:"chem-T5-206",question:"Molten CaCl₂ conducts electricity because:",options:["Electrons move in a sea","Mobile Ca²⁺ and Cl⁻ ions","It is a metal","Covalent bonds break into electrons"],correctIndex:1,explanation:"Ionic liquids conduct via ion motion."},
+    {id:"chem-T5-207",question:"Which is NOT a property typical of simple molecular iodine (I₂) solid?",options:["Low melting point","Weak forces between molecules","I₂ molecules in the crystal","Very high electrical conductivity as solid"],correctIndex:3,explanation:"No mobile charge carriers in solid molecular iodine."},
+    {id:"chem-T5-208",question:"A polar bond may still give a non-polar molecule if:",options:["The molecule is always linear","The bond dipoles cancel by symmetry (e.g. CO₂)","The molecule is ionic","Hydrogen bonding is absent"],correctIndex:1,explanation:"Shape matters for overall dipole."},
+    {id:"chem-T5-209",question:"The main reason ionic crystals are often soluble in water is:",options:["Ionic bonds are weak","Hydration energy can overcome lattice energy","Water always oxidises the cation","Ions are gases"],correctIndex:1,explanation:"Solubility depends on balance of lattice energy vs hydration."}
     ],
     trueFalse: [
     {statement:"Diamond and graphite are both pure carbon but different structures.",correct:true,explain:"Allotropes."},
