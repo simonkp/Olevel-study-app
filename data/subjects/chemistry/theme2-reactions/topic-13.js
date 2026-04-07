@@ -20,7 +20,17 @@
                 "Gp18 noble gases — monatomic gases."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Trend Summary",
+        "points": [
+            "**Across period (→)**: atomic radius ↓; 1st IE ↑; electronegativity ↑; metallic character ↓.",
+            "**Down group**: atomic radius ↑; 1st IE ↓; Gp1 reactivity ↑; Gp17 reactivity ↓ (as oxidising agents).",
+            "**Gp1 + water**: metal + H₂O → metal hydroxide + H₂ (vigour increases down group).",
+            "**Gp17 displacement**: Cl₂ > Br₂ > I₂ as oxidising agents. Cl₂ displaces Br⁻ and I⁻; Br₂ displaces I⁻ only.",
+            "**Transition metals**: variable oxidation states; coloured compounds; catalyst activity."
+        ]
+    }],
     infographics: [ { image: "data/subjects/chemistry/images/reactions-08-periodic-table.jpg", caption: "Periodic trends: radius and electronegativity" } ],
     flashcards: [
         {
@@ -79,7 +89,12 @@
             "front": "Iodine state?",
             "back": "Solid."
         }
-    ],
+    ,
+    { "front": "Across Period 3: IE trend?", "back": "**Generally increases** (↑ Zeff; no extra shielding) with small dips at Al (3p vs 2s²) and S (2p pairing)." },
+    { "front": "Down Group 1: why more reactive?", "back": "Atomic radius ↑ → outer electron further from nucleus → **lower ionisation energy** → lost more easily." },
+    { "front": "Down Group 17: bp trend?", "back": "**Increases** (F₂ < Cl₂ < Br₂ < I₂) due to stronger London dispersion forces between larger molecules." },
+    { "front": "Gp1 element: number of valence electrons?", "back": "**1** — hence configuration ends in …1." },
+    { "front": "Why noble gases unreactive?", "back": "**Full outer shell** (duplet for He; octet for others) — very stable, high ionisation energy, very low electron affinity." }],
     quiz: [
     {question:"Most metallic Period 3:",options:["Cl","Si","Na","S"],correctIndex:2,explanation:"Left."},
     {question:"Smallest atom Period 2:",options:["Li","Ne","Be","B"],correctIndex:1,explanation:"Right end noble small."},
@@ -125,7 +140,15 @@
     {id:"chem-T13-206",question:"Silicon (period 3) is a semiconductor partly because:",options:["It has a full metallic electron sea","The band gap is small enough for some electrons to be promoted at room temperature","It is a halogen","It has no crystal structure"],correctIndex:1,explanation:"Semiconductor band structure (syllabus-level link)."},
     {id:"chem-T13-207",question:"Between N and O, the first IE of O is slightly lower than N mainly because:",options:["O has fewer protons","Pairing repulsion in O’s 2p subshell makes removal slightly easier than from N’s half-filled 2p³","O is a noble gas","O has no p electrons"],correctIndex:1,explanation:"Half-filled subshell stability vs pairing energy — classic exam point."},
     {id:"chem-T13-208",question:"Transition metals are placed in the d-block because:",options:["Their highest-energy electrons occupy d orbitals (after Ca)","They have no d electrons","They are all gases","They only form +1 ions"],correctIndex:0,explanation:"d-block definition."},
-    {id:"chem-T13-209",question:"Astatine (below iodine) is predicted to be:",options:["A colourless gas at RTP","A darker solid with lower melting point than I₂","A noble gas","Non-existent"],correctIndex:1,explanation:"Trend to darker, higher mp solids down halogens."}
+    {id:"chem-T13-209",question:"Astatine (below iodine) is predicted to be:",options:["A colourless gas at RTP","A darker solid with lower melting point than I₂","A noble gas","Non-existent"],correctIndex:1,explanation:"Trend to darker, higher mp solids down halogens."},
+    {id:"chem-T13-301",question:"Elements in the same group of the periodic table have similar chemical properties because:",options:["They have the same mass number","They have the same number of outer-shell (valence) electrons","They are all gases","They have the same number of neutrons"],correctIndex:1,explanation:"Same group = same valence electron count = similar reactivity and bonding."},
+    {id:"chem-T13-302",question:"Elements in the same period have the same:",options:["Number of valence electrons","Number of electron shells","Atomic mass","Reactivity"],correctIndex:1,explanation:"Period number = number of occupied electron shells."},
+    {id:"chem-T13-303",question:"Down Group 1 (Li → Cs), the metals react more vigorously with water because:",options:["Atoms get smaller, nucleus holds electrons tighter","Atoms get larger — the outer electron is further from the nucleus and lost more easily","Fewer neutrons down the group","Electronegativity increases"],correctIndex:1,explanation:"Increasing atomic radius → weaker attraction for outer electron → easier ionisation → more reactive."},
+    {id:"chem-T13-304",question:"Chlorine (Group 17) has 7 valence electrons and forms Cl⁻. Argon (Group 18) has 8. Which is MORE reactive?",options:["Argon — more electrons","Chlorine — needs 1 electron to complete its outer shell","Argon — it never reacts","Both equally reactive"],correctIndex:1,explanation:"Cl is reactive because it needs one more electron. Ar already has a stable full shell."},
+    {id:"chem-T13-305",question:"Bromine is a liquid at room temperature while chlorine is a gas. This is mainly because:",options:["Br₂ is ionic","Br₂ molecules are larger, so London dispersion forces are stronger, raising the boiling point","Br₂ has fewer electrons","Cl₂ has stronger intermolecular forces"],correctIndex:1,explanation:"Bigger molecules → more electrons → stronger instantaneous dipoles → higher melting/boiling points."},
+    {id:"chem-T13-306",question:"A displacement reaction: Cl₂(aq) + 2KBr(aq) → 2KCl(aq) + Br₂(aq). This shows:",options:["Br₂ is more reactive than Cl₂","Cl₂ is a stronger oxidising agent than Br₂ and displaces bromide ions","Br⁻ is reduced to Br₂","Cl₂ is an alkali metal"],correctIndex:1,explanation:"More reactive halogen oxidises (displaces) the less reactive one's anion."},
+    {id:"chem-T13-307",question:"Sodium (Period 3) has first ionisation energy much lower than magnesium. The main reason is:",options:["Na has more protons","Na has only 1 outer-shell electron and larger radius than Mg in the same period — Zeff effect","Na is a non-metal","Mg is in Group 1"],correctIndex:1,explanation:"Mg has 2 outer electrons held more tightly (higher Zeff); Na's 1 outer electron is less tightly held."},
+    {id:"chem-T13-308",question:"Which pair of elements has properties most similar to each other?",options:["Na and Cl","Na and K (both Group 1)","Na and Ne","Cl and Ar"],correctIndex:1,explanation:"Same group → same outer electron configuration → most similar chemical properties."}
     ],
     trueFalse: [
     {statement:"Fluorine is the most electronegative element.",correct:true,explain:"Pauling scale."},

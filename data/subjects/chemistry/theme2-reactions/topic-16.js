@@ -26,7 +26,18 @@
                 "Particles must collide with correct orientation and ≥ Ea for reaction."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Rate Experiment Methods",
+        "points": [
+            "**Gas syringe / inverted burette**: collect and measure volume of gas vs time.",
+            "**Balance method**: open flask on balance; mass decreases as gas escapes.",
+            "**Colorimetry / colour change**: for coloured reactant/product.",
+            "**Titration**: withdraw samples at time intervals; quench (stop reaction); titrate.",
+            "**Initial rate** = gradient of tangent to concentration–time curve at t = 0.",
+            "**Clock reaction** (iodine-clock): sudden blue-black colour appears after a delay."
+        ]
+    }],
     infographics: [ { image: "data/subjects/chemistry/images/reactions-11-rates.jpg", caption: "Surface area and catalyst effects on rate" } ],
     flashcards: [
         {
@@ -85,7 +96,11 @@
             "front": "Photochemical initiation?",
             "back": "Light provides activation."
         }
-    ],
+    ,
+    { "front": "Initial rate from graph?", "back": "**Gradient of tangent at t = 0** — steepest part of concentration-time curve." },
+    { "front": "Why same final gas volume regardless of surface area?", "back": "Surface area affects **rate**, not the total **amount** of product. Total moles of reagent determines volume." },
+    { "front": "Why catalyst doesn't change equilibrium position?", "back": "It lowers $E_a$ for **both** forward and reverse reactions equally → K unchanged; only reaches equilibrium faster." },
+    { "front": "10°C rise roughly doubles rate. Why?", "back": "Fraction of molecules with $E \\geq E_a$ increases **exponentially** (Boltzmann distribution) — not just linearly." }],
     quiz: [
     {question:"Increase rate CaCO₃ + HCl:",options:["Use large lumps","Heat and powder","Dilute more","Remove acid"],correctIndex:1,explanation:"T and surface area."},
     {question:"Lower concentration usually:",options:["Faster","Slower","Same","Explosive"],correctIndex:1,explanation:"Fewer collisions."},
@@ -131,7 +146,15 @@
     {id:"chem-T16-206",question:"For a solid reacting with a solution, increasing stirring may increase rate by:",options:["Lowering Ea","Improving transport of reactants to the surface","Removing the need for collisions","Making the reaction zero order"],correctIndex:1,explanation:"Mass transfer / fresh solution at surface."},
     {id:"chem-T16-207",question:"In the iodine clock with thiosulfate, the sudden colour appears when:",options:["I₂ is produced instantly","Thiosulfate is consumed and free I₂ can accumulate to show with starch","Starch disappears","Temperature hits 100 °C"],correctIndex:1,explanation:"S₂O₃²⁻ scavenges I₂ until it runs out."},
     {id:"chem-T16-208",question:"Heterogeneous catalysis often involves:",options:["Reactants and catalyst in the same phase","Adsorption onto a solid surface","No surface area","Only enzymes"],correctIndex:1,explanation:"Surface catalysis."},
-    {id:"chem-T16-209",question:"If a graph of rate vs [reactant] is a horizontal line, order in that reactant is:",options:["First","Zero","Second","Cannot tell"],correctIndex:1,explanation:"Rate independent of concentration."}
+    {id:"chem-T16-209",question:"If a graph of rate vs [reactant] is a horizontal line, order in that reactant is:",options:["First","Zero","Second","Cannot tell"],correctIndex:1,explanation:"Rate independent of concentration."},
+    {id:"chem-T16-301",question:"Marble chips (CaCO₃) react with dilute HCl. The rate is measured by mass loss per second. Which change would DECREASE the initial rate?",options:["Using smaller marble chips","Adding water to the acid (diluting it)","Raising the temperature","Using powdered marble"],correctIndex:1,explanation:"Diluting = fewer HCl particles per dm³ → fewer effective collisions → slower rate."},
+    {id:"chem-T16-302",question:"Two rate graphs (volume CO₂ vs time) for marble + acid: same mass of marble, same acid amount. Curve A (powder) reaches the final volume faster than B (lumps), but both reach the SAME final volume because:",options:["A uses more acid","Both have same moles of CaCO₃ — only rate differs, not total amount","Powder creates more acid","Lumps keep reacting after powder stops"],correctIndex:1,explanation:"Surface area affects rate but not the amount of product (that depends on moles of limiting reagent)."},
+    {id:"chem-T16-303",question:"A 10°C rise roughly doubles reaction rate. The molecular reason is:",options:["Molecules slow down at higher T","The fraction of molecules with energy ≥ Ea increases significantly — an exponential (Boltzmann) effect","Concentration doubles with T","Catalyst forms spontaneously"],correctIndex:1,explanation:"The high-energy tail of the Maxwell–Boltzmann distribution grows with temperature."},
+    {id:"chem-T16-304",question:"In terms of collision theory, increasing pressure in a gas-phase reaction increases rate because:",options:["It raises activation energy","More gas molecules per unit volume → higher collision frequency → more effective collisions per second","Pressure lowers temperature","Molecules become more reactive individually"],correctIndex:1,explanation:"Higher pressure = higher concentration for gases → more frequent collisions."},
+    {id:"chem-T16-305",question:"A catalyst is described as 'regenerated' at the end of a reaction. This means:",options:["It is consumed in making products","It is reformed unchanged and can catalyse further reactions — it does not appear in the overall equation","It is a reactant only","It lowers the amount of product"],correctIndex:1,explanation:"Catalyst provides an alternative pathway but is regenerated — net amount unchanged."},
+    {id:"chem-T16-306",question:"Effervescent vitamin C tablets bubble faster in warm water than cold. In terms of particles, this is because:",options:["Warm water has fewer molecules","More water molecules and acid particles have energy ≥ Ea → more effective collisions per second","The tablet dissolves slower in warm water","Only surface area changes with temperature"],correctIndex:1,explanation:"Temperature → more particles exceed activation energy → faster reaction."},
+    {id:"chem-T16-307",question:"An initial rate experiment: the gradient at t = 0 on a concentration-time graph gives the initial rate because:",options:["The gradient is zero at t=0","The gradient is steepest at the start when [reactant] is highest","The reaction stops at t=0","The graph is flat initially"],correctIndex:1,explanation:"Concentration is highest at the start → fastest rate; gradient = rate."},
+    {id:"chem-T16-308",question:"Vacuum-sealed food packs have longer shelf lives partly because:",options:["Vacuum increases O₂ concentration","Removing O₂ and moisture prevents oxidation/decomposition reactions that spoil food","Vacuum increases temperature","Bacteria grow faster without O₂"],correctIndex:1,explanation:"Oxidation and aerobic bacterial spoilage require O₂ — removing it slows these reactions."}
     ],
     trueFalse: [
     {statement:"A catalyst increases the rate of both forward and reverse reactions.",correct:true,explain:"Ea lowered both ways."},

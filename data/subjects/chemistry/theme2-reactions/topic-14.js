@@ -19,7 +19,18 @@
                 "Sacrificial protection; thermite (Al + Fe₂O₃)."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Rust & Prevention",
+        "points": [
+            "**Rusting** requires **both O₂ and H₂O** (electrochemical). Salt water accelerates it.",
+            "Rust = hydrated iron(III) oxide $\\text{Fe}_2\\text{O}_3 \\cdot x\\text{H}_2\\text{O}$.",
+            "**Barrier methods**: paint, oil, plastic coat, tin plating (stops when scratched).",
+            "**Galvanising** (Zn coat): barrier + sacrificial anode even when scratched.",
+            "**Sacrificial anode**: Zn or Mg block corrodes preferentially (more reactive than Fe).",
+            "**Alloying**: stainless steel (Cr, Ni) forms passive Cr₂O₃ layer."
+        ]
+    }],
     infographics: [ { image: "data/subjects/chemistry/images/reactions-09-reactivity-series.jpg", caption: "Reactivity series and displacement" } ],
     flashcards: [
         {
@@ -78,7 +89,12 @@
             "front": "Silver tarnish?",
             "back": "Ag₂S from H₂S."
         }
-    ],
+    ,
+    { "front": "Metal + cold water → products?", "back": "**Metal hydroxide + H₂** (e.g. 2K + 2H₂O → 2KOH + H₂↑)." },
+    { "front": "Metal + dilute acid → products?", "back": "**Metal salt + H₂** (e.g. Zn + H₂SO₄ → ZnSO₄ + H₂↑). Only metals above H." },
+    { "front": "Extraction method for Al?", "back": "**Electrolysis of molten Al₂O₃** (cryolite lowers mp). Carbon cannot reduce Al₂O₃." },
+    { "front": "Why scratched tin-plated steel rusts fast?", "back": "Tin is *below* Fe in series → Fe becomes anode in electrochemical cell → Fe rusts rapidly." },
+    { "front": "Thermite reaction?", "back": "Al + Fe₂O₃ → Al₂O₃ + Fe. Al is more reactive → **displaces** Fe from its oxide. Very exothermic." }],
     quiz: [
     {question:"Displaces Cu from CuSO₄:",options:["Ag","Zn","Au","Pt"],correctIndex:1,explanation:"Zn above Cu."},
     {question:"No reaction with cold water:",options:["Na","K","Ca","Mg"],correctIndex:3,explanation:"Mg very slow cold."},
@@ -124,7 +140,15 @@
     {id:"chem-T14-206",question:"Why is cryolite used with molten Al₂O₃ in aluminium extraction?",options:["It is the aluminium ore","It lowers the working temperature of the melt","It removes all oxygen without current","It makes Al unreactive"],correctIndex:1,explanation:"Flux — lowers mp / dissolves alumina."},
     {id:"chem-T14-207",question:"Heating zinc oxide with carbon can produce zinc vapour because:",options:["Zn is less reactive than carbon in the Ellingham sense at high T / carbon can reduce ZnO under practical conditions","Carbon never reduces oxides","ZnO is a noble gas","Zn cannot boil"],correctIndex:0,explanation:"Industrial reduction context — O-level: carbon reduces many metal oxides below Al."},
     {id:"chem-T14-208",question:"Stainless steel resists rust better than plain carbon steel mainly because:",options:["It contains chromium that forms a passive oxide layer","It has no iron","It cannot conduct electricity","It is pure copper"],correctIndex:0,explanation:"Cr₂O₃ passive layer."},
-    {id:"chem-T14-209",question:"If a student adds Sn to Pb²⁺(aq), Sn is:",options:["Reduced because Sn is less reactive","Oxidised to Sn²⁺ if Sn is more reactive than Pb","Unchanged always","A catalyst only"],correctIndex:1,explanation:"More reactive metal displaces less reactive ion."}
+    {id:"chem-T14-209",question:"If a student adds Sn to Pb²⁺(aq), Sn is:",options:["Reduced because Sn is less reactive","Oxidised to Sn²⁺ if Sn is more reactive than Pb","Unchanged always","A catalyst only"],correctIndex:1,explanation:"More reactive metal displaces less reactive ion."},
+    {id:"chem-T14-301",question:"Potassium reacts vigorously with cold water. The products are:",options:["K₂O + H₂","KOH(aq) + H₂(g)","KCl + H₂","K₂SO₄ + O₂"],correctIndex:1,explanation:"2K + 2H₂O → 2KOH + H₂. Group 1 metals produce metal hydroxide + hydrogen."},
+    {id:"chem-T14-302",question:"Magnesium reacts with steam but not cold water because:",options:["Mg is less reactive than water","Steam provides enough energy to overcome Mg's surface oxide layer — reaction: Mg + H₂O(g) → MgO + H₂","Cold water dissolves Mg instantly","Mg is below hydrogen"],correctIndex:1,explanation:"Mg's reactivity with water requires steam; Ca reacts with cold water."},
+    {id:"chem-T14-303",question:"From the reactivity series, which metals can be extracted by reduction with carbon (not electrolysis)?",options:["K, Na, Ca, Al","Zn, Fe, Pb (below Al but above Cu)","Cu, Ag, Au (too unreactive, easily reduced)","Only Cu"],correctIndex:1,explanation:"Carbon is practical for metals below Al in the series (Zn, Fe, Pb); those above Al need electrolysis."},
+    {id:"chem-T14-304",question:"When iron filings are placed in copper(II) sulfate solution, visible evidence of reaction includes:",options:["Solution turns colourless and no solid forms","Blue colour fades; red/brown copper coats the iron","Yellow gas evolves","White precipitate forms"],correctIndex:1,explanation:"Fe displaces Cu²⁺: Fe + CuSO₄ → FeSO₄ + Cu. Blue Cu²⁺ replaced by pale green Fe²⁺; red Cu deposits."},
+    {id:"chem-T14-305",question:"Oil is applied to the moving parts of a machine to prevent rusting mainly by:",options:["Providing extra oxygen","Forming a barrier that excludes water and oxygen from the iron surface","Acting as a reducing agent","Adding electrons to iron"],correctIndex:1,explanation:"Barrier method: excludes H₂O and O₂ needed for electrochemical rusting."},
+    {id:"chem-T14-306",question:"Calcium metal reacts with cold water to give Ca(OH)₂ + H₂. Calcium is placed above magnesium in the reactivity series because:",options:["Ca is denser than Mg","Ca reacts more vigorously — cold water vs only steam for Mg","Ca has fewer electrons","Mg is radioactive"],correctIndex:1,explanation:"Relative vigour with water and acids places Ca above Mg in the series."},
+    {id:"chem-T14-307",question:"Gold and silver are found as native metals in nature because:",options:["They are radioactive and decay from other metals","They are very unreactive — low position in series means oxides easily reduced / rarely form stable compounds","They are allotropes of carbon","Water dissolves their ores"],correctIndex:1,explanation:"Low reactivity → not easily oxidised → found uncombined."},
+    {id:"chem-T14-308",question:"In the thermite reaction: Al + Fe₂O₃ → Al₂O₃ + Fe, which is the oxidising agent?",options:["Al","Fe₂O₃ (Fe³⁺ is reduced to Fe)","O₂ gas added separately","H₂O"],correctIndex:1,explanation:"Fe₂O₃ oxidises Al (Al is oxidised); Fe³⁺ gains electrons (is reduced). Fe₂O₃ = oxidising agent."}
     ],
     trueFalse: [
     {statement:"Copper reacts with dilute hydrochloric acid to give hydrogen.",correct:false,explain:"Below hydrogen."},

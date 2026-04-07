@@ -19,7 +19,18 @@
                 "Metal displacement: higher in series displaces lower ions."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Oxidation State Rules",
+        "points": [
+            "**Uncombined element** = 0 (e.g. Fe, O₂, Cl₂).",
+            "**Simple ion** = ion charge (Na⁺ = +1; Cl⁻ = −1; Fe²⁺ = +2).",
+            "**O in compounds** = −2 (except peroxides e.g. H₂O₂: −1).",
+            "**H in compounds** = +1 (except metal hydrides e.g. NaH: −1).",
+            "Sum in **neutral compound** = 0; sum in **polyatomic ion** = charge.",
+            "Example: Cr in CrO₄²⁻: $x + 4(-2) = -2 \\Rightarrow x = +6$."
+        ]
+    }],
     infographics: [ { image: "data/subjects/chemistry/images/reactions-06-redox.jpg", caption: "Redox: electron transfer and OIL RIG" } ],
     flashcards: [
         {
@@ -78,7 +89,13 @@
             "front": "Gain electrons is?",
             "back": "Reduction."
         }
-    ],
+    ,
+    { "front": "Oxidation state of O in compounds?", "back": "Usually **−2** (except peroxides: −1; OF₂: +2)." },
+    { "front": "Oxidation state of H in compounds?", "back": "Usually **+1** (except metal hydrides: −1)." },
+    { "front": "Cr in Cr₂O₇²⁻?", "back": "$2x + 7(-2) = -2 \\Rightarrow 2x = +12 \\Rightarrow x = +6$." },
+    { "front": "MnO₄⁻: oxidation state of Mn?", "back": "$x + 4(-2) = -1 \\Rightarrow x = +7$." },
+    { "front": "Oxidising agent = ?", "back": "**Gains** electrons (is **reduced**). e.g. MnO₄⁻, Cl₂, O₂." },
+    { "front": "Reducing agent = ?", "back": "**Loses** electrons (is **oxidised**). e.g. Fe, CO, SO₂." }],
     quiz: [
     {question:"In Zn + Cu²⁺ → Zn²⁺ + Cu, oxidising agent:",options:["Zn","Cu²⁺","Zn²⁺","Cu"],correctIndex:1,explanation:"Cu²⁺ reduced."},
     {question:"Oxidation is:",options:["Gain e⁻","Loss e⁻","Gain H","Loss O"],correctIndex:1,explanation:"OIL."},
@@ -124,7 +141,19 @@
     {id:"chem-T11-206",question:"A fuel cell converts chemical energy to electrical energy because:",options:["No redox occurs","Controlled redox separates electron flow at electrodes","Heat is stored in bonds only","Water is electrolysed"],correctIndex:1,explanation:"Spontaneous redox in a cell."},
     {id:"chem-T11-207",question:"When Fe²⁺ is oxidised to Fe³⁺, Fe is:",options:["Reduced","Oxidised","Neither","Always a catalyst"],correctIndex:1,explanation:"Loss of electrons — oxidation."},
     {id:"chem-T11-208",question:"The best reason to balance redox half-equations with H₂O and H⁺ in acid is:",options:["To add colour","To balance atoms and charges in the stated medium","To remove electrons","To make ΔH zero"],correctIndex:1,explanation:"Atom and charge conservation."},
-    {id:"chem-T11-209",question:"In a blast furnace, CO reduces Fe₂O₃. Carbon in CO is:",options:["Oxidised","Reduced","Neither","Always +4"],correctIndex:0,explanation:"CO → CO₂ — carbon oxidation state increases."}
+    {id:"chem-T11-209",question:"In a blast furnace, CO reduces Fe₂O₃. Carbon in CO is:",options:["Oxidised","Reduced","Neither","Always +4"],correctIndex:0,explanation:"CO → CO₂ — carbon oxidation state increases."},
+    {id:"chem-T11-301",question:"Food is packaged in nitrogen gas rather than air to prevent spoilage. The key reason is:",options:["Nitrogen is heavier than oxygen","Nitrogen is unreactive and does not oxidise food","Nitrogen makes the food taste better","Nitrogen lowers the pH inside the packet"],correctIndex:1,explanation:"N₂ is inert — it prevents oxidation reactions that would spoil the food."},
+    {id:"chem-T11-302",question:"In 2Mg(s) + O₂(g) → 2MgO(s), which species is the oxidising agent?",options:["Mg","MgO","O₂","None — no redox occurs"],correctIndex:2,explanation:"O₂ gains electrons (is reduced) — it oxidises Mg, making O₂ the oxidising agent."},
+    {id:"chem-T11-303",question:"Rusting of iron requires both oxygen and water. A piece of iron in dry oxygen will:",options:["Rust at the same rate as in moist air","Not rust — both O₂ and water are needed together","Rust faster because more O₂ is present","Explode"],correctIndex:1,explanation:"The electrochemical corrosion process requires both O₂ and H₂O simultaneously."},
+    {id:"chem-T11-304",question:"When Cl₂(aq) is added to KBr(aq), the mixture turns orange-brown. This shows that:",options:["KBr is the stronger oxidising agent","Cl₂ is a stronger oxidising agent and displaces Br₂ from bromide solution","Br₂ is produced by decomposition of KBr","Cl⁻ displaces Br₂ ions"],correctIndex:1,explanation:"Cl₂ + 2Br⁻ → 2Cl⁻ + Br₂; Cl₂ has higher oxidising power down Group 17."},
+    {id:"chem-T11-305",question:"In the reaction Fe(s) + CuSO₄(aq) → FeSO₄(aq) + Cu(s), iron is:",options:["Reduced — it gains electrons","Oxidised — it loses electrons going from 0 to +2","Acting as the oxidising agent","Not involved in electron transfer"],correctIndex:1,explanation:"Fe goes from oxidation state 0 to +2, losing 2 electrons — this is oxidation."},
+    {id:"chem-T11-306",question:"In 2FeCl₃ + SnCl₂ → 2FeCl₂ + SnCl₄: the tin is:",options:["Reduced (Sn²⁺ → Sn⁴⁺)","Oxidised (Sn²⁺ → Sn⁴⁺)","Unchanged","Acting as a catalyst"],correctIndex:1,explanation:"Sn²⁺ loses 2 electrons to become Sn⁴⁺ — oxidation. Fe³⁺ is reduced to Fe²⁺."},
+    {id:"chem-T11-307",question:"Which reaction is NOT a redox reaction?",options:["Zn + CuSO₄ → ZnSO₄ + Cu","NaCl(aq) + AgNO₃(aq) → AgCl(s) + NaNO₃(aq)","2Mg + O₂ → 2MgO","Fe₂O₃ + 3CO → 2Fe + 3CO₂"],correctIndex:1,explanation:"Precipitation: Na, Cl, Ag, NO₃ oxidation states all unchanged. No electron transfer."},
+    {id:"chem-T11-308",question:"Rusting of iron is an electrochemical redox process. The iron is:",options:["Reduced to Fe²⁺/Fe³⁺","Oxidised to Fe²⁺/Fe³⁺ — it loses electrons","Reduced and gains mass","Not involved in redox"],correctIndex:1,explanation:"Fe → Fe²⁺ + 2e⁻ (oxidation). O₂ is the oxidising agent that is reduced."},
+    {id:"chem-T11-309",question:"Bleach (NaOCl) kills bacteria by acting as an oxidising agent. This means the bleach:",options:["Donates electrons to bacteria","Gains electrons from the organic compounds it oxidises","Loses oxygen to the bacteria","Provides acid pH only"],correctIndex:1,explanation:"Oxidising agent gains electrons (is itself reduced) while oxidising organic material."},
+    {id:"chem-T11-310",question:"Fluorine is such a strong oxidising agent because:",options:["It has a low electronegativity","It has the highest electronegativity of all elements and strongly attracts electrons","It is the largest halogen","It easily loses electrons"],correctIndex:1,explanation:"F is the most electronegative element; strongest electron acceptor among the halogens."},
+    {id:"chem-T11-311",question:"The oxidation state of chlorine in HClO₄ (perchloric acid) is:",options:["+1","+5","+7","−1"],correctIndex:2,explanation:"H is +1; O is −2 (×4 = −8). Total = 0. +1 + Cl + (−8) = 0 → Cl = +7."},
+    {id:"chem-T11-312",question:"In the reaction: MnO₄⁻ + Fe²⁺ → Mn²⁺ + Fe³⁺ (acidic conditions), the oxidising agent is:",options:["Fe²⁺ (reduced)","MnO₄⁻ (Mn goes from +7 to +2 — it is reduced, acting as oxidising agent)","H⁺","H₂O"],correctIndex:1,explanation:"MnO₄⁻ gains electrons (Mn: +7 → +2) = reduced = oxidising agent. Fe²⁺ loses electrons = oxidised = reducing agent."}
     ],
     trueFalse: [
     {statement:"If a species gains electrons it is oxidised.",correct:false,explain:"Reduced."},

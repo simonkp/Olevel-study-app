@@ -20,7 +20,17 @@
                 "NH₄⁺ salt + alkali → NH₃ gas."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Oxide Types",
+        "points": [
+            "**Acidic oxides** — non-metal oxides: CO₂, SO₂, SO₃, NO₂. React with bases/alkalis.",
+            "**Basic oxides** — metal oxides: CuO, MgO, Na₂O. React with acids.",
+            "**Amphoteric oxides** — react with *both* acids and alkalis: **Al₂O₃, ZnO**.",
+            "**Neutral oxides** — react with neither: **CO, H₂O, NO**.",
+            "Alkali = base soluble in water (NaOH, KOH, NH₃(aq))."
+        ]
+    }],
     infographics: [
       { image: "data/subjects/chemistry/images/reactions-02-acids-bases.jpg", caption: "pH scale and indicator colours" },
       { svg: "<svg viewBox=\"0 0 300 90\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"300\" height=\"90\" fill=\"#1c222d\"/><defs><linearGradient id=\"phg\" x1=\"0%\" x2=\"100%\"><stop offset=\"0%\" stop-color=\"#ef4444\"/><stop offset=\"50%\" stop-color=\"#eab308\"/><stop offset=\"100%\" stop-color=\"#3b82f6\"/></linearGradient></defs><rect x=\"20\" y=\"30\" width=\"260\" height=\"20\" rx=\"6\" fill=\"url(#phg)\"/><text x=\"22\" y=\"22\" fill=\"#8b95a8\" font-size=\"9\">acid 0</text><text x=\"135\" y=\"22\" fill=\"#8b95a8\" font-size=\"9\">7</text><text x=\"240\" y=\"22\" fill=\"#8b95a8\" font-size=\"9\">alkali 14</text></svg>", caption: "pH scale" }
@@ -82,7 +92,11 @@
             "front": "Antacid?",
             "back": "Weak base neutralises stomach acid."
         }
-    ],
+    ,
+    { "front": "Amphoteric oxide examples?", "back": "**Al₂O₃** and **ZnO** — react with both acids AND alkalis." },
+    { "front": "Neutral oxide examples?", "back": "**CO, NO, H₂O** — react with neither acids nor bases." },
+    { "front": "What is an alkali?", "back": "A **base that is soluble in water**, producing OH⁻(aq). e.g. NaOH, Ca(OH)₂, NH₃(aq)." },
+    { "front": "Acid rain gases?", "back": "**SO₂** (from sulfur in coal/oil) and **NOₓ** (from N₂ + O₂ at high T in engines)." }],
     quiz: [
     {question:"pH of 0.1 M NaOH strong:",options:["~1","~7","~13","~0"],correctIndex:2,explanation:"High OH⁻."},
     {question:"Mg + dil HCl:",options:["Cl₂","H₂","O₂","N₂"],correctIndex:1,explanation:"Metal+acid."},
@@ -128,7 +142,21 @@
     {id:"chem-T7-206",question:"Which statement about a 0.1 M CH₃COOH solution and 0.1 M HCl is most accurate?",options:["Both have the same pH","HCl has a lower pH (higher [H⁺])","CH₃COOH is always stronger","Strong acids always have pH 0"],correctIndex:1,explanation:"Strong acid fully ionised; weak acid partially ionised."},
     {id:"chem-T7-207",question:"When NH₃(g) dissolves in water, the solution is basic mainly because:",options:["NH₃ donates H⁺","NH₃ accepts H⁺ from water forming NH₄⁺ and OH⁻","NH₃ removes all OH⁻","Water becomes pH 0"],correctIndex:1,explanation:"Proton acceptor in water (Brønsted base)."},
     {id:"chem-T7-208",question:"A salt formed from a strong acid and a weak base (e.g. NH₄Cl) in aqueous solution is often:",options:["Strongly alkaline","Slightly acidic due to NH₄⁺ hydrolysis","Always pH 7","Strongly acidic like HCl"],correctIndex:1,explanation:"NH₄⁺ is acidic in water."},
-    {id:"chem-T7-209",question:"The conjugate acid of the base NH₃ is:",options:["NH₂⁻","NH₄⁺","OH⁻","N₂"],correctIndex:1,explanation:"NH₃ + H⁺ → NH₄⁺."}
+    {id:"chem-T7-209",question:"The conjugate acid of the base NH₃ is:",options:["NH₂⁻","NH₄⁺","OH⁻","N₂"],correctIndex:1,explanation:"NH₃ + H⁺ → NH₄⁺."},
+    {id:"chem-T7-301",question:"Carbon monoxide (CO) is a neutral oxide. This means it:",options:["Reacts with both acids and alkalis","Does not react with acids or alkalis to form a salt","Dissolves in water to form a strong acid","Is the same as CO₂"],correctIndex:1,explanation:"Neutral oxides neither neutralise acids nor react with alkalis to form salts."},
+    {id:"chem-T7-302",question:"When dilute H₂SO₄ is added to copper(II) carbonate powder, what gas is produced?",options:["H₂","SO₂","CO₂","O₂"],correctIndex:2,explanation:"Acid + carbonate → salt + water + carbon dioxide."},
+    {id:"chem-T7-303",question:"Alkali + ammonium chloride solution, on warming, produces a gas that:",options:["Relights a glowing splint","Turns damp blue litmus red","Turns damp red litmus blue","Produces a white precipitate with water"],correctIndex:2,explanation:"NH₄⁺ + OH⁻ → NH₃(g) — ammonia turns damp red litmus blue."},
+    {id:"chem-T7-304",question:"A student adds universal indicator to a solution and it turns orange. The pH is most likely:",options:["1–2","4–5","7","11–12"],correctIndex:1,explanation:"Orange on universal indicator indicates a mildly acidic solution around pH 4–5."},
+    {id:"chem-T7-305",question:"What is the main difference between an alkali and a base?",options:["Alkalis have pH below 7","All alkalis are bases but not all bases are alkalis — alkalis are soluble in water","Bases react with metals to give H₂","Alkalis are always solids"],correctIndex:1,explanation:"A base that dissolves in water is called an alkali."},
+    {id:"chem-T7-306",question:"SO₃ dissolves in water to form H₂SO₄. SO₃ is classified as:",options:["A neutral oxide","A basic oxide","An acidic oxide","An amphoteric oxide"],correctIndex:2,explanation:"Non-metal oxides that react with water/alkalis to form salts are acidic oxides."},
+    {id:"chem-T7-307",question:"Acid rain has pH below 5.6 mainly because of dissolved:",options:["CO₂ only","SO₂ and NOₓ forming H₂SO₃/H₂SO₄ and HNO₃","N₂ only","O₂ only"],correctIndex:1,explanation:"Fossil fuel combustion releases S and N oxides that dissolve to form strong acid rain."},
+    {id:"chem-T7-308",question:"CuO is a base but NOT an alkali because:",options:["It is an oxide of a metal","It does not dissolve in water to produce OH⁻(aq)","It produces H⁺ ions","It is a noble gas compound"],correctIndex:1,explanation:"Alkali: a base soluble in water. CuO is insoluble."},
+    {id:"chem-T7-309",question:"Phosphoric acid H₃PO₄ reacts with NaOH to form Na₃PO₄. The mole ratio NaOH : H₃PO₄ is:",options:["1 : 1","2 : 1","3 : 1","1 : 3"],correctIndex:2,explanation:"H₃PO₄ is triprotic; 3 mol NaOH neutralise 1 mol H₃PO₄."},
+    {id:"chem-T7-310",question:"Two acids of equal concentration: HCl (strong) and CH₃COOH (weak). Which has the higher pH?",options:["HCl — more [H⁺]","CH₃COOH — partially ionised so fewer [H⁺], higher pH","Same pH always","Depends on colour only"],correctIndex:1,explanation:"Weak acid is partially dissociated → lower [H⁺] → higher pH than same-conc strong acid."},
+    {id:"chem-T7-311",question:"Al₂O₃ reacts with both HCl(aq) and NaOH(aq). This makes it:",options:["Acidic oxide","Neutral oxide","Basic oxide","Amphoteric oxide"],correctIndex:3,explanation:"Reacts with both acids and alkalis — amphoteric (Al³⁺ is borderline)."},
+    {id:"chem-T7-312",question:"Which reaction represents an alkali dissolving in water correctly?",options:["NaOH(s) → Na⁺(aq) + OH⁻(aq)","HCl(aq) → H⁺(aq) + Cl⁻(aq)","CuO(s) + H₂O(l) → Cu(OH)₂(aq)","CO₂(g) + H₂O(l) → H₂CO₃(aq)"],correctIndex:0,explanation:"NaOH is soluble in water and releases OH⁻(aq) — the definition of an alkali."},
+    {id:"chem-T7-313",question:"H₂SO₄ is called a diprotic acid because:",options:["It has two sulfur atoms","It can donate 2 moles of H⁺ per mole of acid in neutralisation","It reacts only twice","It has two oxygen atoms"],correctIndex:1,explanation:"Diprotic: H₂SO₄ → 2H⁺ + SO₄²⁻. So 1 mol H₂SO₄ neutralises 2 mol NaOH."},
+    {id:"chem-T7-314",question:"A student adds excess zinc oxide to dilute sulfuric acid and filters. The filtrate contains:",options:["H₂SO₄ and ZnO","ZnSO₄ only (excess ZnO removed by filtration)","Only water","H₂SO₄ and ZnSO₄"],correctIndex:1,explanation:"Excess ZnO ensures all acid is neutralised. Filter removes unreacted ZnO. Pure ZnSO₄ solution remains."}
     ],
     trueFalse: [
     {statement:"All alkalis are soluble.",correct:false,explain:"Alkali = soluble base; many bases insoluble."},

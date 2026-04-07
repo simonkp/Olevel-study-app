@@ -24,6 +24,7 @@
   const QUIZ_PER_ROUND = 20;
   const BOSS_QUESTION_MS_MULT = 0.8;
   const BOSS_XP = 800;
+  const STREAK_DAILY_XP_BASE = 4;
   const STATE_VERSION = 2;
   const XP_POLICY = window.LEVELUP_XP_POLICY || {};
   const TOPIC_FARM_LOCK_POLICY = XP_POLICY.topicFarmLock || {};
@@ -128,6 +129,7 @@
       xp: 0,
       lastStudyDate: null,
       streak: 0,
+      streakRewardDate: "",
       unlockAll: true,
       challengeMode: false,
       topicScores: {},
@@ -162,6 +164,7 @@
     next.schemaVersion = STATE_VERSION;
     next.xp = Number(next.xp || 0);
     next.streak = Number(next.streak || 0);
+    next.streakRewardDate = String(next.streakRewardDate || "");
     next.studyTimeMsByTopicTab = next.studyTimeMsByTopicTab || {};
     next.timeXpEarnedByTopicTab = next.timeXpEarnedByTopicTab || {};
     next.questionStats = next.questionStats || {};
@@ -189,6 +192,7 @@
       xp: state.xp,
       lastStudyDate: state.lastStudyDate,
       streak: state.streak,
+      streakRewardDate: state.streakRewardDate,
       unlockAll: state.unlockAll,
       challengeMode: state.challengeMode,
       topicScores: state.topicScores,
@@ -212,6 +216,7 @@
     state.xp = payload.xp ?? state.xp;
     state.lastStudyDate = payload.lastStudyDate ?? state.lastStudyDate;
     state.streak = payload.streak ?? state.streak;
+    state.streakRewardDate = payload.streakRewardDate ?? state.streakRewardDate;
     state.unlockAll = payload.unlockAll ?? state.unlockAll;
     state.challengeMode = payload.challengeMode ?? state.challengeMode;
     state.topicScores = payload.topicScores || state.topicScores;
@@ -918,6 +923,21 @@
     if (state.lastStudyDate === y.toDateString()) state.streak += 1;
     else state.streak = 1;
     state.lastStudyDate = today;
+    if (state.streakRewardDate !== today) {
+      state.streakRewardDate = today;
+      const bonus = STREAK_DAILY_XP_BASE + Math.min(6, Math.max(0, state.streak - 1));
+      addXp(bonus, {
+        tab: route.tab || "cheat",
+        activityType: "daily_streak",
+        sourceId: `streak:${today}`,
+        reason: "daily_streak_bonus",
+      });
+      const status = document.getElementById("sync-status");
+      if (status) {
+        status.textContent = `Streak bonus +${bonus} XP awarded (day ${state.streak}).`;
+      }
+      return;
+    }
     saveState();
   }
 
@@ -1133,6 +1153,22 @@
     return parts.join("");
   }
 
+  function renderMathWhenReady(el, attempt) {
+    const tryNum = Number(attempt || 0);
+    if (typeof window.renderMathInElement === "function" && el && el.querySelector) {
+      window.renderMathInElement(el, {
+        delimiters: [
+          { left: "$$", right: "$$", display: true },
+          { left: "$", right: "$", display: false },
+        ],
+        throwOnError: false,
+      });
+      return;
+    }
+    if (tryNum >= 20) return;
+    setTimeout(() => renderMathWhenReady(el, tryNum + 1), 50);
+  }
+
   function goTopic(id, tab) {
     stopAndAwardTime();
     route = { view: "topic", topicId: id, tab: tab || "cheat" };
@@ -1225,25 +1261,7 @@
     startTime(t.id, route.tab);
 
     // Typeset `$...$` / `$$...$$` using KaTeX (loaded by `subject.html`).
-    // Retry briefly in case KaTeX auto-render hasn't finished loading yet.
-    (function tryRenderMath(el, attempt) {
-      if (
-        typeof window.renderMathInElement === "function" &&
-        el &&
-        el.querySelector
-      ) {
-        window.renderMathInElement(el, {
-          delimiters: [
-            { left: "$$", right: "$$", display: true },
-            { left: "$", right: "$", display: false },
-          ],
-          throwOnError: false,
-        });
-        return;
-      }
-      if (attempt >= 20) return;
-      setTimeout(() => tryRenderMath(el, attempt + 1), 50);
-    })(document.getElementById("topic-panels") || main, 0);
+    renderMathWhenReady(document.getElementById("topic-panels") || main, 0);
   }
 
   function formatCheatPoint(p) {
@@ -1368,9 +1386,17 @@
   function renderGamePanel(t) {
     const hasSeq = t.orderGame && t.orderGame.length;
     const hasTF = t.trueFalse && t.trueFalse.length >= 6;
+    const tfCount = hasTF ? Math.min(10, (t.trueFalse || []).length) : 0;
+    const matchCount = Math.min(8, (t.flashcards || []).length);
+    const seqCount = hasSeq ? (t.orderGame || []).length : 0;
     return `
       <div class="panel active" data-panel="game">
-        <p class="game-intro">Match, order steps, or true/false drill.</p>
+        <p class="game-intro">Game rules upfront:</p>
+        <ul class="game-intro">
+          <li><strong>Matching pairs</strong>: ${matchCount} cards, clear all pairs to earn XP.</li>
+          ${hasSeq ? `<li><strong>Order game</strong>: arrange ${seqCount} steps correctly, then check.</li>` : ""}
+          ${hasTF ? `<li><strong>True / False</strong>: ${tfCount} statements, XP based on correct count.</li>` : ""}
+        </ul>
         <button type="button" class="btn primary" id="game-match">Matching pairs</button>
         ${
           hasSeq
@@ -1466,16 +1492,20 @@
           } else {
             saveState();
           }
-          front.textContent = "Deck cleared — open another tab or redo.";
-          back.textContent = "Nice.";
+          front.innerHTML = renderMiniMarkdown("Deck cleared — open another tab or redo.");
+          back.innerHTML = renderMiniMarkdown("Nice.");
+          renderMathWhenReady(front, 0);
+          renderMathWhenReady(back, 0);
           card.classList.remove("flipped");
           prog.textContent = "Done";
           return;
         }
       }
       const c = pool[idx];
-      front.textContent = c.front;
-      back.textContent = c.back;
+      front.innerHTML = renderMiniMarkdown(c.front || "");
+      back.innerHTML = renderMiniMarkdown(c.back || "");
+      renderMathWhenReady(front, 0);
+      renderMathWhenReady(back, 0);
       card.classList.remove("flipped");
       prog.textContent = `${idx + 1} / ${pool.length}`;
       cardShownAt = Date.now();
@@ -1658,9 +1688,10 @@
     if (panelShop) panelShop.hidden = true;
     document.getElementById("explain-title").textContent = title;
     const explainBody = document.getElementById("explain-body");
-    explainBody.innerHTML = `${escapeHtml(body)}${
+    explainBody.innerHTML = `${renderMiniMarkdown(body)}${
       note ? `<span class="explain-note">${escapeHtml(note)}</span>` : ""
     }`;
+    renderMathWhenReady(explainBody, 0);
     panelExplain.hidden = false;
     root.hidden = false;
     root.setAttribute("aria-hidden", "false");
@@ -2072,11 +2103,16 @@
             )
             .join("")}</div>
         </div>
-        <div class="quiz-q">${escapeHtml(q.question)}</div>
+        <div class="quiz-q" id="quiz-question"></div>
         <div class="quiz-options" id="q-opts"></div>
         <div class="quiz-score-line">Points this round: ${score}</div>
         <div id="quiz-confidence"></div>
       `;
+      const qEl = document.getElementById("quiz-question");
+      if (qEl) {
+        qEl.innerHTML = renderMiniMarkdown(q.question || "");
+        renderMathWhenReady(qEl, 0);
+      }
       const bar = document.getElementById("q-timer");
       bar.style.transition = "none";
       bar.style.width = "100%";
@@ -2106,8 +2142,9 @@
         const b = document.createElement("button");
         b.type = "button";
         b.className = "quiz-opt";
-        b.textContent = o;
+        b.innerHTML = renderMiniMarkdown(o);
         b.dataset.idx = String(i);
+        renderMathWhenReady(b, 0);
         b.onclick = () => {
           if (b.disabled) return;
           finish(i === q.correctIndex, false, b);
@@ -2504,9 +2541,10 @@
     main.innerHTML = `
       <div class="boss-intro">
         <h1>Boss: ${escapeHtml(name)}</h1>
-        <p>1 HP · 20% faster timer · questions from all topics in this theme.</p>
+        <p><strong>Rules:</strong> 1 HP only · timer is 20% faster · strict timeout (no overtime answers) · mixed questions from all topics in this theme.</p>
+        <p id="boss-count" class="hint">Loading question count…</p>
         <p>Win to earn <strong>${BOSS_XP} XP</strong> and a permanent badge.</p>
-        <button type="button" class="btn primary" id="boss-start">Start battle</button>
+        <button type="button" class="btn primary" id="boss-start" disabled>Start battle</button>
         <button type="button" class="btn" id="boss-cancel">Cancel</button>
       </div>
       <div id="boss-quiz-container" hidden></div>`;
@@ -2514,25 +2552,41 @@
       route = { view: "home" };
       renderHome();
     };
+    const countEl = document.getElementById("boss-count");
+    const startBtn = document.getElementById("boss-start");
+    let preparedQuiz = [];
+    Promise.all(ids.map((id) => loadTopicScript(id)))
+      .then((topics) => {
+        const allQuiz = topics.flatMap((topic) =>
+          getTopicQuizBank(topic).map((q) => ({ ...q }))
+        );
+        const themeExtra = getThemeExtraQuiz(themeKey).map((q) => ({ ...q }));
+        allQuiz.push(...themeExtra);
+        preparedQuiz = allQuiz;
+        if (countEl) {
+          countEl.textContent = `Question bank: ${allQuiz.length} total (each boss run uses ${Math.min(
+            QUIZ_PER_ROUND,
+            allQuiz.length
+          )} adaptive questions).`;
+        }
+        if (startBtn) startBtn.disabled = allQuiz.length === 0;
+      })
+      .catch(() => {
+        if (countEl) countEl.textContent = "Failed to load question count. Please retry.";
+      });
+
     document.getElementById("boss-start").onclick = () => {
       document.querySelector(".boss-intro").hidden = true;
       const container = document.getElementById("boss-quiz-container");
       container.hidden = false;
-      container.innerHTML = "<p class='empty-state'>Loading theme topics…</p>";
-      Promise.all(ids.map((id) => loadTopicScript(id)))
-        .then((topics) => {
-          const allQuiz = topics.flatMap((topic) =>
-            getTopicQuizBank(topic).map((q) => ({ ...q }))
-          );
-          const themeExtra = getThemeExtraQuiz(themeKey).map((q) => ({ ...q }));
-          allQuiz.push(...themeExtra);
-          const synthetic = { id: "boss:" + themeKey, quiz: allQuiz };
-          runQuiz(synthetic, container, { boss: true, themeId: themeKey });
-        })
-        .catch(() => {
-          container.innerHTML = "<p class='empty-state'>Failed to load topics.</p><button type='button' class='btn primary' id='boss-back'>Back</button>";
-          document.getElementById("boss-back").onclick = () => renderHome();
-        });
+      if (!preparedQuiz.length) {
+        container.innerHTML =
+          "<p class='empty-state'>No boss questions available for this theme yet.</p><button type='button' class='btn primary' id='boss-back'>Back</button>";
+        document.getElementById("boss-back").onclick = () => renderHome();
+        return;
+      }
+      const synthetic = { id: "boss:" + themeKey, quiz: preparedQuiz };
+      runQuiz(synthetic, container, { boss: true, themeId: themeKey });
     };
   }
 

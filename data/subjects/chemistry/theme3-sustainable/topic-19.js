@@ -36,7 +36,17 @@
                 "**Electric vehicles** reduce local NOₓ/PM (tailpipe)."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Acid Rain Chemistry",
+        "points": [
+            "SO₂ + H₂O → H₂SO₃ (sulfurous acid); further oxidation: 2SO₂ + O₂ + 2H₂O → 2H₂SO₄.",
+            "NOₓ + H₂O → HNO₃ (nitric acid) via oxidation pathways.",
+            "**FGD** (flue gas desulfurisation): CaCO₃ + SO₂ → CaSO₃ + CO₂ (alkaline scrubbing).",
+            "**Catalytic converter**: $2\\text{CO} + 2\\text{NO} \\rightarrow 2\\text{CO}_2 + \\text{N}_2$ and oxidises hydrocarbons.",
+            "Limestone damage: CaCO₃ + H₂SO₄ → CaSO₄ + H₂O + CO₂ (soluble CaSO₄ washes away)."
+        ]
+    }],
     infographics: [
       { image: "data/subjects/chemistry/images/sustainable-03-air-qualityjpg.jpg", caption: "Air pollutants + control measures (catalytic converter, ozone layer)" }
     ],
@@ -97,7 +107,12 @@
             "front": "Scrubber removes?",
             "back": "SO₂ from flue gases."
         }
-    ],
+    ,
+    { "front": "CO danger mechanism?", "back": "Binds haemoglobin **~200× more strongly** than O₂ → tissues starved of oxygen (hypoxia)." },
+    { "front": "3 greenhouse gases besides CO₂?", "back": "**CH₄** (methane), **N₂O** (nitrous oxide), **H₂O vapour**, and CFCs — pick any three." },
+    { "front": "Ozone hole cause?", "back": "**CFCs** → UV breaks C–Cl → Cl· radicals catalytically destroy O₃ in chain reactions." },
+    { "front": "FGD removes?", "back": "**SO₂** from power station flue gases — reacts with CaCO₃/Ca(OH)₂ scrubber." },
+    { "front": "Why does rain have pH ~5.6 naturally?", "back": "CO₂ dissolves in rainwater: $\\text{CO}_2 + \\text{H}_2\\text{O} \\rightarrow \\text{H}_2\\text{CO}_3$ (weak acid). Pollution lowers pH further." }],
     quiz: [
     {question:"CO is harmful because:",options:["Acidifies blood only","Blocks O₂ transport in blood","Radioactive","Green"],correctIndex:1,explanation:"Hb affinity."},
     {question:"Acid rain damages:",options:["Only metals","Buildings, aquatic life, forests","Nothing","Only plastics"],correctIndex:1,explanation:"Low pH."},
@@ -144,7 +159,15 @@
     {id:"chem-T19-206",question:"Acid rain can leach aluminium from soils into waterways partly because:",options:["Al is a noble metal","Lower pH increases mobility of some metal ions from minerals","Al dissolves only in bases","Rain has no ions"],correctIndex:1,explanation:"Soil/water chemistry nuance."},
     {id:"chem-T19-207",question:"Methane’s high global warming potential in short horizons is mainly because:",options:["It does not absorb IR","It absorbs outgoing IR strongly per molecule vs CO₂ (different lifetime and potency)","It is heavier than CO₂ always","It is not a gas"],correctIndex:1,explanation:"GWP concept — per molecule radiative efficiency × time."},
     {id:"chem-T19-208",question:"Ground-level ozone harms health mainly by:",options:["Blocking UV like stratospheric O₃","Irritating and oxidising lung tissue (respiratory effects)","Increasing haemoglobin O₂ carry","Being odourless and inert"],correctIndex:1,explanation:"Toxic oxidant at breathing level."},
-    {id:"chem-T19-209",question:"Indoor air quality can be worse than outdoor in some homes because:",options:["O₂ is banned indoors","VOCs from furnishings + limited ventilation can accumulate","N₂ disappears","CO₂ is always zero indoors"],correctIndex:1,explanation:"Source strength vs dilution."}
+    {id:"chem-T19-209",question:"Indoor air quality can be worse than outdoor in some homes because:",options:["O₂ is banned indoors","VOCs from furnishings + limited ventilation can accumulate","N₂ disappears","CO₂ is always zero indoors"],correctIndex:1,explanation:"Source strength vs dilution."},
+    {id:"chem-T19-301",question:"Carbon monoxide (CO) is especially dangerous as an indoor pollutant because it:",options:["Is brown and easily spotted","Is colourless and odourless, AND binds haemoglobin more strongly than O₂, causing tissue hypoxia","Is a strong acid","Is heavier than air so detectable at floor level"],correctIndex:1,explanation:"CO binds Hb with 200× greater affinity than O₂ — silent, invisible threat."},
+    {id:"chem-T19-302",question:"In a catalytic converter, which TWO main reactions occur?",options:["N₂ + O₂ → 2NO and 2CO → 2C + O₂","2CO + O₂ → 2CO₂ and 2NO → N₂ + O₂ (simplified)","SO₂ → S + O₂ and CO → CO₂","Only CO₂ → C + O₂"],correctIndex:1,explanation:"Converter oxidises CO and hydrocarbons to CO₂/H₂O; reduces NOₓ to N₂."},
+    {id:"chem-T19-303",question:"Acid rain forms when SO₂ dissolves in rainwater. The simplified reaction is:",options:["SO₂ + H₂O → H₂SO₄ directly","SO₂ + H₂O → H₂SO₃; further oxidation in air can form H₂SO₄","SO₂ + NaOH → neutral salt only","SO₂ is a base"],correctIndex:1,explanation:"Sulfurous acid forms first; oxidation in moist air gives sulfuric acid — more corrosive."},
+    {id:"chem-T19-304",question:"Acid rain damages limestone statues (CaCO₃) because:",options:["Rain evaporates the stone","H₂SO₄ / HNO₃ in acid rain reacts: CaCO₃ + H₂SO₄ → CaSO₄ + H₂O + CO₂ — stone dissolves","Limestone absorbs CO₂ only","Rain is always pH 7"],correctIndex:1,explanation:"Acid attack converts insoluble CaCO₃ to soluble calcium salts that wash away."},
+    {id:"chem-T19-305",question:"The greenhouse effect keeps Earth habitable. The 'enhanced' greenhouse effect (climate change) is concerning because:",options:["All greenhouse gases are toxic to breathe","Human emissions of CO₂/CH₄ are increasing the amount of heat trapped, causing net warming beyond the natural balance","Greenhouse gases destroy the ozone layer","Only CO₂ matters"],correctIndex:1,explanation:"Natural greenhouse effect is necessary; enhanced = extra warming from anthropogenic emissions."},
+    {id:"chem-T19-306",question:"CFCs (chlorofluorocarbons) damage the ozone layer because:",options:["They react with O₂ only","UV breaks C–Cl bonds, releasing Cl· radicals that catalytically destroy O₃ in chain reactions","They absorb all visible light","They are heavier than O₃"],correctIndex:1,explanation:"Each Cl· can destroy thousands of O₃ molecules before termination — catalytic chain."},
+    {id:"chem-T19-307",question:"Flue-gas desulfurisation (FGD) in coal power stations removes SO₂ by:",options:["Burning the SO₂ to CO₂","Reacting it with slaked lime or limestone: CaCO₃ + SO₂ → CaSO₃ + CO₂ / CaO + SO₂ → CaSO₃","Adding more O₂","Electrolysis of SO₂"],correctIndex:1,explanation:"Alkaline scrubbing with CaCO₃ or Ca(OH)₂ neutralises acidic SO₂ → by-product gypsum CaSO₄."},
+    {id:"chem-T19-308",question:"Which correctly links pollutant → health or environmental effect?",options:["CO₂ → direct blindness","SO₂/NOₓ → acid rain → forest damage and aquatic ecosystem harm","Cl₂ → only aesthetic damage to buildings","N₂ → toxic in lungs"],correctIndex:1,explanation:"Accurate linkage: S/N oxides dissolve in rain → sulfuric/nitric acids → ecological damage."}
     ],
     trueFalse: [
     {statement:"Stratospheric ozone is a pollutant in the same sense as ground-level ozone.",correct:false,explain:"Location matters."},

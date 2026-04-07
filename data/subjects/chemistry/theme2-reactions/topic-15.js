@@ -16,7 +16,7 @@
             "title": "Bonds",
             "points": [
                 "Breaking bonds endothermic; making bonds exothermic.",
-                "ΔH reaction ≈ bonds broken − made (bond energy estimate)."
+                "$\Delta H \approx \sum E_{\text{broken}} - \sum E_{\text{formed}}$ (bond energy estimate)."
             ]
         },
         {
@@ -26,7 +26,18 @@
                 "Speeds forward and reverse equally."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Calorimetry & Energy Profiles",
+        "points": [
+            "$q = mc\\Delta T$ — heat (J); m = mass of water/solution (g); c = 4.18 J g⁻¹ K⁻¹; ΔT in K.",
+            "Exothermic: products **lower** than reactants on diagram; $\\Delta H < 0$.",
+            "Endothermic: products **higher** than reactants; $\\Delta H > 0$.",
+            "Activation energy $E_a$ = peak height above reactants.",
+            "Catalyst: **lowers $E_a$** (lower peak) but $\\Delta H$ and product/reactant levels unchanged.",
+            "$\\Delta H \\approx \\sum E_{\\text{broken}} - \\sum E_{\\text{formed}}$ (bond energy method; endothermic step first)."
+        ]
+    }],
     infographics: [ { image: "data/subjects/chemistry/images/reactions-10-energetics.jpg", caption: "Exothermic and endothermic profiles" } ],
     flashcards: [
         {
@@ -85,7 +96,12 @@
             "front": "Lattice enthalpy?",
             "back": "Ions → ionic solid (gaseous ions)."
         }
-    ],
+    ,
+    { "front": "Calorimetry formula?", "back": "$q = mc\\Delta T$. c(water) = 4.18 J g⁻¹ K⁻¹. ΔT = T_final − T_initial." },
+    { "front": "Exothermic: ΔH sign?", "back": "**Negative** (ΔH < 0). Heat released to surroundings → temperature of solution rises." },
+    { "front": "Bond energy ΔH estimate?", "back": "$\\Delta H \\approx \\sum E_{\\text{broken}} - \\sum E_{\\text{formed}}$. Positive = endo; negative = exo." },
+    { "front": "Standard ΔHf° of an element?", "back": "**Zero** by definition (reference state)." },
+    { "front": "What does a catalyst do on an energy profile?", "back": "Lowers the activation energy peak — provides a **lower-energy alternative pathway**. ΔH unchanged." }],
     quiz: [
     {question:"Exothermic:",options:["Products higher energy","Products lower energy than reactants","No energy change","Only light in"],correctIndex:1,explanation:"Heat released."},
     {question:"Endothermic decomposition CaCO₃:",options:["Releases heat","Absorbs heat","No ΔH","Only physical"],correctIndex:1,explanation:"Needs strong heating."},
@@ -131,7 +147,15 @@
     {id:"chem-T15-206",question:"When anhydrous CuSO₄ turns blue on adding water, the process is:",options:["Always endothermic","Often exothermic (hydration)","Never releases heat","Only physical with no energy change"],correctIndex:1,explanation:"Hydration can be noticeably exothermic."},
     {id:"chem-T15-207",question:"Activation energy is best described as:",options:["The overall ΔH of reaction","The minimum energy needed for a successful collision leading to product","The heat released at equilibrium","The energy of products only"],correctIndex:1,explanation:"Ea definition."},
     {id:"chem-T15-208",question:"Hess’s law works because enthalpy is:",options:["Path-dependent","A state function (path independent)","Always zero","Only defined for gases"],correctIndex:1,explanation:"State function — cycles sum to zero."},
-    {id:"chem-T15-209",question:"Incomplete combustion of hydrocarbons can produce CO because:",options:["Oxygen is in excess always","Limited O₂ favours partial oxidation to CO","CO has lower bond energy than CO₂ always","Water cannot form"],correctIndex:1,explanation:"Fuel-rich / limited oxygen conditions."}
+    {id:"chem-T15-209",question:"Incomplete combustion of hydrocarbons can produce CO because:",options:["Oxygen is in excess always","Limited O₂ favours partial oxidation to CO","CO has lower bond energy than CO₂ always","Water cannot form"],correctIndex:1,explanation:"Fuel-rich / limited oxygen conditions."},
+    {id:"chem-T15-301",question:"Dissolving solid NaOH pellets in water makes the water warm. This dissolving is:",options:["Endothermic","Exothermic — hydration of ions releases more energy than lattice energy absorbed","A physical change with no energy","Only fast, not thermochemical"],correctIndex:1,explanation:"Exothermic dissolution: $\\Delta H_{\\text{sol}} < 0$. Heat released to surroundings."},
+    {id:"chem-T15-302",question:"Boiling water ($\\text{H}_2\\text{O}(l) \\to \\text{H}_2\\text{O}(g)$) is endothermic because:",options:["Energy is released when molecules separate","Energy must be absorbed to overcome hydrogen bonds and separate water molecules","Boiling produces CO₂","Water molecules are destroyed"],correctIndex:1,explanation:"Breaking intermolecular hydrogen bonds requires energy input → endothermic."},
+    {id:"chem-T15-303",question:"Using bond energies: H–H = 436, Cl–Cl = 242, H–Cl = 431 kJ/mol. For H₂ + Cl₂ → 2HCl, $\\Delta H \\approx$:",options:["+678 kJ/mol","+862 kJ/mol","−184 kJ/mol","+184 kJ/mol"],correctIndex:2,explanation:"$\\Delta H \\approx (436+242) - 2 \\times 431 = 678 - 862 = -184$ kJ/mol. Exothermic."},
+    {id:"chem-T15-304",question:"An energy profile shows a catalyst lowers the activation energy. The $\\Delta H$ of the reaction:",options:["Becomes less negative with catalyst","Stays exactly the same — catalyst only provides alternate lower-Ea pathway","Increases","Becomes zero"],correctIndex:1,explanation:"Catalyst speeds up by lowering Ea; reactant and product energy levels (hence $\\Delta H$) are unchanged."},
+    {id:"chem-T15-305",question:"A cold pack contains NH₄NO₃ and water. When activated, it feels cold because:",options:["NH₄NO₃ combusts","Dissolving NH₄NO₃ is endothermic — heat absorbed from hand/surroundings","The pack contains ice","CO₂ is released"],correctIndex:1,explanation:"Endothermic dissolution: absorbs heat from surroundings → cooling effect."},
+    {id:"chem-T15-306",question:"Condensation of steam into liquid water releases heat because:",options:["Bond breaking is exothermic","Forming intermolecular bonds (hydrogen bonds) releases energy","Condensation is always endothermic","Only ionic bonds release energy"],correctIndex:1,explanation:"Bond/interaction forming = exothermic. Condensation releases the same energy as boiling absorbed."},
+    {id:"chem-T15-307",question:"Hess's law states that the total enthalpy change is independent of the route because:",options:["All reactions have the same rate","Enthalpy is a state function — depends only on initial and final states","ΔH is always zero","Temperature is always 25°C"],correctIndex:1,explanation:"State function: path does not matter. Energy of reactants and products fixed → $\\sum \\Delta H$ around cycle = 0."},
+    {id:"chem-T15-308",question:"Reaction profile: reactants at 200 kJ, peak at 280 kJ, products at 120 kJ. The activation energy Ea and $\\Delta H$ are:",options:["Ea = 80 kJ; $\\Delta H$ = −80 kJ","Ea = 80 kJ; $\\Delta H$ = −80 kJ","Ea = 80 kJ (280−200); $\\Delta H$ = −80 kJ (120−200)","Ea = 160 kJ; $\\Delta H$ = +80 kJ"],correctIndex:2,explanation:"$E_a = 280 - 200 = 80$ kJ; $\\Delta H = 120 - 200 = -80$ kJ (exothermic)."}
     ],
     trueFalse: [
     {statement:"All spontaneous reactions are exothermic.",correct:false,explain:"Entropy can drive endothermic."},

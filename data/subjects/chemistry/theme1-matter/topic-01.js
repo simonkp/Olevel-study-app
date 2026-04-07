@@ -47,7 +47,17 @@
                 "**Volumetric glassware** — read burette/pipette meniscus at eye level."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Measurement Apparatus",
+        "points": [
+            "**Burette** — reads to ±0.05 cm³; use for delivering variable volumes in titrations.",
+            "**Volumetric pipette** — delivers one exact fixed volume (e.g. 25.00 cm³).",
+            "**Thermometer** — ±0.5°C; immerse bulb fully; read at eye level.",
+            "$R_f = \\dfrac{\\text{distance substance moved}}{\\text{distance solvent front moved}}$ (always ≤ 1).",
+            "SI base units: mass → **kg** (g in chemistry); T → **K** (= °C + 273); time → **s**."
+        ]
+    }],
     infographics: [ { image: "data/subjects/chemistry/images/matter-01-experimental-design.jpg", caption: "Fair test: variables and apparatus" } ],
     flashcards: [
         {
@@ -106,7 +116,11 @@
             "front": "Fair test checklist?",
             "back": "One IV, measure DV, list and fix controls."
         }
-    ],
+    ,
+    { "front": "$R_f$ formula?", "back": "$R_f = \\dfrac{d_{\\text{substance}}}{d_{\\text{solvent front}}}$. Always between 0 and 1." },
+    { "front": "Precision vs accuracy?", "back": "**Precision**: readings agree with each other (reproducible). **Accuracy**: readings are close to the true value." },
+    { "front": "How to reduce random error?", "back": "Take **repeat readings** and calculate the **mean**. Discard outliers." },
+    { "front": "Which glassware for exact 25.00 cm³?", "back": "**Volumetric pipette** (fixed volume) or **burette** (variable, to 0.05 cm³)." }],
     quiz: [
     {question:"Fair test requires changing:",options:["Only one independent variable","All variables","Only the dependent","Nothing"],correctIndex:0,explanation:"One factor at a time."},
     {question:"Dependent variable is:",options:["What you measure","What you keep fixed","The hypothesis","Apparatus list"],correctIndex:0,explanation:"Response to your change."},
@@ -152,7 +166,17 @@
     {id:"chem-T1-206",question:"External validity refers to:",options:["How far conclusions generalise beyond the specific conditions tested","Whether the thermometer is calibrated","Whether random error is small","Whether the hypothesis is long"],correctIndex:0,explanation:"Generalisable to other contexts."},
     {id:"chem-T1-207",question:"When plotting a quantity that spans 10^4–10^8 on a wide range, a log scale is often used because:",options:["It removes all systematic error","It compresses wide ranges so trends are easier to see","It makes all relationships linear","It is required by SI"],correctIndex:1,explanation:"Log scales help visualise multiplicative change across orders of magnitude."},
     {id:"chem-T1-208",question:"A systematic error that is proportional to the measured value (e.g. a wrongly calibrated 2% high scale) will:",options:["Affect only one reading","Shift all readings by a consistent percentage or offset pattern","Disappear if you repeat once","Average out over many repeats"],correctIndex:1,explanation:"Repeats stay biased; calibration is needed."},
-    {id:"chem-T1-209",question:"The best reason to plot error bars on a graph is to:",options:["Make the graph colourful","Show uncertainty in each measured point","Force the line to be straight","Replace a table"],correctIndex:1,explanation:"Error bars communicate uncertainty visually."}
+    {id:"chem-T1-209",question:"The best reason to plot error bars on a graph is to:",options:["Make the graph colourful","Show uncertainty in each measured point","Force the line to be straight","Replace a table"],correctIndex:1,explanation:"Error bars communicate uncertainty visually."},
+    {id:"chem-T1-301",question:"Which conversion is correct?",options:["1 m = 1000 cm","1 kg = 100 g","1 minute = 60 s","1 cm³ = 1000 dm³"],correctIndex:2,explanation:"1 minute equals 60 seconds."},
+    {id:"chem-T1-302",question:"Temperature in Kelvin is calculated from Celsius by:",options:["K = °C - 273","K = °C + 273","K = °C × 273","K = °C / 273"],correctIndex:1,explanation:"Add 273 to convert from degrees Celsius to Kelvin."},
+    {id:"chem-T1-303",question:"A pure substance is identified by having:",options:["Any colour","A fixed melting or boiling point at fixed pressure","Only one element always","A very high density"],correctIndex:1,explanation:"Pure substances show sharp, fixed phase-change temperatures."},
+    {id:"chem-T1-304",question:"Which pair is correctly matched in an experiment?",options:["Independent variable: what you measure","Dependent variable: what you change","Control variable: kept constant","Anomaly: always removed"],correctIndex:2,explanation:"Control variables are kept the same for a fair test."},
+    {id:"chem-T1-305",question:"Why are repeat readings taken in practical work?",options:["To make the graph longer","To reduce random error and improve reliability","To change the independent variable","To remove all systematic error"],correctIndex:1,explanation:"Repeats allow averaging and improve reliability."},
+    {id:"chem-T1-306",question:"To measure exactly 25.15 cm³ of acid solution, a student should use:",options:["A measuring cylinder (reads to 1 cm³)","A burette (reads to 0.05 cm³)","A beaker","A conical flask"],correctIndex:1,explanation:"Burette gives the precision needed for 0.05 cm³ readings; measuring cylinders are far less precise."},
+    {id:"chem-T1-307",question:"The SI unit of temperature is:",options:["°C (degrees Celsius)","K (kelvin)","°F","Cal"],correctIndex:1,explanation:"SI unit = kelvin (K). Celsius is commonly used but K is the base SI unit. 0°C = 273 K."},
+    {id:"chem-T1-308",question:"Chlorine gas is denser than air AND soluble in water. The correct collection method is:",options:["Upward delivery","Downward delivery","Water displacement (collection over water)","Syringe only"],correctIndex:1,explanation:"Downward delivery: denser gas sinks to fill the jar from the bottom. Cannot use water displacement (Cl₂ is very soluble in water)."},
+    {id:"chem-T1-309",question:"In a chromatography experiment, substance V remains on the start line. This means:",options:["V moved the fastest","V is the most soluble in the solvent","V did not dissolve in (or was not carried by) the solvent used — Rf = 0","V is a pure substance"],correctIndex:2,explanation:"Rf = 0 means no movement; the substance is insoluble in or does not interact with the solvent."},
+    {id:"chem-T1-310",question:"'Accuracy' in a measurement means:",options:["Getting the same reading every time","How close the measurement is to the true/accepted value","Taking many measurements","Having no random error ever"],correctIndex:1,explanation:"Accuracy = closeness to true value. Precision = reproducibility (same result each time, but may be consistently wrong)."}
     ],
     trueFalse: [
     {statement:"More repeats always remove systematic error.",correct:false,explain:"Repeats reduce random error; systematic needs calibration/fix."},

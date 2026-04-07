@@ -26,7 +26,17 @@
                 "Microplastics environmental issue."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Addition vs Condensation — Quick Compare",
+        "points": [
+            "**Addition**: monomer has **C=C** (alkene); π bond opens; **no small molecule released**; repeat unit = monomer atoms.",
+            "**Condensation**: monomers have 2 functional groups; **small molecule lost** (H₂O or HCl per bond formed).",
+            "**Nylon**: diamine + diacid/diacyl chloride → **amide links** (–CONH–).",
+            "**Polyester (PET/Terylene)**: diol + diacid → **ester links** (–COO–).",
+            "Condensation repeat unit contains **fewer atoms** than monomers combined."
+        ]
+    }],
     infographics: [
       { image: "data/subjects/chemistry/images/sustainable-02-polymers.jpg", caption: "Addition and condensation polymers + recycling context" }
     ],
@@ -87,7 +97,12 @@
             "front": "Polystyrene monomer?",
             "back": "Phenylethene (styrene)."
         }
-    ],
+    ,
+    { "front": "Monomer for PVC?", "back": "**Chloroethene** (CH₂=CHCl, vinyl chloride)." },
+    { "front": "Monomer for poly(propene)?", "back": "**Propene** (CH₂=CHCH₃). Each chain unit has a –CH₃ branch." },
+    { "front": "Nylon bond type?", "back": "**Amide bond** (–CONH–); formed between –NH₂ and –COOH groups." },
+    { "front": "Thermoplastic vs thermoset — recycling?", "back": "**Thermoplastic**: chain polymer → remelt → recyclable. **Thermoset**: cross-linked network → cannot remelt." },
+    { "front": "Why plastics are non-biodegradable?", "back": "**C–C backbone** is not recognised by most soil enzymes as a substrate for decomposition." }],
     quiz: [
     {question:"Poly(ethene) monomer:",options:["Ethane","Ethene","Ethanol","Ethyne"],correctIndex:1,explanation:"Opens double bond."},
     {question:"Condensation polymer examples:",options:["Only PE","Nylon, polyester","Only diamond","NaCl"],correctIndex:1,explanation:"Step-growth."},
@@ -134,7 +149,15 @@
     {id:"chem-T18-206",question:"PET bottles are often recycled mechanically by:",options:["Cracking to ethene only","Melting and remoulding (thermoplastic behaviour)","Electrolysis","Dissolving in HCl only"],correctIndex:1,explanation:"Thermoplastic polyester."},
     {id:"chem-T18-207",question:"The repeat unit of poly(propene) contains a methyl branch because:",options:["Propane was cracked","The monomer is CH₂=CHCH₃","The catalyst is methyl","Ethene dimerises"],correctIndex:1,explanation:"Propene structure is retained in the chain."},
     {id:"chem-T18-208",question:"Which is a health/environment reason to limit open burning of mixed plastics?",options:["Produces only CO₂","May release toxic gases (e.g. HCl from PVC) and particulates","Removes all particulates","Increases ozone in stratosphere only"],correctIndex:1,explanation:"Incomplete combustion and halogen content."},
-    {id:"chem-T18-209",question:"Disposing of durable plastics in landfill is problematic mainly because:",options:["They dissolve overnight","They persist and may fragment to microplastics","They become noble gases","They always biodegrade quickly"],correctIndex:1,explanation:"Environmental persistence."}
+    {id:"chem-T18-209",question:"Disposing of durable plastics in landfill is problematic mainly because:",options:["They dissolve overnight","They persist and may fragment to microplastics","They become noble gases","They always biodegrade quickly"],correctIndex:1,explanation:"Environmental persistence."},
+    {id:"chem-T18-301",question:"In addition polymerisation of ethene, the C=C double bond opens so that:",options:["H₂O is eliminated","Each monomer unit bonds to the next without losing any atoms — all atoms are in the polymer","CO₂ is released","The chain remains unsaturated"],correctIndex:1,explanation:"Addition: no small molecule lost. The π bond becomes two new σ bonds linking monomers."},
+    {id:"chem-T18-302",question:"PVC (poly(chloroethene)) is made from chloroethene monomers CH₂=CHCl. The repeat unit is:",options:["–CH₂–CH₂–","–CH₂–CHCl–","–CHCl–CHCl–","–CH=CCl–"],correctIndex:1,explanation:"Each chloroethene monomer contributes –CH₂–CHCl– to the chain."},
+    {id:"chem-T18-303",question:"Nylon-6,6 is produced from a diamine (6 carbons) and a dicarboxylic acid (6 carbons). Each bond formed is an:",options:["Ester link (–COO–)","Amide link (–CONH–)","Ether link (–O–)","Double C=C bond"],correctIndex:1,explanation:"Amide bond formation: –COOH + H₂N– → –CONH– + H₂O. Polyamide = nylon."},
+    {id:"chem-T18-304",question:"Thermoplastics can be melted and remoulded because:",options:["They are cross-linked covalent networks","Polymer chains are held together only by intermolecular forces that break on heating","They are ionic solids","They contain no carbon"],correctIndex:1,explanation:"No permanent cross-links → chains slide when soft → shape-able."},
+    {id:"chem-T18-305",question:"Plastics are generally non-biodegradable because:",options:["They contain too much oxygen","The C–C backbone is not recognised by most soil microorganisms as a substrate","They are too cold","They contain metal atoms"],correctIndex:1,explanation:"Biological enzymes that digest natural polymers (cellulose, starch) do not break C–C chains easily."},
+    {id:"chem-T18-306",question:"Physical recycling of thermoplastic bottles involves:",options:["Cracking to monomers","Melting, shredding, and reforming into new plastic products","Electrolysis","Burning for energy only"],correctIndex:1,explanation:"Mechanical recycling: clean thermoplastic is softened by heat and remoulded."},
+    {id:"chem-T18-307",question:"Burning mixed plastics in open air is environmentally harmful mainly because:",options:["Only CO₂ is released — same as natural fires","Incomplete combustion and chlorine/other atoms in polymers like PVC produce toxic gases (e.g. HCl, dioxins) and particulates","All plastics burn cleanly","Only smoke is harmful"],correctIndex:1,explanation:"Halogenated and mixed plastics release toxic compounds when burnt without proper scrubbing."},
+    {id:"chem-T18-308",question:"A polyester is formed from ethane-1,2-diol and benzene-1,4-dicarboxylic acid. The link between monomers is:",options:["Amide bond","Ester bond (–COO–) with elimination of water","Carbon–carbon double bond","Ionic bond"],correctIndex:1,explanation:"Diol + diacid condensation → –COO– ester links + H₂O. This is how PET (Terylene) is made."}
     ],
     trueFalse: [
     {statement:"All plastics are addition polymers.",correct:false,explain:"Condensation: nylon, polyester."},

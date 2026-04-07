@@ -19,7 +19,51 @@
                 "SO₄²⁻ + Ba²⁺ → white BaSO₄."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Flame Test Colours",
+        "points": [
+            "**Li⁺** — crimson red",
+            "**Na⁺** — persistent yellow (masks K — use cobalt blue glass to see K through Na)",
+            "**K⁺** — lilac/violet",
+            "**Ca²⁺** — brick red / orange-red",
+            "**Cu²⁺** — blue-green / green"
+        ]
+    },
+    {
+        "title": "Gas Tests",
+        "points": [
+            "**H₂** — burning splint: _squeaky pop_.",
+            "**O₂** — glowing splint: _relights_.",
+            "**CO₂** — limewater: _turns milky_ (Ca(OH)₂ + CO₂ → CaCO₃↓ + H₂O).",
+            "**Cl₂** — damp litmus: _bleaches white_; pungent yellow-green gas.",
+            "**NH₃** — pungent; damp red litmus turns blue; white fumes with conc HCl.",
+            "**SO₂** — decolourises acidified KMnO₄; turns damp dichromate orange→green."
+        ]
+    },
+    {
+        "title": "NaOH Precipitate Tests (cations)",
+        "points": [
+            "**Cu²⁺** — pale blue ppt; does NOT dissolve in excess NaOH.",
+            "**Fe²⁺** — green ppt; turns brown in air (oxidised to Fe³⁺).",
+            "**Fe³⁺** — rusty brown ppt; does NOT dissolve in excess.",
+            "**Al³⁺** — white ppt; **dissolves in excess NaOH** (amphoteric).",
+            "**Zn²⁺** — white ppt; **dissolves in excess NaOH** (amphoteric).",
+            "**Ca²⁺** — white ppt; does NOT dissolve in excess.",
+            "**Mg²⁺** — white ppt; does NOT dissolve in excess."
+        ]
+    },
+    {
+        "title": "Anion Tests",
+        "points": [
+            "**Cl⁻** — add dilute HNO₃ then AgNO₃: **white** AgCl ppt (insoluble in dil HNO₃).",
+            "**Br⁻** — same: **cream** AgBr ppt.",
+            "**I⁻** — same: **yellow** AgI ppt.",
+            "**SO₄²⁻** — add dil HCl then BaCl₂: **white** BaSO₄ ppt (insoluble in HCl).",
+            "**CO₃²⁻** — add dil acid: effervescence; CO₂ turns limewater milky.",
+            "**NO₃⁻** — add NaOH + Al foil, heat: NH₃ gas produced (litmus test)."
+        ]
+    }],
     infographics: [ { image: "data/subjects/chemistry/images/reactions-05-qualitative-analysis.jpg", caption: "Flame colours and precipitate tests" } ],
     flashcards: [
         {
@@ -78,7 +122,19 @@
             "front": "Chromate CrO₄²⁻ colour?",
             "back": "Yellow."
         }
-    ],
+    ,
+    { "front": "Flame: Na⁺?", "back": "**Persistent yellow** (intense; masks other colours)." },
+    { "front": "Flame: K⁺?", "back": "**Lilac/violet** (use cobalt blue glass if Na present)." },
+    { "front": "Flame: Ca²⁺?", "back": "**Brick red / orange-red**." },
+    { "front": "Flame: Cu²⁺?", "back": "**Blue-green**." },
+    { "front": "Gas: squeaky pop?", "back": "**H₂** with burning splint." },
+    { "front": "Gas: relights glowing splint?", "back": "**O₂**." },
+    { "front": "Gas: limewater milky?", "back": "**CO₂**." },
+    { "front": "Gas: bleaches damp litmus?", "back": "**Cl₂** (also pungent yellow-green)." },
+    { "front": "Gas: turns damp red litmus blue + white fumes with HCl?", "back": "**NH₃** (alkaline; reacts with HCl to make NH₄Cl white smoke)." },
+    { "front": "White ppt dissolves in excess NaOH?", "back": "**Al³⁺ or Zn²⁺** — amphoteric hydroxides." },
+    { "front": "SO₄²⁻ test?", "back": "**Acidified BaCl₂** (add dil HCl first): **white BaSO₄** ppt, insoluble in HCl." },
+    { "front": "Halide test: white/cream/yellow ppt?", "back": "**White** = Cl⁻ (AgCl); **cream** = Br⁻ (AgBr); **yellow** = I⁻ (AgI). Add dil HNO₃ first." }],
     quiz: [
     {question:"CO₂ test:",options:["Relights splint","Limewater milky","White ppt AgNO₃","Blue litmus"],correctIndex:1,explanation:"Carbonate/acid."},
     {question:"Cl⁻ with AgNO₃:",options:["Black","White","Yellow","Red"],correctIndex:1,explanation:"AgCl."},
@@ -124,7 +180,19 @@
     {id:"chem-T10-206",question:"Pb²⁺(aq) + 2I⁻(aq) → PbI₂(s) is used as a test because:",options:["PbI₂ is soluble","PbI₂ is a yellow precipitate","No colour change","Gas forms"],correctIndex:1,explanation:"Characteristic yellow precipitate."},
     {id:"chem-T10-207",question:"Before adding acidified BaCl₂ to test for sulfate, the solution is often acidified to remove interference from:",options:["Na⁺","Carbonate ions that could form BaCO₃ precipitate","All metals","Water only"],correctIndex:1,explanation:"Carbonate gives false positive white ppt with Ba²⁺."},
     {id:"chem-T10-208",question:"A gas that relights a glowing splint is:",options:["H₂","CO₂","O₂","N₂"],correctIndex:2,explanation:"Oxygen supports combustion."},
-    {id:"chem-T10-209",question:"In qualitative analysis, ‘no visible reaction’ with a reagent does not always mean:",options:["No ions are present","The ion concentration is too low or wrong conditions","The student is colour-blind","Water is always pure"],correctIndex:1,explanation:"Sensitivity and conditions matter."}
+    {id:"chem-T10-209",question:"In qualitative analysis, ‘no visible reaction’ with a reagent does not always mean:",options:["No ions are present","The ion concentration is too low or wrong conditions","The student is colour-blind","Water is always pure"],correctIndex:1,explanation:"Sensitivity and conditions matter."},
+    {id:"chem-T10-301",question:"A white precipitate forms when NaOH(aq) is added to a solution and dissolves when more NaOH is added in excess. The cation is most likely:",options:["Ca²⁺","Fe³⁺","Al³⁺ or Zn²⁺","Cu²⁺"],correctIndex:2,explanation:"Al(OH)₃ and Zn(OH)₂ are amphoteric - they dissolve in excess NaOH; Ca(OH)₂ does not."},
+    {id:"chem-T10-302",question:"The nitrate ion can be confirmed by heating with NaOH(aq) and aluminium powder. A positive result is:",options:["A white precipitate","Orange-brown fumes","A gas turns damp red litmus blue","A yellow precipitate"],correctIndex:2,explanation:"NO3- is reduced to NH3 by Al in alkaline conditions; NH3 turns damp red litmus blue."},
+    {id:"chem-T10-303",question:"SO2 gas is identified by moist filter paper soaked in acidified KMnO4 turning from purple to colourless because:",options:["SO2 is a strong acid","SO2 reduces Mn(VII) to Mn(II)","SO2 reacts only with solid KMnO4","SO2 is unreactive with KMnO4"],correctIndex:1,explanation:"SO2 is a reducing agent - it decolourises acidified permanganate."},
+    {id:"chem-T10-304",question:"Which cation gives a blue precipitate with NaOH(aq) that does NOT dissolve when excess NaOH is added?",options:["Al3+","Zn2+","Cu2+","Fe2+"],correctIndex:2,explanation:"Cu(OH)2 is blue and stays as precipitate in excess NaOH, unlike amphoteric Al(OH)3 and Zn(OH)2."},
+    {id:"chem-T10-305",question:"Chlorine gas turns damp blue litmus paper first red, then bleaches it white. This shows Cl2 is:",options:["Neutral only","An acidic and bleaching/oxidising gas","A strong reducing agent","A noble gas"],correctIndex:1,explanation:"Cl2 dissolves in water forming HCl and HClO; hypochlorite then bleaches the dye."},
+    {id:"chem-T10-306",question:"In a flame test, sodium ions produce an intense persistent yellow flame that can mask the:",options:["Red of calcium","Lilac/violet of potassium","Blue of copper","Green of barium"],correctIndex:1,explanation:"Na flame is strong yellow — always use Na-free equipment to detect K."},
+    {id:"chem-T10-307",question:"A green precipitate forms when NaOH(aq) is added to a solution. On standing in air it turns brown/rust. The cation was:",options:["Cu²⁺","Fe³⁺","Fe²⁺ (oxidised to Fe³⁺ in air)","Zn²⁺"],correctIndex:2,explanation:"Fe(OH)₂ is green; it oxidises in air to Fe(OH)₃ (rusty brown)."},
+    {id:"chem-T10-308",question:"Why must nitric acid (not HCl or H₂SO₄) be added before AgNO₃ when testing for Cl⁻?",options:["HCl adds Cl⁻ (false positive); H₂SO₄ gives SO₄²⁻ ppt; only HNO₃ removes CO₃²⁻/SO₃²⁻ without adding interfering ions","AgNO₃ dissolves in HCl","HNO₃ is needed as catalyst","To lower pH below 1 always"],correctIndex:0,explanation:"Acidified HNO₃ destroys CO₃²⁻/SO₃²⁻ which also give white Ag ppts; HCl or H₂SO₄ would add Cl⁻ or SO₄²⁻."},
+    {id:"chem-T10-309",question:"A gas decolourises moist litmus then bleaches it white. The gas is:",options:["CO₂","HCl","Cl₂","SO₂"],correctIndex:2,explanation:"Cl₂ first turns litmus red (acidic), then bleaches it due to chlorine's oxidising/bleaching action."},
+    {id:"chem-T10-310",question:"A white precipitate forms with dilute HCl and is insoluble in excess HCl. The anion present is most likely:",options:["Cl⁻","CO₃²⁻ (CO₂ would evolve — white ppt is not characteristic)","SO₄²⁻ (BaCl₂ test needed)","Pb²⁺ cation forming PbCl₂ white ppt — actually Pb²⁺ IS the cation here"],correctIndex:3,explanation:"PbCl₂ is a white precipitate with HCl that is poorly soluble. (Pb²⁺ + 2Cl⁻ → PbCl₂↓)"},
+    {id:"chem-T10-311",question:"To test for the ammonium ion NH₄⁺, add sodium hydroxide NaOH solution and gently heat. A positive result is:",options:["White precipitate forming","Ammonia gas produced (turns damp red litmus blue; pungent smell)","Blue precipitate","Brown precipitate"],correctIndex:1,explanation:"NH₄⁺ + OH⁻ → NH₃(g) + H₂O. Ammonia gas confirmed by litmus/smell."},
+    {id:"chem-T10-312",question:"To confirm sulfate ion SO₄²⁻ is present, the test reagent sequence is:",options:["Add AgNO₃ — white ppt confirms","Add acidified BaCl₂ (dilute HCl + BaCl₂) — white ppt of BaSO₄ insoluble in HCl confirms","Add NaOH — blue ppt","Add universal indicator"],correctIndex:1,explanation:"Ba²⁺ + SO₄²⁻ → BaSO₄(s) white precipitate. Acidification (HCl) ensures CO₃²⁻/SO₃²⁻ don't give false white ppts."}
     ],
     trueFalse: [
     {statement:"AgBr is more soluble than AgCl in water.",correct:true,explain:"Ksp larger."},

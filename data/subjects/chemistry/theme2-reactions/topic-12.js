@@ -19,7 +19,25 @@
                 "Electroplating: object at cathode."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Preferential Discharge",
+        "points": [
+            "At **cathode**: less reactive cation discharged first (e.g. Cu²⁺ before H⁺ before Na⁺ in aqueous).",
+            "At **anode**: high [Cl⁻] → **Cl₂** preferred over O₂; dilute salt → **O₂** preferred.",
+            "Inert electrodes (Pt, graphite): don't react with electrolyte or products.",
+            "Active electrodes (Cu anode in CuSO₄): electrode dissolves (electrorefining)."
+        ]
+    },
+    {
+        "title": "Industrial Electrolysis",
+        "points": [
+            "**Al extraction**: molten Al₂O₃ dissolved in cryolite (lowers mp ~1000°C → ~950°C). Cathode: Al; anode: O₂ (burns C anode).",
+            "**Chlor-alkali** (brine NaCl(aq)): anode → **Cl₂**; cathode → **H₂**; bulk solution → **NaOH(aq)**.",
+            "**Electroplating**: object = cathode in metal ion solution. Anode = plating metal (dissolves to replenish ions).",
+            "**Electrorefining Cu**: impure Cu anode dissolves; pure Cu deposits on cathode."
+        ]
+    }],
     infographics: [
       { image: "data/subjects/chemistry/images/reactions-07-electrochemistry.jpg", caption: "Electrolysis and Daniel cell" },
       { svg: "<svg viewBox=\"0 0 280 120\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"280\" height=\"120\" fill=\"#1c222d\"/><rect x=\"50\" y=\"35\" width=\"180\" height=\"55\" fill=\"#2a3344\" stroke=\"#5eead4\"/><rect x=\"60\" y=\"45\" width=\"35\" height=\"35\" fill=\"#6366f1\"/><rect x=\"185\" y=\"45\" width=\"35\" height=\"35\" fill=\"#f87171\"/><text x=\"58\" y=\"100\" fill=\"#8b95a8\" font-size=\"9\">cathode −</text><text x=\"175\" y=\"100\" fill=\"#8b95a8\" font-size=\"9\">anode +</text><text x=\"70\" y=\"28\" fill=\"#5eead4\" font-size=\"10\">Electrolysis · DC supply</text></svg>", caption: "Electrolysis cell (schematic)" }
@@ -81,7 +99,12 @@
             "front": "Ion migration cathode?",
             "back": "Positive ions reduced."
         }
-    ],
+    ,
+    { "front": "Half-equation at cathode: Cu²⁺?", "back": "$\\text{Cu}^{2+} + 2e^- \\rightarrow \\text{Cu}(s)$ (reduction)." },
+    { "front": "Half-equation at anode: 2Cl⁻?", "back": "$2\\text{Cl}^- \\rightarrow \\text{Cl}_2 + 2e^-$ (oxidation)." },
+    { "front": "Electroplating: object is which electrode?", "back": "**Cathode** — metal ions are *reduced* (deposited) onto the object." },
+    { "front": "Chlor-alkali: 3 products?", "back": "**Cl₂** (anode), **H₂** (cathode), **NaOH(aq)** in solution." },
+    { "front": "Why cryolite with Al₂O₃?", "back": "Dissolves Al₂O₃ and **lowers melting point** of the mixture → less energy, cheaper." }],
     quiz: [
     {question:"Cathode in electrolysis:",options:["Positive","Negative","No charge","AC"],correctIndex:1,explanation:"Cations go there."},
     {question:"Molten PbBr₂ anode:",options:["Pb","Br₂","H₂","O₂"],correctIndex:1,explanation:"Halide oxidised."},
@@ -127,7 +150,15 @@
     {id:"chem-T12-206",question:"In a voltaic cell, electrons flow in the external wire from:",options:["Cathode to anode","Anode to cathode","Salt bridge to air","Positive cathode to positive anode"],correctIndex:1,explanation:"Oxidation at anode releases electrons."},
     {id:"chem-T12-207",question:"Electrolysis of concentrated NaCl(aq) with inert electrodes often produces Cl₂ at the anode because:",options:["OH⁻ is never oxidised","High [Cl⁻] favours chloride discharge over oxygen evolution","Na metal always forms","Water never oxidises"],correctIndex:1,explanation:"Preferential discharge order depends on concentration."},
     {id:"chem-T12-208",question:"Sacrificial zinc protects steel because Zn:",options:["Is less reactive than Fe","Is more reactive and preferentially oxidises","Insulates the steel","Catalyses rust"],correctIndex:1,explanation:"Zn corrodes instead of Fe."},
-    {id:"chem-T12-209",question:"Pure water electrolyses slowly without added ions mainly because:",options:["Water has no dipole","Very low ion concentration","Electrons swim freely","O₂ blocks current"],correctIndex:1,explanation:"Low conductivity — need electrolyte."}
+    {id:"chem-T12-209",question:"Pure water electrolyses slowly without added ions mainly because:",options:["Water has no dipole","Very low ion concentration","Electrons swim freely","O₂ blocks current"],correctIndex:1,explanation:"Low conductivity — need electrolyte."},
+    {id:"chem-T12-301",question:"Electrolysis of CuSO₄(aq) with copper electrodes: the net effect over time is:",options:["Copper deposits on cathode only; anode is unchanged","Copper dissolves from the anode and plates onto the cathode — net copper transfer","Solution concentration rises indefinitely","H₂ and O₂ are the main products"],correctIndex:1,explanation:"Electrorefining: Cu → Cu²⁺ at anode; Cu²⁺ + 2e⁻ → Cu at cathode. [Cu²⁺] stays roughly constant."},
+    {id:"chem-T12-302",question:"To electroplate a steel spoon with silver, the spoon must be:",options:["The anode in a silver nitrate solution","The cathode in a silver nitrate solution","Either electrode — it doesn't matter","Outside the electrolysis cell"],correctIndex:1,explanation:"Ag⁺ + e⁻ → Ag on the cathode (the spoon)."},
+    {id:"chem-T12-303",question:"Electrolysis of acidified water produces H₂ and O₂. The volume ratio H₂ : O₂ is:",options:["1 : 2","2 : 1","1 : 1","4 : 1"],correctIndex:1,explanation:"2H₂O → 2H₂ + O₂ → 2 mol H₂ : 1 mol O₂ → volume ratio 2:1."},
+    {id:"chem-T12-304",question:"Aluminium cannot be extracted by carbon reduction of Al₂O₃ because:",options:["Al is below carbon in the reactivity series","Al is more reactive than carbon — carbon cannot reduce Al₂O₃ under practical conditions","Al₂O₃ has too low a melting point","Al is a noble metal"],correctIndex:1,explanation:"Very reactive metals need electrolysis; carbon reduction only works for metals below Al in the series."},
+    {id:"chem-T12-305",question:"In the chlor-alkali process (brine electrolysis), the THREE products formed are:",options:["Na, Cl₂, H₂","Cl₂, H₂, and NaOH solution","Na, O₂, HCl","NaCl, H₂, O₂"],correctIndex:1,explanation:"At cathode: 2H₂O + 2e⁻ → H₂ + 2OH⁻ (NaOH); at anode: 2Cl⁻ → Cl₂."},
+    {id:"chem-T12-306",question:"In a hydrogen fuel cell, hydrogen is oxidised at the:",options:["Cathode","Anode","Salt bridge","Electrolyte only"],correctIndex:1,explanation:"Anode = oxidation: H₂ → 2H⁺ + 2e⁻. Electrons flow through external circuit."},
+    {id:"chem-T12-307",question:"Corrosion of iron is accelerated when two different metals are in electrical contact in an electrolyte (bimetallic corrosion) because:",options:["The less reactive metal becomes the anode and corrodes","The more reactive metal becomes the anode and preferentially oxidises","Both metals corrode at equal rate","No electrons transfer"],correctIndex:1,explanation:"More reactive metal = anode, corrodes sacrificially. This is also the principle of galvanic corrosion."},
+    {id:"chem-T12-308",question:"The quantity of product in electrolysis (Faraday's law concept) depends on:",options:["Only temperature","Charge passed (current × time) and the number of electrons per ion","Only the colour of the electrolyte","The shape of the electrode only"],correctIndex:1,explanation:"$Q = It$; moles of electrons = $Q/F$; links to moles of product via stoichiometry."}
     ],
     trueFalse: [
     {statement:"In electrolysis the cathode is where oxidation happens.",correct:false,explain:"Reduction at cathode."},

@@ -19,7 +19,18 @@
                 "CuSO₄·5H₂O blue crystals hydrated."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Solubility Rules (key)",
+        "points": [
+            "**ALL nitrates** are soluble.",
+            "**ALL sodium, potassium, ammonium salts** are soluble.",
+            "**Most chlorides** soluble — EXCEPT AgCl (white), PbCl₂ (white).",
+            "**Most sulfates** soluble — EXCEPT BaSO₄ (white), PbSO₄ (white), CaSO₄ (slightly soluble).",
+            "**Most carbonates** insoluble — EXCEPT Na₂CO₃, K₂CO₃, (NH₄)₂CO₃.",
+            "**Most hydroxides** insoluble — EXCEPT NaOH, KOH, Ba(OH)₂; Ca(OH)₂ slightly soluble."
+        ]
+    }],
     infographics: [ { image: "data/subjects/chemistry/images/reactions-03-salts.jpg", caption: "Salt preparation: acid + base and titration" } ],
     flashcards: [
         {
@@ -78,7 +89,11 @@
             "front": "Test for sulfate?",
             "back": "Ba²⁺ acidified white ppt."
         }
-    ],
+    ,
+    { "front": "Are all nitrates soluble?", "back": "**Yes — ALL nitrates are soluble** in water. Key rule!" },
+    { "front": "Insoluble chlorides?", "back": "**AgCl** (white ppt); **PbCl₂** (white ppt, soluble in hot water)." },
+    { "front": "Insoluble sulfates?", "back": "**BaSO₄** (white, insoluble in HCl — used as test); **PbSO₄** (white); CaSO₄ (slightly)." },
+    { "front": "How to prepare BaSO₄?", "back": "**Precipitation**: mix BaCl₂(aq) + Na₂SO₄(aq) → BaSO₄(s) ppt. Filter, wash, dry." }],
     quiz: [
     {question:"NaCl from HCl+NaOH:",options:["Excess CuO","Titration","Burn Na","AgCl only"],correctIndex:1,explanation:"Both soluble."},
     {question:"AgCl from:",options:["Na+Cl heat","AgNO₃+NaCl aq","Ag+Cl₂ gas","Only solid"],correctIndex:1,explanation:"Precipitation."},
@@ -125,7 +140,19 @@
     {id:"chem-T8-206",question:"A solution of Na₂CO₃ is slightly basic because:",options:["Na⁺ is acidic","CO₃²⁻ hydrolyses to produce OH⁻","Water has no role","Na₂CO₃ is a strong acid"],correctIndex:1,explanation:"Carbonate is basic in water."},
     {id:"chem-T8-207",question:"When preparing a soluble salt from an acid and an insoluble base, excess base is used so that:",options:["The acid is in excess","No acid remains in the filtrate after filtration","The base dissolves completely","The salt is always insoluble"],correctIndex:1,explanation:"Filter off excess solid base."},
     {id:"chem-T8-208",question:"Which ion with NaOH(aq) gives a green precipitate typical of Fe²⁺?",options:["Fe³⁺","Fe²⁺","Cu²⁺","Na⁺"],correctIndex:1,explanation:"Fe(OH)₂ is green (may oxidise on standing)."},
-    {id:"chem-T8-209",question:"Deliquescent salts (e.g. CaCl₂) are used as drying agents because they:",options:["Never absorb water","Absorb water from air to form a solution","Are always gases","Only work in acidic pH"],correctIndex:1,explanation:"Strong affinity for water."}
+    {id:"chem-T8-209",question:"Deliquescent salts (e.g. CaCl₂) are used as drying agents because they:",options:["Never absorb water","Absorb water from air to form a solution","Are always gases","Only work in acidic pH"],correctIndex:1,explanation:"Strong affinity for water."},
+    {id:"chem-T8-301",question:"To prepare magnesium sulfate (MgSO₄) in the lab, a student adds excess magnesium oxide to dilute H₂SO₄. Why is excess MgO used?",options:["To speed up the reaction only","To ensure all the acid reacts so the final solution contains only the salt","To make the solution more acidic","To produce more H₂ gas"],correctIndex:1,explanation:"Excess insoluble base consumes all the acid; excess is filtered off leaving pure salt solution."},
+    {id:"chem-T8-302",question:"Which of the following salts can only be made by a precipitation reaction (not acid + metal/base/carbonate)?",options:["MgSO₄","NaCl from HCl + NaOH","BaSO₄","ZnCl₂"],correctIndex:2,explanation:"BaSO₄ is insoluble — it cannot be made by titration and is obtained by mixing Ba²⁺ and SO₄²⁻ solutions."},
+    {id:"chem-T8-303",question:"In preparing copper(II) sulfate by adding CuO to H₂SO₄, after filtering the excess CuO, the next step to obtain crystals is:",options:["Add more acid","Evaporate the filtrate until saturated then cool","Heat to full dryness immediately","Add NaOH"],correctIndex:1,explanation:"Evaporate to crystallisation point then cool — avoids decomposition of the salt."},
+    {id:"chem-T8-304",question:"Which of the following is a correct solubility rule?",options:["All carbonates are soluble","All sulfates are insoluble","All nitrates are soluble","All chlorides are insoluble"],correctIndex:2,explanation:"All common nitrates (including Pb(NO₃)₂ and AgNO₃) are soluble in water."},
+    {id:"chem-T8-305",question:"When Na₂CO₃(aq) is mixed with CaCl₂(aq), a white precipitate forms. This is an example of:",options:["Thermal decomposition","A displacement reaction","A precipitation reaction forming insoluble CaCO₃","Electrolysis"],correctIndex:2,explanation:"Ca²⁺(aq) + CO₃²⁻(aq) → CaCO₃(s) — double decomposition gives an insoluble salt."},
+    {id:"chem-T8-306",question:"To obtain pure, dry crystals of CuSO₄ from excess CuO + H₂SO₄, which step comes AFTER filtration?",options:["Add more acid","Evaporate filtrate then cool to crystallise","Electrolyse","Add NaOH"],correctIndex:1,explanation:"Heat solution to concentrate → cool → crystals form → filter and dry."},
+    {id:"chem-T8-307",question:"In the preparation of BaSO₄ by mixing BaCl₂(aq) + Na₂SO₄(aq), the method is precipitation because:",options:["Both reactants are soluble but the product is insoluble","Heat is required","Only acids work","BaSO₄ is very soluble"],correctIndex:0,explanation:"Mixing two soluble salts produces an insoluble precipitate — precipitation route."},
+    {id:"chem-T8-308",question:"Washing a precipitate on filter paper with cold distilled water removes:",options:["The desired precipitate","Soluble impurities (from the original solution) that cling to the solid","Colour only","The filter paper itself"],correctIndex:1,explanation:"Soluble by-products are washed away; the precipitate stays."},
+    {id:"chem-T8-309",question:"To make sodium chloride NaCl by titration, the correct method is:",options:["Add excess NaOH to HCl and evaporate","Use an indicator — find exact volume of acid to neutralise alkali, then repeat without indicator and evaporate","Electrolyse brine","Dissolve Na in HCl"],correctIndex:1,explanation:"Titration gives the exact volume; omit indicator for the final pure product, then evaporate."},
+    {id:"chem-T8-310",question:"Which salt is insoluble in water?",options:["Sodium nitrate NaNO₃","Potassium chloride KCl","Barium sulfate BaSO₄","Ammonium sulfate (NH₄)₂SO₄"],correctIndex:2,explanation:"BaSO₄ is insoluble; most nitrates and potassium/sodium salts are soluble."},
+    {id:"chem-T8-311",question:"Lead(II) chloride PbCl₂ is insoluble. To prepare it, a student mixes:",options:["Pb(NO₃)₂(aq) + NaCl(aq) → PbCl₂(s) precipitate by precipitation","Pb metal + HCl — impractical for pure product","Dissolving PbCl₂ in water directly","Electrolysing PbSO₄"],correctIndex:0,explanation:"Precipitation: mix solutions of Pb²⁺ and Cl⁻ salts. PbCl₂ is insoluble → forms precipitate. Filter, wash, dry."},
+    {id:"chem-T8-312",question:"Which statement about the solubility of salts is correct?",options:["All potassium salts are insoluble","All nitrate salts are soluble in water","All sodium salts are insoluble","All carbonate salts are soluble"],correctIndex:1,explanation:"Key rule: ALL nitrates are soluble. Most Group 1 (Na, K) salts are soluble. Most carbonates (except Na, K, NH₄) are insoluble."}
     ],
     trueFalse: [
     {statement:"All nitrates are soluble.",correct:true,explain:"General rule."},

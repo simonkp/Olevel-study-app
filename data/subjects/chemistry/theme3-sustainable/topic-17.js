@@ -34,7 +34,17 @@
                 "**Cracking** breaks long alkanes to shorter alkanes + alkenes (fuels + chemical feedstock)."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Functional Groups & Key Tests",
+        "points": [
+            "**Alkene** (C=C): decolourises **bromine water** (orange → colourless).",
+            "**Alcohol** (–OH): burns; acidified **K₂Cr₂O₇** (orange → green) on oxidation.",
+            "**Carboxylic acid** (–COOH): fizzes with Na₂CO₃ → CO₂; weak acid (higher pH than HCl at same conc).",
+            "**Ester** (–COO–): fruity smell; acid hydrolysis → carboxylic acid + alcohol.",
+            "Fermentation: $C_6H_{12}O_6 \\xrightarrow{\\text{yeast}} 2C_2H_5OH + 2CO_2$ (warm, anaerobic)."
+        ]
+    }],
     infographics: [
       { image: "data/subjects/chemistry/images/sustainable-01-organic.jpg", caption: "Organic families + key tests (alkene bromine water, oxidation, esterification)" },
       { svg: "<svg viewBox=\"0 0 320 90\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"320\" height=\"90\" fill=\"#1c222d\"/><text x=\"8\" y=\"22\" fill=\"#a78bfa\" font-size=\"11\">Alkane C–C single</text><text x=\"8\" y=\"42\" fill=\"#fb923c\" font-size=\"11\">Alkene C=C · decolourises Br₂(aq)</text><text x=\"8\" y=\"62\" fill=\"#5eead4\" font-size=\"11\">Alcohol –OH · Acid –COOH · Ester + H₂O</text></svg>", caption: "Organic families (revision)" }
@@ -96,7 +106,13 @@
             "front": "Natural gas main alkane?",
             "back": "Methane."
         }
-    ],
+    ,
+    { "front": "General formula alkane?", "back": "$C_nH_{2n+2}$ — **saturated** (single bonds only)." },
+    { "front": "General formula alkene?", "back": "$C_nH_{2n}$ — **unsaturated** (contains C=C)." },
+    { "front": "Alcohol → acid oxidation agent?", "back": "**Acidified K₂Cr₂O₇** (orange → green) or acidified KMnO₄ (purple → colourless)." },
+    { "front": "Fermentation equation?", "back": "$C_6H_{12}O_6 \\xrightarrow{\\text{yeast}} 2C_2H_5OH + 2CO_2$. Conditions: warm (~35°C), anaerobic (no O₂)." },
+    { "front": "Esterification reagents?", "back": "Carboxylic acid + alcohol + **conc H₂SO₄** (catalyst). Product: ester + water." },
+    { "front": "Why cracking of long alkanes?", "back": "Demand > supply for short-chain fuels. Cracking breaks C–C bonds to produce **shorter alkanes + alkenes** (also feedstock)." }],
     quiz: [
     {question:"Which decolourises bromine water:",options:["Ethane","Ethene","Methane","Ethanoic acid"],correctIndex:1,explanation:"Addition to C=C."},
     {question:"General formula alkane:",options:["CₙH₂ₙ","CₙH₂ₙ₊₂","CₙH₂ₙ₋₂","CₙHₙ"],correctIndex:1,explanation:"Saturated chain."},
@@ -142,7 +158,17 @@
     {id:"chem-T17-206",question:"A student tests an unknown with sodium carbonate: vigorous bubbling. This supports:",options:["Presence of an alcohol","Presence of a carboxylic acid (or strong acid)","Presence of an alkene","Presence of an ester only"],correctIndex:1,explanation:"Acid + carbonate → CO₂."},
     {id:"chem-T17-207",question:"Why does ethanoic acid have a lower electrical conductivity than HCl at the same concentration?",options:["Ethanoic acid is a strong acid","Ethanoic acid is weak — fewer ions per dm³","HCl has no ions","Ethanoic acid is a gas"],correctIndex:1,explanation:"Partial ionisation."},
     {id:"chem-T17-208",question:"The general formula for a non-cyclic alkane is:",options:["CₙH₂ₙ","CₙH₂ₙ₊₂","CₙH₂ₙ₋₂","CₙHₙO₂"],correctIndex:1,explanation:"Saturated acyclic alkanes."},
-    {id:"chem-T17-209",question:"Methylpropane and butane both have formula C₄H₁₀. Their relationship is:",options:["Same empirical formula only","Structural isomers","Cis–trans isomers","Allotropes"],correctIndex:1,explanation:"Different connectivity — structural isomerism."}
+    {id:"chem-T17-209",question:"Methylpropane and butane both have formula C₄H₁₀. Their relationship is:",options:["Same empirical formula only","Structural isomers","Cis–trans isomers","Allotropes"],correctIndex:1,explanation:"Different connectivity — structural isomerism."},
+    {id:"chem-T17-301",question:"Crude oil is separated into fractions using fractional distillation because the fractions have:",options:["Different densities only","Different boiling points — shorter hydrocarbon chains are more volatile","Different colours only","Different ionic charges"],correctIndex:1,explanation:"Shorter/lighter chains have weaker London forces → lower bp → come off the column first."},
+    {id:"chem-T17-302",question:"Short-chain alkanes are in high demand as petrol while long-chain fractions are less so. Refineries crack long chains because:",options:["Long chains have more colour","Cracking produces shorter alkanes + alkenes to match fuel demand and chemical feedstocks","Cracking makes crude oil heavier","Only to remove sulfur"],correctIndex:1,explanation:"Demand > supply for shorter fractions; cracking matches supply to demand."},
+    {id:"chem-T17-303",question:"Propane (C₃H₈) is a saturated hydrocarbon. 'Saturated' means:",options:["It contains only single C–C and C–H bonds (no C=C or C≡C)","It is dissolved in water","It is fully coloured","It cannot burn"],correctIndex:0,explanation:"Saturated = only sigma bonds; cannot undergo addition reactions."},
+    {id:"chem-T17-304",question:"Alkenes burn with a sooty/smoky flame compared with alkanes of similar size because:",options:["Alkenes have lower carbon:hydrogen ratio","Alkenes have higher carbon:hydrogen ratio → less complete combustion → more carbon/soot","Alkenes are ionic","Alkenes do not burn"],correctIndex:1,explanation:"CₙH₂ₙ vs CₙH₂ₙ₊₂: alkenes are relatively carbon-rich → sootier combustion."},
+    {id:"chem-T17-305",question:"Ethene reacts with bromine: CH₂=CH₂ + Br₂ → CH₂BrCH₂Br. This reaction is:",options:["Substitution","Electrophilic addition across the C=C double bond","Combustion","Esterification"],correctIndex:1,explanation:"Atoms add across the C=C (no atoms removed). The π bond breaks to form two new σ bonds."},
+    {id:"chem-T17-306",question:"Bioethanol is claimed to be more sustainable than petrol because:",options:["It produces more energy per litre","It is produced from renewable crops — CO₂ released on combustion is partially offset by CO₂ absorbed during plant growth","It produces no CO₂","It contains no hydrogen"],correctIndex:1,explanation:"Short-cycle carbon: plants fix CO₂; burning releases it back. Net impact less than fossil fuel (though land use matters)."},
+    {id:"chem-T17-307",question:"Fermentation of glucose: C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂. The conditions required are:",options:["High temperature (300°C) and Pt catalyst","Yeast (contains enzymes/zymase), warm temperature (~30–35°C), anaerobic (no O₂)","Concentrated H₂SO₄","Only UV light"],correctIndex:1,explanation:"Yeast enzymes ferment glucose at body-temperature conditions without oxygen."},
+    {id:"chem-T17-308",question:"Ethanoic acid reacts with sodium carbonate to produce sodium ethanoate, water, and:",options:["Cl₂","H₂","CO₂ gas (effervescence)","O₂"],correctIndex:2,explanation:"Carboxylic acid + carbonate → salt + H₂O + CO₂. Test for –COOH group."},
+    {id:"chem-T17-309",question:"The ester ethyl ethanoate is formed from:",options:["Ethane + acetic acid","Ethanol + ethanoic acid, with conc H₂SO₄ as catalyst","Ethene + ethanol","Ethanol + water"],correctIndex:1,explanation:"Esterification: alcohol + carboxylic acid ⇌ ester + water."},
+    {id:"chem-T17-310",question:"Ethene (from cracking) can be hydrated industrially to form ethanol: $\\text{CH}_2{=}\\text{CH}_2 + \\text{H}_2\\text{O} \\to \\text{C}_2\\text{H}_5\\text{OH}$. This is preferred over fermentation for large-scale production because:",options:["It uses food crops","Continuous process, higher purity, lower cost at scale — though uses non-renewable ethene feedstock","It requires no energy","Fermentation is impossible"],correctIndex:1,explanation:"Industrial hydration is a continuous high-yield process, but relies on fossil-fuel derived ethene."}
     ],
     trueFalse: [
     {statement:"All alkenes have the same empirical formula CH₂.",correct:true,explain:"CₙH₂ₙ → CH₂."},

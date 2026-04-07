@@ -37,7 +37,18 @@
                 "**Dry gases** — pass through a suitable drying agent (e.g. anhydrous CaCl₂) if the gas is compatible."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Choosing the Right Technique",
+        "points": [
+            "**Filtration** — insoluble solid + liquid mixture.",
+            "**Crystallisation** — dissolved solid from solution (evaporate → cool → filter).",
+            "**Simple distillation** — solvent from dissolved solute (large bp difference).",
+            "**Fractional distillation** — two miscible liquids with close boiling points (e.g. crude oil).",
+            "**Chromatography** — identify/separate dissolved substances by $R_f$ value.",
+            "**Solvent extraction** — substance more soluble in organic solvent than water."
+        ]
+    }],
     infographics: [ { image: "data/subjects/chemistry/images/matter-02-purification.jpg", caption: "Distillation and chromatography" } ],
     flashcards: [
         {
@@ -96,7 +107,11 @@
             "front": "Why anti-bumping granules?",
             "back": "Even boiling in distillation."
         }
-    ],
+    ,
+    { "front": "When to use fractional not simple distillation?", "back": "When two **miscible liquids have close boiling points** (e.g. ethanol/water, crude oil fractions)." },
+    { "front": "Crystallisation steps?", "back": "1. Dissolve. 2. Heat to concentrate. 3. Cool slowly. 4. Filter crystals. 5. Dry (oven or desiccator)." },
+    { "front": "If $R_f$ of two spots are the same as the reference?", "back": "The substances are likely **the same compound** (same interaction with solvent/stationary phase)." },
+    { "front": "Why Rf ≤ 1 always?", "back": "Substance can never travel *further* than the solvent front that carries it." }],
     quiz: [
     {question:"Rf is calculated as:",options:["Front ÷ spot","Spot ÷ front","Mass ÷ volume","Time ÷ distance"],correctIndex:1,explanation:"Spot over solvent front."},
     {question:"Two liquids bp 82°C and 78°C best separated by:",options:["Simple distillation only","Fractional distillation","Filtration","Magnet"],correctIndex:1,explanation:"Close bp need fractionating column."},
@@ -123,15 +138,15 @@
     {question:"Recrystallisation purifies by:",options:["Different solubility of impurities","Burning impurities","Magnet","Sound"],correctIndex:0,explanation:"Impurity stays in solution or filters out."},
     {question:"Gas chromatography mobile phase is:",options:["Paper","Inert gas","Only water","Mercury"],correctIndex:1,explanation:"Carrier gas."},
     {question:"Thin layer chromatography stationary phase:",options:["Glass rod","Silica on plate","Only filter paper","Ice"],correctIndex:1,explanation:"TLC plate."},
-    {question:"Azeotrope (e.g. some ethanol-water) means:",options:["Easy 100% separation by one distillation","Constant boiling mixture — limit of simple separation","No liquid","Only solid"],correctIndex:1,explanation:"Fractional still may be needed."},
+    {question:"A thermometer bulb in distillation should be placed:",options:["Fully inside liquid","At the still head near side-arm to read vapour temperature","Outside apparatus","Inside condenser water"],correctIndex:1,explanation:"It should measure vapour temperature entering the condenser."},
     {question:"Two spots have the same Rf in the same solvent. What follows?",options:["They must be the same compound","They could be the same compound — confirm with another solvent","Rf identifies molar mass exactly","Rf is independent of temperature"],correctIndex:1,explanation:"Rf is suggestive; co-elution happens — a second solvent helps."},
     {question:"Why keep the chromatography tank lid on during a run?",options:["To make the solvent evaporate faster","To keep vapour-saturated air and a stable solvent front","To heat the paper","To stop light reactions only"],correctIndex:1,explanation:"Saturated vapour improves reproducibility and reduces edge effects."},
     {question:"In TLC, silica is often slightly acidic. Weak bases may:",options:["Always decompose","Show tailing if protonated strongly","Never move","Have Rf = 1 always"],correctIndex:1,explanation:"Strong adsorption/tailing can occur — technique and solvent matter."},
     {question:"Simple distillation is least suitable when:",options:["Separating a volatile liquid from a dissolved solid","Boiling points of two liquids are very close","One component is non-volatile","You need only rough separation"],correctIndex:1,explanation:"Close-boiling mixtures need a fractionating column."},
     {question:"Which error is reduced most by using a calibrated thermometer?",options:["Parallax when reading the meniscus","Systematic temperature offset","Random scatter between readings","Convection in the flask"],correctIndex:1,explanation:"Calibration fixes consistent reading bias."},
-    {question:"Partition coefficient K (organic/aqueous) increases for a solute when:",options:["It becomes more ionic in the organic layer","It favours the stationary phase more","It prefers the organic phase more","Temperature always lowers K"],correctIndex:2,explanation:"Higher K means higher concentration ratio in the organic phase (definition-dependent, but ‘more soluble in organic’ raises K in typical extractions)."},
     {question:"After hot filtration, a solution sometimes deposits crystals as it cools because:",options:["Water evaporates completely first","Solubility usually decreases on cooling","Crystals need light","Filtration increases solubility"],correctIndex:1,explanation:"Cooling drives supersaturated solutions toward equilibrium."},
-    {question:"Steam distillation is useful for:",options:["Only ionic solids","Heat-sensitive organics with appreciable vapour pressure","Separating two ionic salts","Drying gases"],correctIndex:1,explanation:"Steam carries volatile components at lower effective temperatures."},
+    {question:"To obtain pure water from seawater in school lab, use:",options:["Filtration only","Simple distillation","Chromatography","Magnetic separation"],correctIndex:1,explanation:"Water vaporises and condenses while dissolved salts remain."},
+    {question:"Why should the chromatography baseline be above the solvent level?",options:["To keep paper dry forever","So the sample spots do not dissolve directly into the solvent pool","To increase Rf values","To prevent evaporation"],correctIndex:1,explanation:"Spots must travel with solvent front, not dissolve at start."},
     {question:"If two components have identical boiling points, fractional distillation:",options:["Always gives pure components in one cut","Cannot separate by boiling point alone","Always forms an azeotrope","Requires filtration"],correctIndex:1,explanation:"No bp difference means no vapour enrichment by distillation."},
     {question:"Green solvent choice in chromatography might prioritise:",options:["Maximum toxicity","Low toxicity and lower environmental impact","Only the brightest colour","Highest boiling point always"],correctIndex:1,explanation:"Safety and waste matter in practical chemistry."},
     {id:"chem-T2-201",question:"Collecting ammonia gas by displacement of water is usually unsuitable mainly because:",options:["Ammonia is denser than air","Ammonia is highly soluble in water","Ammonia does not react","Water freezes"],correctIndex:1,explanation:"Very soluble gases dissolve extensively in the water collection system."},
@@ -142,7 +157,17 @@
     {id:"chem-T2-206",question:"Percentage yield compares:",options:["Moles of catalyst to product","Actual mass obtained to theoretical maximum from stoichiometry","Volume of solvent to mass","Rf before and after"],correctIndex:1,explanation:"Yield = (actual / theoretical) × 100%."},
     {id:"chem-T2-207",question:"Percentage purity of a sample compares:",options:["Mass of pure desired substance to total sample mass","Volume of solvent to solute","Time to temperature","Rf to 1"],correctIndex:0,explanation:"Purity is about mass fraction of the desired component."},
     {id:"chem-T2-208",question:"Concentrated sulfuric acid is a poor drying agent for ammonia gas because:",options:["Ammonia is not basic","They react to form a salt","Ammonia is too light","Sulfuric acid is not hygroscopic"],correctIndex:1,explanation:"Acid-base neutralisation consumes the gas rather than simply drying it."},
-    {id:"chem-T2-209",question:"In a separating funnel, the lower layer is:",options:["Always water","The denser liquid","Always organic","Always aqueous"],correctIndex:1,explanation:"Density determines which layer is lower."}
+    {id:"chem-T2-209",question:"In a separating funnel, the lower layer is:",options:["Always water","The denser liquid","Always organic","Always aqueous"],correctIndex:1,explanation:"Density determines which layer is lower."},
+    {id:"chem-T2-301",question:"Which method is used to separate insoluble sand from water?",options:["Distillation","Filtration","Chromatography","Cracking"],correctIndex:1,explanation:"Filtration separates insoluble solid from liquid."},
+    {id:"chem-T2-302",question:"Fractional distillation is best for separating:",options:["Insoluble solid from liquid","Two miscible liquids with different boiling points","A coloured dye from paper","Magnetic and non-magnetic solids"],correctIndex:1,explanation:"Fractionating column improves separation of liquids by boiling point."},
+    {id:"chem-T2-303",question:"A chromatogram showing one single spot for a sample most likely means:",options:["The sample is a mixture","The sample may be pure under these conditions","The solvent was wrong","Rf must be 1"],correctIndex:1,explanation:"One spot suggests one component, though confirmation with another solvent is good practice."},
+    {id:"chem-T2-304",question:"In paper chromatography, Rf is:",options:["distance solvent front / distance spot","distance spot / distance solvent front","mass of solute / volume of solvent","time / distance"],correctIndex:1,explanation:"Rf uses spot distance divided by solvent front distance from baseline."},
+    {id:"chem-T2-305",question:"Crystallisation is commonly used to:",options:["Separate two gases","Obtain a pure soluble solid from solution","Separate magnetic solids","Measure concentration directly"],correctIndex:1,explanation:"A hot saturated solution on cooling gives crystals."},
+    {id:"chem-T2-306",question:"To separate chilli flakes (insoluble solid) from table salt (soluble), the best method is:",options:["Distillation","Filtration — flakes stay on filter paper; salt solution passes through","Chromatography","Evaporation only"],correctIndex:1,explanation:"Insoluble + soluble mixture → dissolve in water, then filter. The solid is trapped; the salt is in the filtrate."},
+    {id:"chem-T2-307",question:"Simple distillation is used instead of fractional distillation when:",options:["The two liquids have very close boiling points","You want to separate a dissolved solid from its solvent","The liquids must be separated into many fractions","You need Rf values"],correctIndex:1,explanation:"Simple distillation works well for solvent from solute. Fractional distillation is needed for liquids with close boiling points."},
+    {id:"chem-T2-308",question:"In paper chromatography, which substance is identified as pure (single component)?",options:["One that produces multiple spots","One that produces exactly one spot at a unique Rf value","One that stays on the start line","One that reaches the solvent front first"],correctIndex:1,explanation:"A pure substance gives one spot. Multiple spots indicate a mixture."},
+    {id:"chem-T2-309",question:"Capsaicin (chilli compound) dissolves better in oil than in water. To extract it from chilli, a student could use:",options:["Filtration with water","Solvent extraction with a non-polar/organic solvent","Fractional distillation","Electrolysis"],correctIndex:1,explanation:"Like dissolves like: capsaicin (non-polar) dissolves into non-polar solvents (oil) preferentially. Solvent extraction applies."},
+    {id:"chem-T2-310",question:"To obtain pure salt crystals from a salt solution, which sequence is correct?",options:["Filter → distil → cool","Evaporate solution to concentrate → allow to cool → filter off crystals → dry","Electrolyse → heat → filter","Chromatograph → distil"],correctIndex:1,explanation:"Crystallisation: heat to evaporate water (not to dryness to avoid decomposition) → cool → crystals form → filter and dry."}
     ],
     trueFalse: [
     {statement:"Rf can be greater than 1.",correct:false,explain:"By definition ratio ≤ 1."},

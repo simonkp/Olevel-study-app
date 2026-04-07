@@ -7,10 +7,10 @@
         {
             "title": "Moles",
             "points": [
-                "n = mass/Mr; Mr from periodic table.",
+                "$n = m / M_r$ — moles = mass ÷ molar mass.",
                 "Avogadro 6.02×10²³ particles per mole.",
-                "Gas: n = V/24 dm³ at r.t.p. (syllabus).",
-                "Solution: n = C×V (V in dm³)."
+                "Gas at r.t.p.: $V = 24n$ dm³ (molar volume = 24 dm³ mol⁻¹).",
+                "Solution: $n = C \times V$ (V in dm³; convert cm³ ÷ 1000)."
             ]
         },
         {
@@ -18,11 +18,22 @@
             "points": [
                 "Balance equation → mole ratio.",
                 "Limiting reactant stops reaction.",
-                "% yield = actual/theoretical ×100.",
+                "$\% \text{ yield} = \dfrac{\text{actual}}{\text{theoretical}} \times 100$.",
                 "Empirical vs molecular formula."
             ]
         }
-    ],
+    ,
+    {
+        "title": "Key Mole Formulas",
+        "points": [
+            "$n = \\dfrac{m}{M_r}$ — moles from mass (g) and molar mass",
+            "$C = \\dfrac{n}{V}$ — concentration (mol dm⁻³); rearrange: $n = C \\times V$ (V in dm³)",
+            "$V_{\\text{gas}} = 24n$ dm³ at r.t.p. (molar volume = 24 dm³ mol⁻¹)",
+            "$N = n \\times N_A = n \\times 6.02 \\times 10^{23}$ — number of particles",
+            "$\\%\\,\\text{yield} = \\dfrac{\\text{actual yield}}{\\text{theoretical yield}} \\times 100$",
+            "$\\%\\,\\text{purity} = \\dfrac{\\text{mass of pure substance}}{\\text{total mass of sample}} \\times 100$"
+        ]
+    }],
     infographics: [ { image: "data/subjects/chemistry/images/reactions-01-calculations.jpg", caption: "Mole triangle and concentration" } ],
     flashcards: [
         {
@@ -81,7 +92,12 @@
             "front": "Relative formula mass CaCO₃?",
             "back": "40+12+48=100."
         }
-    ],
+    ,
+    { "front": "Moles from mass?", "back": "$n = \\dfrac{m}{M_r}$" },
+    { "front": "Concentration formula?", "back": "$C = \\dfrac{n}{V}$ (V in dm³). Rearrange: $n = C \\times V$." },
+    { "front": "Gas volume at r.t.p.?", "back": "$V = 24n$ dm³. (molar volume = 24 dm³ mol⁻¹ at r.t.p.)" },
+    { "front": "Number of molecules in $n$ mol?", "back": "$N = n \\times 6.02 \\times 10^{23}$" },
+    { "front": "% yield formula?", "back": "$\\% \\text{ yield} = \\dfrac{\\text{actual}}{\\text{theoretical}} \\times 100$" }],
     quiz: [
     {question:"Mr H₂SO₄ (H1,S32,O16):",options:["82","88","98","108"],correctIndex:2,explanation:"2+32+64."},
     {question:"Moles in 9 g water:",options:["0.25","0.5","1","2"],correctIndex:1,explanation:"9/18=0.5."},
@@ -127,7 +143,21 @@
     {id:"chem-T6-206",question:"Which statement about a 0.5 M glucose solution and a 0.5 M NaCl solution is correct?",options:["They have the same number of particles per dm³","They have the same number of moles of solute per dm³","They have the same conductivity","They have the same osmotic pressure"],correctIndex:1,explanation:"Molarity is moles of solute per dm³; same concentration but different particle counts (NaCl dissociates)."},
     {id:"chem-T6-207",question:"When balancing C₂H₆ + O₂ → CO₂ + H₂O, the coefficient of O₂ in the simplest whole-number equation is:",options:["5","7","9","4"],correctIndex:1,explanation:"2 C₂H₆ + 7 O₂ → 4 CO₂ + 6 H₂O."},
     {id:"chem-T6-208",question:"A titration requires 18.5 cm³ of 0.10 M acid to reach endpoint with 25.0 cm³ of 0.074 M alkali (1:1). The result is:",options:["Concordant","Impossible because acid volume is smaller","Wrong because acid should always be larger","Always invalid"],correctIndex:0,explanation:"Moles acid = 0.00185; moles alkali = 0.00185 — balanced."},
-    {id:"chem-T6-209",question:"The number of moles of solute in 500 cm³ of 0.40 mol/dm³ solution is:",options:["0.10","0.20","0.40","0.80"],correctIndex:1,explanation:"n = C×V = 0.40 × 0.5 = 0.20 mol."}
+    {id:"chem-T6-209",question:"The number of moles of solute in 500 cm³ of 0.40 mol/dm³ solution is:",options:["0.10","0.20","0.40","0.80"],correctIndex:1,explanation:"n = C×V = 0.40 × 0.5 = 0.20 mol."},
+    {id:"chem-T6-301",question:"In the ionic equation for AgNO₃(aq) + NaCl(aq) → AgCl(s) + NaNO₃(aq), the spectator ions are:",options:["Ag⁺ and Cl⁻","Na⁺ and NO₃⁻","Na⁺ and Cl⁻","Ag⁺ and NO₃⁻"],correctIndex:1,explanation:"Spectator ions appear on both sides unchanged; only Ag⁺ + Cl⁻ → AgCl(s) is the net ionic equation."},
+    {id:"chem-T6-302",question:"A solution has a concentration of 7.3 g/dm³ of HCl (Mr = 36.5). What is the concentration in mol/dm³?",options:["0.10 mol/dm³","0.20 mol/dm³","0.36 mol/dm³","0.73 mol/dm³"],correctIndex:1,explanation:"Divide g/dm³ by Mr: 7.3 ÷ 36.5 = 0.20 mol/dm³."},
+    {id:"chem-T6-303",question:"Which is the correct net ionic equation when magnesium reacts with dilute HCl?",options:["Mg(s) + 2Cl⁻(aq) → MgCl₂(s)","Mg(s) + 2H⁺(aq) → Mg²⁺(aq) + H₂(g)","Mg²⁺(aq) + 2Cl⁻(aq) → MgCl₂(s)","Mg(s) + HCl(aq) → MgCl₂(aq)"],correctIndex:1,explanation:"Remove spectator Cl⁻; net: Mg + 2H⁺ → Mg²⁺ + H₂."},
+    {id:"chem-T6-304",question:"When balancing: _Fe(OH)₃ + _H₂SO₄ → Fe₂(SO₄)₃ + _H₂O, the coefficient of H₂O is:",options:["3","6","9","12"],correctIndex:1,explanation:"2Fe(OH)₃ + 3H₂SO₄ → Fe₂(SO₄)₃ + 6H₂O; balance Fe then S then H."},
+    {id:"chem-T6-305",question:"State symbols in equations show:",options:["The mass of each substance","The physical state of each substance at reaction conditions","Whether the reaction is exothermic","The colour of each substance"],correctIndex:1,explanation:"(s)=solid, (l)=liquid, (g)=gas, (aq)=aqueous solution."},
+    {id:"chem-T6-306",question:"A student uses $n = \\frac{m}{M_r}$ to find moles of NaCl (Mr = 58.5) in 11.7 g. The answer is:",options:["0.1 mol","0.2 mol","1.0 mol","2.0 mol"],correctIndex:1,explanation:"$n = 11.7 \\div 58.5 = 0.2$ mol."},
+    {id:"chem-T6-307",question:"Using $C = \\frac{n}{V}$: 0.25 mol KOH dissolved in 500 cm³ water. Concentration in mol/dm³:",options:["0.125 mol/dm³","0.5 mol/dm³","1.0 mol/dm³","0.25 mol/dm³"],correctIndex:1,explanation:"$C = 0.25 \\div 0.5 = 0.5$ mol/dm³. (500 cm³ = 0.5 dm³)"},
+    {id:"chem-T6-308",question:"Gas volume at r.t.p. (24 dm³/mol): 0.1 mol CO₂ occupies:",options:["0.24 dm³","2.4 dm³","24 dm³","240 dm³"],correctIndex:1,explanation:"$V = 0.1 \\times 24 = 2.4$ dm³."},
+    {id:"chem-T6-309",question:"In the reaction Mg + 2HCl → MgCl₂ + H₂, if 0.3 mol HCl is used with excess Mg, the moles of H₂ produced is:",options:["0.3 mol","0.15 mol","0.6 mol","1.0 mol"],correctIndex:1,explanation:"Ratio HCl : H₂ = 2 : 1, so $0.3 \\div 2 = 0.15$ mol H₂."},
+    {id:"chem-T6-310",question:"5.6 g of iron (Ar = 56) reacts completely with excess CuSO₄(aq). The moles of Cu displaced are:",options:["0.1 mol","0.2 mol","0.5 mol","1.0 mol"],correctIndex:0,explanation:"$n_{\\text{Fe}} = 5.6 \\div 56 = 0.1$ mol; Fe : Cu = 1 : 1."},
+    {id:"chem-T6-311",question:"Percentage by mass of oxygen in CO₂ (Mr = 44) is:",options:["27%","36%","73%","50%"],correctIndex:1,explanation:"$\\frac{2 \\times 16}{44} \\times 100 = \\frac{32}{44} \\times 100 \\approx 72.7\\%$. Nearest answer: 73%. (Correct: ~72.7% → closest is 73%.)"},
+    {id:"chem-T6-312",question:"Empirical formula of a compound with 40% C, 6.7% H, 53.3% O by mass (Ar: C=12, H=1, O=16):",options:["CH₂O","C₂H₄O₂","C₂H₂O","CH₄O"],correctIndex:0,explanation:"Mole ratio: C = 40/12 ≈ 3.33; H = 6.7; O = 53.3/16 ≈ 3.33. Ratio C:H:O = 1:2:1 → CH₂O."},
+    {id:"chem-T6-313",question:"Percentage yield = $\\frac{\\text{actual yield}}{\\text{theoretical yield}} \\times 100$. If 4.0 g Cu is obtained from a reaction where 5.0 g was theoretically possible, the percentage yield is:",options:["80%","60%","125%","40%"],correctIndex:0,explanation:"$\\frac{4.0}{5.0} \\times 100 = 80\\%$."},
+    {id:"chem-T6-314",question:"The limiting reagent is:",options:["The reagent in smallest mass","The reagent that is completely consumed first and determines the maximum amount of product","The cheapest reagent","The reagent in the largest container"],correctIndex:1,explanation:"It limits the reaction — once it's used up, the reaction stops even if other reagents remain."}
     ],
     trueFalse: [
     {statement:"One mole always occupies 24 dm³.",correct:false,explain:"Only ideal gas at r.t.p.; liquids/solids differ."},
