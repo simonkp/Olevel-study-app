@@ -2712,6 +2712,42 @@
       );
     }
 
+    const passThreshold = state.challengeMode ? 80 : PASS_PCT;
+    const lockedTopics = manifest
+      .filter((m) => !isUnlocked(m.id))
+      .map((m) => {
+        const i = topicIndex(m.id);
+        const prev = i > 0 ? manifest[i - 1] : null;
+        const prevBest = prev ? Number(state.topicBest[prev.id] || 0) : 0;
+        return {
+          id: m.id,
+          title: m.title,
+          blockedByTopicId: prev ? prev.id : null,
+          blockedByTopicTitle: prev ? prev.title : "",
+          blockedByBest: prevBest,
+          needed: passThreshold,
+        };
+      });
+    const xpPausedTopics = manifest
+      .map((m) => {
+        const stats = touchTopicStats(m.id);
+        const until = Number(stats.xpLockUntil || 0);
+        if (!isCooldownActive(until)) return null;
+        return {
+          id: m.id,
+          title: m.title,
+          xpLockUntil: until,
+        };
+      })
+      .filter(Boolean);
+    const lockDiagnostics = {
+      unlockAll: !!state.unlockAll,
+      challengeMode: !!state.challengeMode,
+      passThreshold,
+      lockedTopics,
+      xpPausedTopics,
+    };
+
     return {
       generatedAt: new Date().toISOString(),
       subjectId: SUBJECT_ID,
@@ -2727,6 +2763,7 @@
       anomalyFlags,
       dailyChallenge: getDailyChallengeSummary(),
       syncSnapshot: buildSyncSnapshot(),
+      lockDiagnostics,
     };
   }
 
@@ -2850,6 +2887,29 @@
           .map((item) => `<li>${escapeHtml(item)}</li>`)
           .join("")}</ul>`
       : "<p class='hint'>No anomaly flags detected.</p>";
+    const lockInfo = report.lockDiagnostics || {};
+    const lockedTopicList = lockInfo.lockedTopics && lockInfo.lockedTopics.length
+      ? `<ul class="report-list">${lockInfo.lockedTopics
+          .map(
+            (row) =>
+              `<li>T${escapeHtml(row.id)} ${escapeHtml(row.title)} · blocked by T${escapeHtml(
+                row.blockedByTopicId || "-"
+              )} (${escapeHtml(row.blockedByTopicTitle || "n/a")}) best ${row.blockedByBest}% / need ${
+                row.needed
+              }%</li>`
+          )
+          .join("")}</ul>`
+      : "<p class='hint'>No chapter locks right now.</p>";
+    const xpPauseList = lockInfo.xpPausedTopics && lockInfo.xpPausedTopics.length
+      ? `<ul class="report-list">${lockInfo.xpPausedTopics
+          .map(
+            (row) =>
+              `<li>T${escapeHtml(row.id)} ${escapeHtml(row.title)} · XP paused until ${escapeHtml(
+                formatShortDate(row.xpLockUntil)
+              )}</li>`
+          )
+          .join("")}</ul>`
+      : "<p class='hint'>No XP-paused chapters right now.</p>";
 
     return `
       <div class="report-grid">
@@ -2889,6 +2949,16 @@
         <div class="report-card">
           <h3>Anomaly Flags</h3>
           ${anomalyList}
+        </div>
+        <div class="report-card">
+          <h3>Lock Diagnostics</h3>
+          <p class="hint">Unlock all: <strong>${lockInfo.unlockAll ? "ON" : "OFF"}</strong> · Challenge mode: <strong>${
+            lockInfo.challengeMode ? "ON" : "OFF"
+          }</strong> · Pass threshold: <strong>${lockInfo.passThreshold || PASS_PCT}%</strong></p>
+          <h4>Locked chapters</h4>
+          ${lockedTopicList}
+          <h4>XP-paused chapters</h4>
+          ${xpPauseList}
         </div>
       </div>`;
   }
@@ -2933,6 +3003,34 @@
       report.anomalyFlags.forEach((flag) => lines.push(`- ${flag}`));
     } else {
       lines.push("- none");
+    }
+    lines.push("", "Lock diagnostics:");
+    lines.push(`- unlockAll: ${report.lockDiagnostics && report.lockDiagnostics.unlockAll ? "on" : "off"}`);
+    lines.push(`- challengeMode: ${report.lockDiagnostics && report.lockDiagnostics.challengeMode ? "on" : "off"}`);
+    lines.push(
+      `- passThreshold: ${
+        (report.lockDiagnostics && report.lockDiagnostics.passThreshold) || PASS_PCT
+      }%`
+    );
+    const locked = (report.lockDiagnostics && report.lockDiagnostics.lockedTopics) || [];
+    if (locked.length) {
+      locked.forEach((row) => {
+        lines.push(
+          `- locked T${row.id} ${row.title}: blocked by T${row.blockedByTopicId} (${row.blockedByTopicTitle}) best ${row.blockedByBest}% / need ${row.needed}%`
+        );
+      });
+    } else {
+      lines.push("- locked chapters: none");
+    }
+    const paused = (report.lockDiagnostics && report.lockDiagnostics.xpPausedTopics) || [];
+    if (paused.length) {
+      paused.forEach((row) => {
+        lines.push(
+          `- XP paused T${row.id} ${row.title} until ${formatShortDate(row.xpLockUntil)}`
+        );
+      });
+    } else {
+      lines.push("- XP-paused chapters: none");
     }
     return lines.join("\n");
   }
