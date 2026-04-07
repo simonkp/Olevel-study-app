@@ -20,14 +20,118 @@
     button.primary { border-color:var(--accent); color:var(--accent); }
     .hint { color:var(--muted); font-size:.9rem; margin-top:8px; }
     .remember { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:.9rem; }
-    table { width:100%; border-collapse:collapse; margin-top:10px; }
-    th, td { padding:10px 8px; border-bottom:1px solid #1f2a40; text-align:left; }
-    th { color:#cbd5e1; font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; }
     .details { margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
     .mini { border:1px solid #1f2a40; border-radius:10px; padding:10px; background:#0b1220; }
     .mini h4 { margin:0 0 6px; font-size:.9rem; color:#cbd5e1; }
     .chips { display:flex; flex-wrap:wrap; gap:6px; }
     .chip { border:1px solid #273449; border-radius:999px; padding:3px 8px; font-size:.78rem; color:#cbd5e1; }
+    .student-card {
+      border:1px solid #1f2a40;
+      border-radius:12px;
+      padding:10px 12px;
+      background:#0b1220;
+      margin-top:10px;
+    }
+    .student-toggle {
+      width:100%;
+      border:none;
+      background:transparent;
+      color:inherit;
+      padding:0;
+      text-align:left;
+      cursor:pointer;
+    }
+    .student-head {
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-wrap:wrap;
+    }
+    .student-card h3 { margin:0 0 4px; font-size:1rem; }
+    .name-row { display:flex; gap:8px; align-items:center; }
+    .student-avatar {
+      width:24px;
+      height:24px;
+      border-radius:50%;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #35507a;
+      color:#bcd6ff;
+      font-size:.8rem;
+      background:#10213d;
+      flex:0 0 24px;
+    }
+    .divider-dot {
+      color:#5f7397;
+      margin:0 6px;
+    }
+    .student-meta { margin:0; }
+    .student-summary {
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-top:8px;
+    }
+    .student-summary .chip { font-size:.75rem; }
+    .student-expand {
+      margin-left:auto;
+      color:var(--accent);
+      font-size:.8rem;
+      border:1px solid #2a3a57;
+      border-radius:999px;
+      padding:2px 8px;
+    }
+    .student-details { margin-top:10px; }
+    .actions-row { margin-top: 10px; display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .menu-wrap { margin-left:auto; position:relative; }
+    .menu-btn {
+      border:1px solid #2a3a57;
+      background:#0b1220;
+      color:#cbd5e1;
+      border-radius:10px;
+      padding:6px 10px;
+      line-height:1;
+      font-size:1rem;
+    }
+    .menu-panel {
+      position:absolute;
+      right:0;
+      top:calc(100% + 6px);
+      min-width:180px;
+      border:1px solid #2a3a57;
+      border-radius:10px;
+      background:#0b1220;
+      padding:8px;
+      z-index:20;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    .menu-panel[hidden] { display:none; }
+    .menu-panel button { width:100%; text-align:left; }
+    .btn-danger {
+      border-color:#ef4444;
+      color:#fecaca;
+      background:#1b0d12;
+    }
+    .stat-grid {
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .stat-grid .chip { display:block; text-align:center; }
+    #student-cards .hint { margin: 0; }
+    @media (max-width: 760px) {
+      .shell { padding:16px 10px 28px; }
+      .row { flex-direction:column; align-items:stretch; }
+      input, button { width:100%; min-width:0; }
+      .remember { justify-content:flex-start; }
+      .stat-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+      .details { grid-template-columns:1fr; }
+      .student-expand { margin-left:0; }
+    }
   </style>
 </head>
 <body>
@@ -44,22 +148,9 @@
       <p class="hint" id="status">Configure keys if needed, then load overview.</p>
     </div>
     <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Student</th>
-            <th>Student ID</th>
-            <th>XP Balance</th>
-            <th>XP Events</th>
-            <th>Topics</th>
-            <th>Purchases</th>
-            <th>Last Activity</th>
-          </tr>
-        </thead>
-        <tbody id="rows">
-          <tr><td colspan="7" class="hint">No data yet.</td></tr>
-        </tbody>
-      </table>
+      <div id="student-cards">
+        <p class="hint">No data yet.</p>
+      </div>
     </div>
   </div>
 
@@ -67,7 +158,7 @@
   <script>
     (function () {
       const status = document.getElementById("status");
-      const rows = document.getElementById("rows");
+      const studentCards = document.getElementById("student-cards");
       const btnSetup = document.getElementById("btn-setup-keys");
       const btnRefresh = document.getElementById("btn-refresh");
       const projectCode = document.getElementById("project-code");
@@ -147,6 +238,53 @@
           .join("");
       }
 
+      function studentDetailBlocks(s) {
+        return `
+          <div class="actions-row">
+            <div class="menu-wrap">
+              <button type="button" class="menu-btn student-menu-toggle" aria-haspopup="true" aria-expanded="false" title="More actions">⋮</button>
+              <div class="menu-panel" hidden>
+                <button type="button" class="rename-student" data-student-id="${esc(s.student_id || "")}" data-student-name="${esc(s.student_name || s.student_id || "")}">Rename</button>
+                <button type="button" class="delete-student btn-danger" data-student-id="${esc(s.student_id || "")}" data-student-name="${esc(s.student_name || s.student_id || "")}">Delete student data</button>
+              </div>
+            </div>
+          </div>
+          <div class="details">
+            <div class="mini">
+              <h4>Last 7 days</h4>
+              <div class="chips">
+                <span class="chip">XP ${Number(s.xp_last_7d || 0)}</span>
+                <span class="chip">Events ${Number(s.xp_events_last_7d || 0)}</span>
+              </div>
+            </div>
+            <div class="mini">
+              <h4>Areas studied (overall)</h4>
+              <div class="chips">${
+                (Array.isArray(s.areas_overall) && s.areas_overall.length)
+                  ? s.areas_overall.map((a) => `<span class="chip">${esc(a)}</span>`).join("")
+                  : "<span class='chip'>none</span>"
+              }</div>
+            </div>
+            <div class="mini">
+              <h4>Areas studied (last week)</h4>
+              <div class="chips">${
+                (Array.isArray(s.areas_week) && s.areas_week.length)
+                  ? s.areas_week.map((a) => `<span class="chip">${esc(a)}</span>`).join("")
+                  : "<span class='chip'>none</span>"
+              }</div>
+            </div>
+            <div class="mini">
+              <h4>Strong topics</h4>
+              <div class="chips">${topicList(s.strong_topics, "mastery")}</div>
+            </div>
+            <div class="mini">
+              <h4>Weak topics</h4>
+              <div class="chips">${topicList(s.weak_topics, "mastery")}</div>
+            </div>
+          </div>
+        `;
+      }
+
       async function loadData() {
         const { url, key } = getKeys();
         if (!url || !key) {
@@ -177,60 +315,165 @@
           if (!rememberCode.checked) clearToken();
           const students = Array.isArray(data.students) ? data.students : [];
           if (!students.length) {
-            rows.innerHTML = "<tr><td colspan='7' class='hint'>No student rows yet.</td></tr>";
+            if (studentCards) studentCards.innerHTML = "<p class='hint'>No student rows yet.</p>";
             status.textContent = "Loaded. No students found yet.";
             return;
           }
-          rows.innerHTML = students
-            .map((s, idx) => `
-              <tr>
-                <td>${(s.student_name || "").replace(/</g, "&lt;")}</td>
-                <td>${(s.student_id || "").replace(/</g, "&lt;")}</td>
-                <td>${Number(s.xp_balance || 0)}</td>
-                <td>${Number(s.xp_events || 0)}</td>
-                <td>${Number(s.chapters_covered || s.studied_topics || 0)}</td>
-                <td>${Number(s.purchases || 0)}</td>
-                <td>${fmt(s.last_activity)}</td>
-              </tr>
-              <tr>
-                <td colspan="7">
-                  <div class="details">
-                    <div class="mini">
-                      <h4>Last 7 days</h4>
-                      <div class="chips">
-                        <span class="chip">XP ${Number(s.xp_last_7d || 0)}</span>
-                        <span class="chip">Events ${Number(s.xp_events_last_7d || 0)}</span>
+          if (studentCards) {
+            studentCards.innerHTML = students
+              .map(
+                (s) => `
+                  <section class="student-card">
+                    <button type="button" class="student-toggle" aria-expanded="false">
+                    <div class="student-head">
+                      <div>
+                        <div class="name-row">
+                          <span class="student-avatar">👤</span>
+                          <h3>${esc(s.student_name || "Student")}</h3>
+                        </div>
+                        <p class="hint student-meta">ID: ${esc(s.student_id || "-")}</p>
                       </div>
+                      <div class="hint"><span class="divider-dot">•</span> Last activity: ${fmt(s.last_activity)}</div>
                     </div>
-                    <div class="mini">
-                      <h4>Areas studied (overall)</h4>
-                      <div class="chips">${
-                        (Array.isArray(s.areas_overall) && s.areas_overall.length)
-                          ? s.areas_overall.map((a) => `<span class="chip">${esc(a)}</span>`).join("")
-                          : "<span class='chip'>none</span>"
-                      }</div>
+                    <div class="student-summary">
+                      <span class="chip">XP ${Number(s.xp_balance || 0)}</span>
+                      <span class="chip">Events ${Number(s.xp_events || 0)}</span>
+                      <span class="chip">Topics ${Number(s.chapters_covered || s.studied_topics || 0)}</span>
+                      <span class="chip">Purchases ${Number(s.purchases || 0)}</span>
+                      <span class="student-expand">Tap to expand</span>
                     </div>
-                    <div class="mini">
-                      <h4>Areas studied (last week)</h4>
-                      <div class="chips">${
-                        (Array.isArray(s.areas_week) && s.areas_week.length)
-                          ? s.areas_week.map((a) => `<span class="chip">${esc(a)}</span>`).join("")
-                          : "<span class='chip'>none</span>"
-                      }</div>
+                  </button>
+                  <div class="student-details" hidden>
+                    <div class="stat-grid">
+                      <span class="chip">XP ${Number(s.xp_balance || 0)}</span>
+                      <span class="chip">Events ${Number(s.xp_events || 0)}</span>
+                      <span class="chip">Topics ${Number(s.chapters_covered || s.studied_topics || 0)}</span>
+                      <span class="chip">Purchases ${Number(s.purchases || 0)}</span>
                     </div>
-                    <div class="mini">
-                      <h4>Strong topics</h4>
-                      <div class="chips">${topicList(s.strong_topics, "mastery")}</div>
-                    </div>
-                    <div class="mini">
-                      <h4>Weak topics</h4>
-                      <div class="chips">${topicList(s.weak_topics, "mastery")}</div>
-                    </div>
+                    ${studentDetailBlocks(s)}
                   </div>
-                </td>
-              </tr>
-            `)
-            .join("");
+                  </section>
+                `
+              )
+              .join("");
+            studentCards.querySelectorAll(".student-toggle").forEach((btn) => {
+              btn.addEventListener("click", () => {
+                const details = btn.nextElementSibling;
+                if (!details) return;
+                const nextHidden = !details.hidden;
+                details.hidden = nextHidden;
+                btn.setAttribute("aria-expanded", nextHidden ? "false" : "true");
+                const expand = btn.querySelector(".student-expand");
+                if (expand) expand.textContent = nextHidden ? "Tap to expand" : "Tap to collapse";
+              });
+            });
+            studentCards.querySelectorAll(".student-menu-toggle").forEach((btn) => {
+              btn.addEventListener("click", (evt) => {
+                evt.stopPropagation();
+                const wrap = btn.closest(".menu-wrap");
+                const panel = wrap ? wrap.querySelector(".menu-panel") : null;
+                if (!panel) return;
+                const willOpen = panel.hidden;
+                studentCards.querySelectorAll(".menu-panel").forEach((p) => (p.hidden = true));
+                studentCards
+                  .querySelectorAll(".student-menu-toggle")
+                  .forEach((b) => b.setAttribute("aria-expanded", "false"));
+                panel.hidden = !willOpen;
+                btn.setAttribute("aria-expanded", willOpen ? "true" : "false");
+              });
+            });
+            studentCards.querySelectorAll(".menu-panel").forEach((panel) => {
+              panel.addEventListener("click", (evt) => evt.stopPropagation());
+            });
+            studentCards.querySelectorAll(".rename-student").forEach((btn) => {
+              btn.addEventListener("click", async (evt) => {
+                evt.stopPropagation();
+                const studentId = (btn.dataset.studentId || "").trim();
+                const currentName = (btn.dataset.studentName || "").trim();
+                if (!studentId) return;
+                const parentPanel = btn.closest(".menu-panel");
+                if (parentPanel) parentPanel.hidden = true;
+                const nextName = prompt("New display name:", currentName);
+                if (!nextName || !nextName.trim()) return;
+                let token = loadToken();
+                const pin = (parentCode.value || "").trim();
+                if (!token && pin) token = await sha256Hex(pin);
+                if (!token) {
+                  status.textContent = "Enter parent access code first.";
+                  return;
+                }
+                try {
+                  status.textContent = `Renaming ${studentId}...`;
+                  const sb = window.supabase.createClient(getKeys().url, getKeys().key);
+                  const { data, error } = await sb.rpc("study_parent_update_student_name_token", {
+                    p_project_code: (projectCode.value || "study-app").trim(),
+                    p_parent_token: token,
+                    p_student_id: studentId,
+                    p_new_display_name: nextName.trim(),
+                  });
+                  if (error) throw error;
+                  if (!data || !data.ok) {
+                    status.textContent = "Rename failed: " + ((data && data.error) || "unknown");
+                    return;
+                  }
+                  status.textContent = `Renamed ${studentId} to "${data.student_name || nextName.trim()}".`;
+                  await loadData();
+                } catch (e) {
+                  status.textContent = "Rename error: " + (e && e.message ? e.message : String(e));
+                }
+              });
+            });
+            studentCards.querySelectorAll(".delete-student").forEach((btn) => {
+              btn.addEventListener("click", async (evt) => {
+                evt.stopPropagation();
+                const parentPanel = btn.closest(".menu-panel");
+                if (parentPanel) parentPanel.hidden = true;
+                const studentId = (btn.dataset.studentId || "").trim();
+                const studentName = (btn.dataset.studentName || studentId).trim();
+                if (!studentId) return;
+                const confirmName = prompt(
+                  `DELETE IS PERMANENT.\nType this exact current student name to confirm:\n\n${studentName}`
+                );
+                if (confirmName == null) return;
+                let token = loadToken();
+                const pin = (parentCode.value || "").trim();
+                if (!token && pin) token = await sha256Hex(pin);
+                if (!token) {
+                  status.textContent = "Enter parent access code first.";
+                  return;
+                }
+                try {
+                  status.textContent = `Deleting ${studentId}...`;
+                  const sb = window.supabase.createClient(getKeys().url, getKeys().key);
+                  const { data, error } = await sb.rpc("study_parent_delete_student_token", {
+                    p_project_code: (projectCode.value || "study-app").trim(),
+                    p_parent_token: token,
+                    p_student_id: studentId,
+                    p_confirm_name: String(confirmName),
+                    p_delete_profile: true,
+                  });
+                  if (error) throw error;
+                  if (!data || !data.ok) {
+                    status.textContent = "Delete failed: " + ((data && data.error) || "unknown");
+                    return;
+                  }
+                  status.textContent = `Deleted ${studentId}.`;
+                  await loadData();
+                } catch (e) {
+                  status.textContent = "Delete error: " + (e && e.message ? e.message : String(e));
+                }
+              });
+            });
+            if (!window.__parentMenuDocBound) {
+              window.__parentMenuDocBound = true;
+              document.addEventListener("click", () => {
+                studentCards.querySelectorAll(".menu-panel").forEach((p) => (p.hidden = true));
+                studentCards
+                  .querySelectorAll(".student-menu-toggle")
+                  .forEach((b) => b.setAttribute("aria-expanded", "false"));
+              });
+            }
+          }
           status.textContent = `Loaded ${students.length} student(s). Generated at ${fmt(data.generated_at)}.`;
         } catch (e) {
           status.textContent = "Error: " + (e && e.message ? e.message : String(e));
@@ -239,7 +482,16 @@
 
       btnSetup.onclick = setupKeys;
       btnRefresh.onclick = loadData;
-      if (loadToken()) rememberCode.checked = true;
+      const initialToken = loadToken();
+      if (initialToken) {
+        rememberCode.checked = true;
+        loadData();
+      } else {
+        // Autofill may populate the code slightly after script execution.
+        setTimeout(() => {
+          if ((parentCode.value || "").trim()) loadData();
+        }, 150);
+      }
     })();
   </script>
 </body>

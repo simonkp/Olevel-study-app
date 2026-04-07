@@ -114,6 +114,25 @@
       border-color: var(--accent);
       color: var(--accent);
     }
+    .parent-link-row {
+      margin-top: 14px;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .parent-link {
+      text-decoration: none;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      background: rgba(15, 23, 42, 0.75);
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .parent-link:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
   </style>
 </head>
 <body>
@@ -146,15 +165,9 @@
           <span class="tag">Electricity</span>
         </div>
       </a>
-      <a class="card" href="parent.html">
-        <h2>Parent Dashboard</h2>
-        <div class="meta">Cross-student snapshot from Supabase</div>
-        <div class="tag-row">
-          <span class="tag">All students</span>
-          <span class="tag">DB overview</span>
-          <span class="tag">Parent PIN</span>
-        </div>
-      </a>
+    </div>
+    <div class="parent-link-row">
+      <a class="parent-link" href="parent.html">Parent Dashboard</a>
     </div>
   </div>
   <script>

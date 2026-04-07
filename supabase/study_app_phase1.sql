@@ -710,20 +710,35 @@ begin
       pr.student_id,
       pr.display_name,
       pr.device_id,
-      coalesce(sum(x.delta), 0) as xp_balance,
-      count(x.id) filter (where x.delta > 0) as xp_events,
-      count(distinct ts.topic_id) as studied_topics,
-      coalesce(max(ts.updated_at), pr.created_at) as last_activity,
-      coalesce(count(rp.id), 0) as purchases
+      coalesce(xa.xp_balance, 0) as xp_balance,
+      coalesce(xa.xp_events, 0) as xp_events,
+      coalesce(tsa.studied_topics, 0) as studied_topics,
+      coalesce(tsa.last_activity, pr.created_at) as last_activity,
+      coalesce(rpa.purchases, 0) as purchases
     from public.profiles pr
-    left join public.study_xp_ledger x
-      on x.project_id = pr.project_id and x.profile_id = pr.id
-    left join public.study_topic_stats ts
-      on ts.project_id = pr.project_id and ts.profile_id = pr.id
-    left join public.study_reward_purchases rp
-      on rp.project_id = pr.project_id and rp.profile_id = pr.id
+    left join lateral (
+      select
+        coalesce(sum(x.delta), 0) as xp_balance,
+        count(*) filter (where x.delta > 0) as xp_events
+      from public.study_xp_ledger x
+      where x.project_id = pr.project_id
+        and x.profile_id = pr.id
+    ) xa on true
+    left join lateral (
+      select
+        count(distinct ts.topic_id) as studied_topics,
+        max(ts.updated_at) as last_activity
+      from public.study_topic_stats ts
+      where ts.project_id = pr.project_id
+        and ts.profile_id = pr.id
+    ) tsa on true
+    left join lateral (
+      select count(*) as purchases
+      from public.study_reward_purchases rp
+      where rp.project_id = pr.project_id
+        and rp.profile_id = pr.id
+    ) rpa on true
     where pr.project_id = v_project_id
-    group by pr.id, pr.student_id, pr.display_name, pr.device_id, pr.created_at
   )
   select coalesce(
     jsonb_agg(
@@ -796,25 +811,43 @@ begin
       pr.student_id,
       pr.display_name,
       pr.device_id,
-      coalesce(sum(x.delta), 0) as xp_balance,
-      count(x.id) filter (where x.delta > 0) as xp_events,
-      count(distinct ts.topic_id) as studied_topics,
-      count(distinct ts.topic_id) filter (where coalesce(ts.seen, 0) > 0) as chapters_covered,
-      coalesce(sum(x.delta) filter (where x.created_at >= now() - interval '7 days'), 0) as xp_last_7d,
-      count(x.id) filter (
-        where x.delta > 0 and x.created_at >= now() - interval '7 days'
-      ) as xp_events_last_7d,
-      coalesce(max(ts.updated_at), pr.created_at) as last_activity,
-      coalesce(count(rp.id), 0) as purchases
+      coalesce(xa.xp_balance, 0) as xp_balance,
+      coalesce(xa.xp_events, 0) as xp_events,
+      coalesce(tsa.studied_topics, 0) as studied_topics,
+      coalesce(tsa.chapters_covered, 0) as chapters_covered,
+      coalesce(xa.xp_last_7d, 0) as xp_last_7d,
+      coalesce(xa.xp_events_last_7d, 0) as xp_events_last_7d,
+      coalesce(tsa.last_activity, pr.created_at) as last_activity,
+      coalesce(rpa.purchases, 0) as purchases
     from public.profiles pr
-    left join public.study_xp_ledger x
-      on x.project_id = pr.project_id and x.profile_id = pr.id
-    left join public.study_topic_stats ts
-      on ts.project_id = pr.project_id and ts.profile_id = pr.id
-    left join public.study_reward_purchases rp
-      on rp.project_id = pr.project_id and rp.profile_id = pr.id
+    left join lateral (
+      select
+        coalesce(sum(x.delta), 0) as xp_balance,
+        count(*) filter (where x.delta > 0) as xp_events,
+        coalesce(sum(x.delta) filter (where x.created_at >= now() - interval '7 days'), 0) as xp_last_7d,
+        count(*) filter (
+          where x.delta > 0 and x.created_at >= now() - interval '7 days'
+        ) as xp_events_last_7d
+      from public.study_xp_ledger x
+      where x.project_id = pr.project_id
+        and x.profile_id = pr.id
+    ) xa on true
+    left join lateral (
+      select
+        count(distinct ts.topic_id) as studied_topics,
+        count(distinct ts.topic_id) filter (where coalesce(ts.seen, 0) > 0) as chapters_covered,
+        max(ts.updated_at) as last_activity
+      from public.study_topic_stats ts
+      where ts.project_id = pr.project_id
+        and ts.profile_id = pr.id
+    ) tsa on true
+    left join lateral (
+      select count(*) as purchases
+      from public.study_reward_purchases rp
+      where rp.project_id = pr.project_id
+        and rp.profile_id = pr.id
+    ) rpa on true
     where pr.project_id = v_project_id
-    group by pr.id, pr.student_id, pr.display_name, pr.device_id, pr.created_at
   ),
   topic_strength as (
     select
@@ -896,6 +929,146 @@ $$;
 
 revoke all on function public.study_parent_student_overview_token(text, text) from public;
 grant execute on function public.study_parent_student_overview_token(text, text) to anon, authenticated;
+
+create or replace function public.study_parent_update_student_name_token(
+  p_project_code text,
+  p_parent_token text,
+  p_student_id text,
+  p_new_display_name text
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_project_id uuid;
+  v_hash text;
+  v_profile_id uuid;
+  v_name text;
+begin
+  select id into v_project_id from public.projects where code = p_project_code;
+  if v_project_id is null then
+    return jsonb_build_object('ok', false, 'error', 'project_not_found');
+  end if;
+
+  select code_sha256 into v_hash
+  from public.project_parent_access
+  where project_id = v_project_id;
+  if v_hash is null then
+    return jsonb_build_object('ok', false, 'error', 'parent_token_not_set');
+  end if;
+  if coalesce(trim(p_parent_token), '') = '' or p_parent_token <> v_hash then
+    return jsonb_build_object('ok', false, 'error', 'invalid_parent_token');
+  end if;
+
+  if coalesce(trim(p_student_id), '') = '' then
+    return jsonb_build_object('ok', false, 'error', 'student_id_required');
+  end if;
+  if coalesce(trim(p_new_display_name), '') = '' then
+    return jsonb_build_object('ok', false, 'error', 'name_required');
+  end if;
+
+  select id into v_profile_id
+  from public.profiles
+  where project_id = v_project_id
+    and student_id = p_student_id
+  limit 1;
+  if v_profile_id is null then
+    return jsonb_build_object('ok', false, 'error', 'profile_not_found');
+  end if;
+
+  update public.profiles
+  set display_name = left(trim(p_new_display_name), 120)
+  where id = v_profile_id
+  returning display_name into v_name;
+
+  return jsonb_build_object(
+    'ok', true,
+    'project_id', v_project_id,
+    'profile_id', v_profile_id,
+    'student_id', p_student_id,
+    'student_name', coalesce(v_name, p_student_id)
+  );
+end;
+$$;
+
+revoke all on function public.study_parent_update_student_name_token(text, text, text, text) from public;
+grant execute on function public.study_parent_update_student_name_token(text, text, text, text) to anon, authenticated;
+
+create or replace function public.study_parent_delete_student_token(
+  p_project_code text,
+  p_parent_token text,
+  p_student_id text,
+  p_confirm_name text,
+  p_delete_profile boolean default true
+) returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_project_id uuid;
+  v_hash text;
+  v_profile_id uuid;
+  v_expected_name text;
+  v_result jsonb;
+begin
+  select id into v_project_id from public.projects where code = p_project_code;
+  if v_project_id is null then
+    return jsonb_build_object('ok', false, 'error', 'project_not_found');
+  end if;
+
+  select code_sha256 into v_hash
+  from public.project_parent_access
+  where project_id = v_project_id;
+  if v_hash is null then
+    return jsonb_build_object('ok', false, 'error', 'parent_token_not_set');
+  end if;
+  if coalesce(trim(p_parent_token), '') = '' or p_parent_token <> v_hash then
+    return jsonb_build_object('ok', false, 'error', 'invalid_parent_token');
+  end if;
+
+  if coalesce(trim(p_student_id), '') = '' then
+    return jsonb_build_object('ok', false, 'error', 'student_id_required');
+  end if;
+
+  select p.id, coalesce(nullif(trim(p.display_name), ''), p.student_id)
+    into v_profile_id, v_expected_name
+  from public.profiles p
+  where p.project_id = v_project_id
+    and p.student_id = p_student_id
+  limit 1;
+
+  if v_profile_id is null then
+    return jsonb_build_object('ok', false, 'error', 'profile_not_found');
+  end if;
+  if coalesce(trim(p_confirm_name), '') <> v_expected_name then
+    return jsonb_build_object(
+      'ok', false,
+      'error', 'confirmation_name_mismatch',
+      'expected', v_expected_name
+    );
+  end if;
+
+  select public.study_clear_profile_data(
+    p_project_code => p_project_code,
+    p_student_id => p_student_id,
+    p_device_id => null,
+    p_delete_profile => p_delete_profile
+  ) into v_result;
+
+  return jsonb_build_object(
+    'ok', coalesce((v_result->>'ok')::boolean, false),
+    'project_id', v_project_id,
+    'profile_id', v_profile_id,
+    'student_id', p_student_id,
+    'deleted', v_result
+  );
+end;
+$$;
+
+revoke all on function public.study_parent_delete_student_token(text, text, text, text, boolean) from public;
+grant execute on function public.study_parent_delete_student_token(text, text, text, text, boolean) to anon, authenticated;
 
 
 -- ====================
