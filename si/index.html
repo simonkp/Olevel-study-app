@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>IS5126 Practice Quiz</title>
+  <style>
+    :root {
+      --bg: #1a1a1e;
+      --card: #252530;
+      --text: #e4e4e7;
+      --muted: #a1a1aa;
+      --correct: #22c55e;
+      --wrong: #ef4444;
+      --accent: #8b5cf6;
+      --container-max: 960px;
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; min-height: 100vh; padding: 16px; }
+    .container { max-width: var(--container-max); margin: 0 auto; }
+    h1 { font-size: 1.4rem; margin-bottom: 4px; }
+    .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+    .progress { color: var(--muted); font-size: 0.85rem; margin-bottom: 16px; }
+    .q-block { background: var(--card); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .q-block .q-text { font-size: 1.05rem; font-weight: 600; margin-bottom: 20px; line-height: 1.5; word-wrap: break-word; }
+    .opt { display: block; width: 100%; text-align: left; padding: 14px 16px; margin: 10px 0; border: 2px solid #3f3f46; border-radius: 10px; background: #2a2a32; color: var(--text); font-size: 0.95rem; cursor: pointer; transition: border-color 0.2s, background 0.2s; min-height: 44px; -webkit-tap-highlight-color: transparent; word-wrap: break-word; }
+    .opt:hover:not(.disabled) { border-color: var(--accent); background: #2e2e3a; }
+    .opt.disabled { cursor: default; opacity: 0.9; }
+    .opt.correct { border-color: var(--correct); background: rgba(34, 197, 94, 0.15); }
+    .opt.wrong { border-color: var(--wrong); background: rgba(239, 68, 68, 0.15); }
+    .opt-feedback { font-size: 0.85rem; margin-top: 8px; padding-top: 8px; border-top: 1px solid #3f3f46; }
+    .opt.correct .opt-feedback { color: var(--correct); }
+    .opt.wrong .opt-feedback { color: var(--wrong); }
+    .opt-feedback .label { font-weight: 600; margin-bottom: 4px; }
+    .opt-feedback .label.correct-msg::before { content: "✓ That's right! "; }
+    .opt-feedback .label.wrong-msg::before { content: "✗ Not quite. "; }
+    .opt-feedback .label.right-answer-msg::before { content: "✓ Right answer. "; }
+    .opt-feedback .label.other-msg { color: var(--muted); font-weight: normal; }
+    .opt.other-reveal .opt-feedback { display: block !important; }
+    .opt.other-reveal { border-color: #3f3f46; }
+    .multi-hint { font-size: 0.85rem; color: var(--muted); margin-bottom: 12px; }
+    .btn-check { margin-bottom: 16px; padding: 10px 20px; border-radius: 8px; background: var(--accent); color: white; border: none; font-size: 0.95rem; cursor: pointer; }
+    .btn-check:hover:not(:disabled) { filter: brightness(1.1); }
+    .btn-check:disabled { opacity: 0.5; cursor: not-allowed; }
+    .opt input[type="checkbox"] { margin-right: 10px; accent-color: var(--accent); }
+    .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; padding-top: 16px; border-top: 1px solid #3f3f46; }
+    .nav-bar button { padding: 12px 20px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; border: none; min-height: 44px; -webkit-tap-highlight-color: transparent; }
+    .nav-bar .btn-prev, .nav-bar .btn-explain { background: transparent; color: var(--muted); }
+    .nav-bar .btn-prev:hover:not(:disabled), .nav-bar .btn-explain:hover { color: var(--text); }
+    .nav-bar .btn-next { background: var(--accent); color: white; }
+    .nav-bar .btn-next:hover:not(:disabled) { filter: brightness(1.1); }
+    .nav-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .controls-wrap { margin-bottom: 10px; }
+    .controls-panel { border: 1px solid #3f3f46; border-radius: 10px; background: #22222b; }
+    .controls-panel summary { cursor: pointer; list-style: none; padding: 10px 12px; color: var(--muted); font-size: 0.9rem; user-select: none; }
+    .controls-panel summary::-webkit-details-marker { display: none; }
+    .controls-panel summary::after { content: "▾"; float: right; color: var(--muted); }
+    .controls-panel:not([open]) summary::after { content: "▸"; }
+    .controls { display: grid; grid-template-columns: 1fr; gap: 10px; margin: 0; padding: 0 10px 10px; }
+    .control-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .control-row select, .control-row button { padding: 10px 12px; border-radius: 6px; background: var(--card); color: var(--text); border: 1px solid #3f3f46; font-size: 0.9rem; min-height: 42px; }
+    .control-row button { cursor: pointer; }
+    .control-row button:hover { border-color: var(--accent); }
+    .control-row .toggle { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 0.9rem; }
+    .scoreboard { color: var(--muted); font-size: 0.85rem; margin-bottom: 8px; }
+    @media (min-width: 600px) {
+      body { padding: 24px; }
+      .q-block { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>IS5126 Practice Quiz</h1>
+    <p class="subtitle">Weeks 1–9 • One question at a time • Select an answer to see feedback</p>
+    <div class="controls-wrap">
+      <details class="controls-panel">
+        <summary>Quiz options</summary>
+        <div class="controls">
+          <div class="control-row">
+            <label for="ch">Chapter:</label>
+            <select id="ch">
+              <option value="">All</option>
+            </select>
+            <label for="order-mode">Order:</label>
+            <select id="order-mode">
+              <option value="sequential">Sequential</option>
+              <option value="random-all">Random all questions</option>
+              <option value="random-lecture">Random lecture-wise</option>
+            </select>
+            <label class="toggle" for="adaptive">
+              <input type="checkbox" id="adaptive" checked />
+              Adaptive (focus weak areas)
+            </label>
+            <button type="button" id="btn-regen">Reshuffle</button>
+            <button type="button" id="btn-reset-stats">Reset stats</button>
+          </div>
+        </div>
+      </details>
+    </div>
+    <div class="scoreboard" id="scoreboard"></div>
+    <div class="progress" id="progress"></div>
+    <div class="q-block" id="q-block">
+      <div class="q-text" id="q-text"></div>
+      <p class="multi-hint" id="multi-hint" style="display: none;">Select all that apply, then click Check.</p>
+      <button type="button" class="btn-check" id="btn-check" style="display: none;">Check answer</button>
+      <div id="options"></div>
+    </div>
+    <div class="nav-bar">
+      <button type="button" class="btn-explain" id="btn-explain" style="visibility: hidden;">Explain</button>
+      <button type="button" class="btn-prev" id="btn-prev">Previous</button>
+      <button type="button" class="btn-next" id="btn-next">Next</button>
+    </div>
+  </div>
+
+  <script>
+    const QUIZ_DB_ASSET_VERSION = "2026-03-17-3"; // bump on deploy to bust CDN/browser cache
+
+    function loadQuizDbScript(onReady) {
+      const script = document.createElement("script");
+      script.src = `questions-db.js?v=${encodeURIComponent(QUIZ_DB_ASSET_VERSION)}`;
+      script.onload = onReady;
+      script.onerror = () => {
+        document.getElementById("q-text").textContent = "Failed to load questions DB script.";
+      };
+      document.head.appendChild(script);
+    }
+
+    const STORE_KEY = "is5126_quiz_stats_v1";
+    let questions = [];
+    let index = 0;
+    let selected = null;
+    let selectedSet = null;
+    let answeredThisView = false;
+    let stats = loadStats();
+
+    function loadStats() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORE_KEY) || "{}");
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (_) {
+        return {};
+      }
+    }
+
+    function persistStats() {
+      localStorage.setItem(STORE_KEY, JSON.stringify(stats));
+    }
+
+    function isMulti(q) {
+      return Array.isArray(q.correct);
+    }
+
+    function correctSet(q) {
+      return new Set(Array.isArray(q.correct) ? q.correct : [q.correct]);
+    }
+
+    function isAnswerCorrect(q, chosen) {
+      const corr = correctSet(q);
+      if (chosen.length !== corr.size) return false;
+      return chosen.every(k => corr.has(k));
+    }
+
+    function getQStat(id) {
+      if (!stats[id]) stats[id] = { attempts: 0, correct: 0, wrong: 0, streak: 0 };
+      return stats[id];
+    }
+
+    function updateQStat(id, ok) {
+      const s = getQStat(id);
+      s.attempts += 1;
+      if (ok) {
+        s.correct += 1;
+        s.streak += 1;
+      } else {
+        s.wrong += 1;
+        s.streak = 0;
+      }
+      persistStats();
+      renderScoreboard();
+    }
+
+    function weightedShuffle(items, weightFn) {
+      const arr = [...items];
+      const out = [];
+      while (arr.length) {
+        let total = 0;
+        const ws = arr.map(q => {
+          const w = Math.max(0.05, weightFn(q));
+          total += w;
+          return w;
+        });
+        let r = Math.random() * total;
+        let idxPick = 0;
+        for (let i = 0; i < ws.length; i++) {
+          r -= ws[i];
+          if (r <= 0) {
+            idxPick = i;
+            break;
+          }
+        }
+        out.push(arr[idxPick]);
+        arr.splice(idxPick, 1);
+      }
+      return out;
+    }
+
+    function adaptiveWeight(q) {
+      const s = getQStat(q.id);
+      if (s.attempts === 0) return 2.0;
+      const wrongRate = s.wrong / Math.max(1, s.attempts);
+      const base = 1 + (s.wrong * 0.8) + (wrongRate * 1.8) - (s.streak * 0.22);
+      return Math.max(0.2, base);
+    }
+
+    function shufflePlain(arr) {
+      const out = [...arr];
+      for (let i = out.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [out[i], out[j]] = [out[j], out[i]];
+      }
+      return out;
+    }
+
+    function buildQuestionSet() {
+      const ch = document.getElementById("ch").value;
+      const mode = document.getElementById("order-mode").value;
+      const adaptive = document.getElementById("adaptive").checked;
+      const base = ch ? QUIZ_DB.filter(q => q.chapter === ch) : [...QUIZ_DB];
+      const weightFn = adaptive ? adaptiveWeight : (() => 1);
+
+      if (mode === "sequential") return base;
+      if (mode === "random-all") return adaptive ? weightedShuffle(base, weightFn) : shufflePlain(base);
+      if (mode === "random-lecture") {
+        const byChapter = new Map();
+        base.forEach(q => {
+          if (!byChapter.has(q.chapter)) byChapter.set(q.chapter, []);
+          byChapter.get(q.chapter).push(q);
+        });
+        const chapterKeys = [...byChapter.keys()].sort();
+        const out = [];
+        chapterKeys.forEach(k => {
+          const chunk = byChapter.get(k);
+          const shuffled = adaptive ? weightedShuffle(chunk, weightFn) : shufflePlain(chunk);
+          out.push(...shuffled);
+        });
+        return out;
+      }
+      return base;
+    }
+
+    function regenerateQuestions(keepCurrentChapter = false) {
+      if (!keepCurrentChapter) index = 0;
+      questions = buildQuestionSet();
+      if (index >= questions.length) index = Math.max(0, questions.length - 1);
+      render();
+    }
+
+    function renderScoreboard() {
+      const values = Object.values(stats);
+      const attempts = values.reduce((a, s) => a + (s.attempts || 0), 0);
+      const correct = values.reduce((a, s) => a + (s.correct || 0), 0);
+      const wrong = values.reduce((a, s) => a + (s.wrong || 0), 0);
+      const acc = attempts ? ((correct / attempts) * 100).toFixed(1) : "0.0";
+      document.getElementById("scoreboard").textContent =
+        `Score: ${correct} correct / ${wrong} wrong (${acc}% accuracy, ${attempts} attempts)`;
+    }
+
+    function init() {
+      const chSelect = document.getElementById("ch");
+      const chapters = [...new Set(QUIZ_DB.map(q => q.chapter))].sort();
+      chapters.forEach(ch => {
+        const q = QUIZ_DB.find(x => x.chapter === ch);
+        const opt = document.createElement("option");
+        opt.value = ch;
+        opt.textContent = q ? q.chapterTitle : ch;
+        chSelect.appendChild(opt);
+      });
+
+      chSelect.addEventListener("change", () => {
+        index = 0;
+        regenerateQuestions(true);
+      });
+      document.getElementById("order-mode").addEventListener("change", () => regenerateQuestions(true));
+      document.getElementById("adaptive").addEventListener("change", () => regenerateQuestions(true));
+      document.getElementById("btn-regen").addEventListener("click", () => regenerateQuestions(true));
+      document.getElementById("btn-reset-stats").addEventListener("click", () => {
+        stats = {};
+        persistStats();
+        renderScoreboard();
+        regenerateQuestions(true);
+      });
+      document.getElementById("btn-prev").addEventListener("click", () => { index = Math.max(0, index - 1); render(); });
+      document.getElementById("btn-next").addEventListener("click", () => { index = Math.min(questions.length - 1, index + 1); render(); });
+      document.getElementById("btn-check").addEventListener("click", onMultiCheck);
+      renderScoreboard();
+      regenerateQuestions();
+    }
+
+    function render() {
+      const q = questions[index];
+      if (!q) {
+        document.getElementById("progress").textContent = "No questions for this filter.";
+        document.getElementById("q-text").textContent = "No questions available.";
+        document.getElementById("options").innerHTML = "";
+        return;
+      }
+      document.getElementById("progress").textContent = `${index + 1} / ${questions.length}`;
+      document.getElementById("q-text").textContent = q.text;
+      const multi = isMulti(q);
+      document.getElementById("multi-hint").style.display = multi ? "block" : "none";
+      document.getElementById("btn-check").style.display = multi ? "block" : "none";
+      document.getElementById("btn-check").disabled = false;
+      const optsEl = document.getElementById("options");
+      optsEl.innerHTML = "";
+      selected = null;
+      selectedSet = null;
+      answeredThisView = false;
+      const keys = ["A", "B", "C", "D"];
+      keys.forEach(key => {
+        const label = document.createElement("label");
+        label.className = "opt";
+        if (multi) {
+          const cb = document.createElement("input");
+          cb.type = "checkbox";
+          cb.dataset.key = key;
+          label.appendChild(cb);
+          label.appendChild(document.createTextNode(" " + key + ". " + (q.options[key] || "")));
+        } else {
+          label.setAttribute("role", "button");
+          label.tabIndex = 0;
+          label.appendChild(document.createTextNode(key + ". " + (q.options[key] || "")));
+        }
+        const fb = document.createElement("div");
+        fb.className = "opt-feedback";
+        fb.style.display = "none";
+        const lb = document.createElement("div");
+        lb.className = "label";
+        lb.textContent = q.explainOptions ? q.explainOptions[key] : "";
+        fb.appendChild(lb);
+        label.appendChild(fb);
+        if (!multi) label.addEventListener("click", () => onSelect(key, q));
+        optsEl.appendChild(label);
+      });
+      document.getElementById("btn-prev").disabled = index === 0;
+      document.getElementById("btn-next").disabled = index === questions.length - 1;
+    }
+
+    function onSelect(key, q) {
+      if (selected !== null) return;
+      selected = key;
+      applyFeedback(q, [key]);
+    }
+
+    function onMultiCheck() {
+      const q = questions[index];
+      if (!q || !isMulti(q)) return;
+      const checkboxes = document.querySelectorAll("#options input[type=checkbox]");
+      const chosen = [];
+      checkboxes.forEach(cb => { if (cb.checked) chosen.push(cb.dataset.key); });
+      selectedSet = new Set(chosen);
+      applyFeedback(q, chosen);
+    }
+
+    function applyFeedback(q, chosen) {
+      const multi = isMulti(q);
+      const correct = correctSet(q);
+      const opts = document.querySelectorAll("#options .opt");
+      const keys = ["A", "B", "C", "D"];
+      opts.forEach(opt => opt.classList.add("disabled"));
+      keys.forEach((k, i) => {
+        const el = opts[i];
+        const exp = (q.explainOptions && q.explainOptions[k]) || "";
+        const lb = el.querySelector(".opt-feedback .label");
+        lb.textContent = exp;
+        el.querySelector(".opt-feedback").style.display = "block";
+        const isChosen = multi ? selectedSet.has(k) : (chosen[0] === k);
+        const isCorrect = correct.has(k);
+        if (isChosen && isCorrect) {
+          el.classList.add("correct");
+          lb.className = "label correct-msg";
+        } else if (isChosen && !isCorrect) {
+          el.classList.add("wrong");
+          lb.className = "label wrong-msg";
+        } else if (!isChosen && isCorrect) {
+          el.classList.add("correct");
+          lb.className = "label right-answer-msg";
+        } else {
+          el.classList.add("other-reveal");
+          lb.className = "label other-msg";
+        }
+      });
+      if (!answeredThisView) {
+        updateQStat(q.id, isAnswerCorrect(q, chosen));
+        answeredThisView = true;
+      }
+      if (multi) {
+        document.getElementById("btn-check").disabled = true;
+        document.querySelectorAll("#options input[type=checkbox]").forEach(cb => cb.disabled = true);
+      }
+    }
+
+    loadQuizDbScript(async () => {
+      try {
+        if (typeof window.loadQuizDb === "function") await window.loadQuizDb();
+      } catch (e) {
+        document.getElementById("q-text").textContent = `Failed to load question banks: ${e.message}`;
+        return;
+      }
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init, { once: true });
+      } else {
+        init();
+      }
+    });
+  </script>
+</body>
+</html>

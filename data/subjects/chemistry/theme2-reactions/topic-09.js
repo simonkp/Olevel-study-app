@@ -1,0 +1,171 @@
+(function () {
+  window.__registerTopic({
+    id: "9",
+    theme: "Theme 2: Chemical Reactions",
+    title: "Ammonia",
+    cheatBlocks: [
+        {
+            "title": "Haber",
+            "points": [
+                "N₂+3H₂⇌2NH₃; Fe catalyst; ~450°C; high P.",
+                "Recycle unreacted gases.",
+                "NH₃ → HNO₃, fertilisers."
+            ]
+        },
+        {
+            "title": "Properties",
+            "points": [
+                "Alkaline gas; turns damp red litmus blue.",
+                "Very soluble; fountain experiment.",
+                "NH₄⁺ + OH⁻ → NH₃."
+            ]
+        }
+    ,
+    {
+        "title": "Haber Process — Conditions & Reasons",
+        "points": [
+            "Equation: $\\text{N}_2(g) + 3\\text{H}_2(g) \\rightleftharpoons 2\\text{NH}_3(g)$ (ΔH < 0, exothermic)",
+            "**Temperature**: ~450 °C — compromise. Low T: slow (rate). High T: equilibrium shifts left (Le Chatelier). 450°C balances both.",
+            "**Pressure**: ~200 atm — high P shifts right (4 mol gas → 2 mol). Expensive to build/run so 200 atm is compromise.",
+            "**Catalyst**: iron (Fe) with promoters — lowers activation energy.",
+            "Yield ~15%. Unreacted N₂/H₂ recycled — efficient overall."
+        ]
+    }],
+    infographics: [ { image: "data/subjects/chemistry/images/reactions-04-ammonia.jpg", caption: "Haber process and conditions" } ],
+    flashcards: [
+        {
+            "front": "Haber catalyst?",
+            "back": "Iron."
+        },
+        {
+            "front": "Ostwald (context)?",
+            "back": "NH₃ → NO → HNO₃."
+        },
+        {
+            "front": "Urea formula?",
+            "back": "CO(NH₂)₂ fertiliser N."
+        },
+        {
+            "front": "Liquid NH₃ use?",
+            "back": "Refrigerant; solvent."
+        },
+        {
+            "front": "Test ammonium ion?",
+            "back": "NaOH heat, gas turns litmus blue."
+        },
+        {
+            "front": "Dilute NH₃ + Cu²⁺?",
+            "back": "Pale blue ppt, deep blue solution excess."
+        },
+        {
+            "front": "NPK fertiliser?",
+            "back": "N,P,K nutrients."
+        },
+        {
+            "front": "Le Chatelier low T favours NH₃ but?",
+            "back": "Rate slower — compromise T."
+        },
+        {
+            "front": "High P favours?",
+            "back": "Fewer gas moles side — NH₃."
+        },
+        {
+            "front": "Natural ammonia source?",
+            "back": "Decomposition, bacterial."
+        },
+        {
+            "front": "Ammonium nitrate explosive risk?",
+            "back": "Oxidiser — careful storage."
+        },
+        {
+            "front": "Nitrate leaching?",
+            "back": "Eutrophication risk."
+        },
+        {
+            "front": "Haber energy intensive?",
+            "back": "Fossil H₂ often."
+        },
+        {
+            "front": "NH₃ bp vs H₂O?",
+            "back": "Lower — H-bond weaker than water."
+        }
+    ,
+    { "front": "Haber conditions (3 things)?", "back": "~**450°C**, ~**200 atm**, **iron catalyst** (with K₂O/Al₂O₃ promoters)." },
+    { "front": "Why 450°C not higher?", "back": "Higher T shifts equilibrium *left* (exothermic forward) → less NH₃. 450°C is a **kinetic compromise**." },
+    { "front": "Why high pressure in Haber?", "back": "$N_2 + 3H_2 \\rightarrow 2NH_3$: 4 mol gas → 2 mol. High P pushes **right** → more NH₃ (Le Chatelier)." },
+    { "front": "3 uses of NH₃?", "back": "1. **Fertilisers** (NH₄NO₃, urea). 2. **Nitric acid** (Ostwald process). 3. **Cleaners/refrigerants**." }],
+    quiz: [
+    {question:"NH₃ turns damp red litmus:",options:["Red","Blue","No change","Green"],correctIndex:1,explanation:"Base."},
+    {question:"Haber nitrogen source:",options:["Air fractionation","Only NH₄Cl","Urea burn","Water only"],correctIndex:0,explanation:"N₂ from air."},
+    {question:"Forward reaction to NH₃ is:",options:["Endothermic","Exothermic","Zero ΔH","Only physical"],correctIndex:1,explanation:"Heat released."},
+    {question:"Higher pressure in Haber:",options:["Less NH₃","More NH₃ equilibrium","No effect","Explodes always"],correctIndex:1,explanation:"Fewer gas moles."},
+    {question:"NH₄Cl + NaOH warmed:",options:["Cl₂","NH₃","H₂","N₂"],correctIndex:1,explanation:"Ammonium test."},
+    {question:"NH₃ in water equation simplified:",options:["NH₃+H₂O⇌NH₄⁺+OH⁻","Only NH₄OH molecule","No ions","Only H⁺"],correctIndex:0,explanation:"Equilibrium."},
+    {question:"Fertiliser from NH₃ not:",options:["Urea","Ammonium salts","Diamond","NH₄NO₃"],correctIndex:2,explanation:"Not carbon allotrope."},
+    {question:"Catalyst in Haber:",options:["Pt only","Fe","Ni","Enzyme"],correctIndex:1,explanation:"Iron promoted."},
+    {question:"Nitric acid from ammonia:",options:["Ostwald process","Contact only","Haber only","Electrolysis"],correctIndex:0,explanation:"Oxidation steps."},
+    {question:"NH₃ density vs air:",options:["Lighter","Heavier","Same","No mass"],correctIndex:0,explanation:"Mr 17<29."},
+    {question:"Why compress gases in Haber:",options:["Increase rate and shift equilibrium","Only cooling","Remove catalyst","Dilute"],correctIndex:0,explanation:"More collisions."},
+    {question:"Equilibrium means:",options:["Forward stops","Forward=reverse rates","Only products","No catalyst"],correctIndex:1,explanation:"Dynamic."},
+    {question:"NH₃ hydrogen bonding:",options:["Yes with water","Never","Only ionic","Only metal"],correctIndex:0,explanation:"N lone pair."},
+    {question:"Ammonium nitrate in soil:",options:["N source","Only P","Toxic metal","Inert sand"],correctIndex:0,explanation:"N fertiliser."},
+    {question:"Biological nitrogen fixation:",options:["Lightning only","Bacteria in legumes","Only Haber","Oceans only"],correctIndex:1,explanation:"Rhizobia."},
+    {question:"NH₃ toxic inhalation:",options:["Respiratory irritant","Nutrient only","Inert","Healing"],correctIndex:0,explanation:"Safety."},
+    {question:"Dry NH₃ does not turn litmus on paper without:",options:["Water","Heat only","O₂","Cl₂"],correctIndex:0,explanation:"Needs moisture."},
+    {question:"Reverse of Haber:",options:["NH₃ decomposes to N₂+H₂ at very high T","Never","Only liquid","Only catalyst"],correctIndex:0,explanation:"Endothermic back."},
+    {question:"Eutrophication from excess N:",options:["Algal bloom","Ozone hole","Acid rain only","Nothing"],correctIndex:0,explanation:"Nutrient runoff."},
+    {question:"NH₃ + HCl gas:",options:["White smoke NH₄Cl","Blue solution","No reaction","Cl₂"],correctIndex:0,explanation:"Solid formation."},
+    {question:"Industrial H₂ for Haber often from:",options:["Natural gas steam reforming","Only water split","Air only","Coal never"],correctIndex:0,explanation:"CH₄+H₂O."},
+    {question:"NH₃ lone pair:",options:["Lewis base","Lewis acid only","No electrons","Only metal"],correctIndex:0,explanation:"Donor."},
+    {question:"pH of 0.1 M NH₃ ~:",options:["1","7","11","14"],correctIndex:2,explanation:"Weak base ~11."},
+    {question:"Double salt ammonium (context):",options:["NH₄Fe(SO₄)₂ type","Only NaCl","Gas","Diamond"],correctIndex:0,explanation:"Alum analogues."},
+    {question:"Why not extreme low T in Haber:",options:["Rate too slow","Explosion","No catalyst","No N₂"],correctIndex:0,explanation:"Kinetic limit."},
+    {question:"NOₓ from fertiliser overuse:",options:["Can acidify/runoff issues","Only ozone","Helium release","None"],correctIndex:0,explanation:"Environmental."},
+    {question:"Le Chatelier: for N₂(g)+3H₂(g)⇌2NH₃(g), increasing total pressure at constant T shifts equilibrium:",options:["Left (more gas moles)","Right (fewer gas moles)","No shift","Only changes rate"],correctIndex:1,explanation:"4 mol gas → 2 mol gas; higher P favours the side with fewer gas molecules."},
+    {question:"The Haber forward reaction is exothermic, so lower T would favour NH₃ yield but plants use ~450 °C because:",options:["High T removes catalyst","Higher T increases rate despite lower K","Low T always gives zero NH₃","Catalyst needs cold"],correctIndex:1,explanation:"Kinetic compromise — reasonable rate vs equilibrium."},
+    {question:"Recycling unreacted N₂ and H₂ in the Haber process mainly:",options:["Changes ΔH of reaction","Improves atom economy of the overall plant","Removes need for a catalyst","Stops ammonia liquefaction"],correctIndex:1,explanation:"Unconverted feedstock is returned — less waste."},
+    {question:"Aqueous ammonia is a weak base because:",options:["NH₃ fully ionises","NH₃ only partially forms NH₄⁺ and OH⁻","It contains no nitrogen","It is always pH 14"],correctIndex:1,explanation:"Equilibrium lies left: NH₃ + H₂O ⇌ NH₄⁺ + OH⁻."},
+    {question:"NH₃ has a lone pair and acts as a Lewis base by:",options:["Accepting a proton or donating an electron pair to an electron-pair acceptor","Losing all electrons","Forming only ionic lattices","Oxidising metals only"],correctIndex:0,explanation:"Lone pair donation defines Lewis basicity."},
+    {question:"Compared with air, a small leak of NH₃ gas is:",options:["Heavier and sinks only","Lighter on average (Mr 17) and can mix upward in air","The same density always","Only found as a liquid"],correctIndex:1,explanation:"Average molar mass of air ~29 g/mol > NH₃."},
+    {question:"Nitrogen fixation (Haber) is industrially important because:",options:["N₂ is very unreactive at room conditions","Air has no nitrogen","Ammonia is never used","Plants cannot use nitrogen"],correctIndex:0,explanation:"Strong N≡N bond — harsh conditions + catalyst needed."},
+    {question:"Excess nitrate runoff can cause eutrophication because:",options:["It removes all oxygen instantly","Nutrients boost algal growth → decomposition can deplete dissolved O₂","Nitrates are insoluble","It raises pH to 14 always"],correctIndex:1,explanation:"Algal blooms and microbial breakdown harm aquatic life."},
+    {question:"NH₄NO₃ as fertiliser must be stored carefully because:",options:["It is never soluble","It can decompose explosively under misuse/heat/shock","It is a noble gas","It cannot absorb water"],correctIndex:1,explanation:"Oxidiser + fuel hazard — safety context."},
+    {question:"In Ostwald’s route conceptually, ammonia is oxidised toward:",options:["Diamond","Nitrogen only","Nitric acid (via NO → NO₂)","Helium"],correctIndex:2,explanation:"Industrial oxidation steps to HNO₃."},
+    {id:"chem-T9-201",question:"The main reason a high pressure is used in the Haber process is:",options:["To increase the rate only","To shift equilibrium toward fewer gas moles (NH₃) and increase collision frequency","To remove the catalyst","To make N₂ unreactive"],correctIndex:1,explanation:"N₂ + 3H₂ ⇌ 2NH₃ — fewer gas molecules on the right."},
+    {id:"chem-T9-202",question:"If the temperature of a Haber reactor is suddenly increased (other factors fixed), the equilibrium constant K for the exothermic forward reaction:",options:["Always increases","Generally decreases","Is unchanged","Becomes zero"],correctIndex:1,explanation:"Exothermic forward — heat treated as product; Le Chatelier."},
+    {id:"chem-T9-203",question:"Iron catalyst in Haber mainly:",options:["Increases equilibrium yield of NH₃","Increases reaction rate without changing equilibrium position","Removes H₂","Converts N₂ to NO"],correctIndex:1,explanation:"Catalyst speeds both directions equally."},
+    {id:"chem-T9-204",question:"Ammonium nitrate as fertiliser is a source of:",options:["Only phosphorus","Nitrogen for plant growth","Only potassium","Inert filler only"],correctIndex:1,explanation:"NH₄⁺ and NO₃⁻ both supply nitrogen."},
+    {id:"chem-T9-205",question:"Why is NH₃ liquefied in industrial synthesis?",options:["To remove it from the equilibrium mixture and shift equilibrium forward","Because it is always a solid","To destroy the catalyst","To increase N₂ pressure"],correctIndex:0,explanation:"Product removal favours more NH₃ formation."},
+    {id:"chem-T9-206",question:"Hydrogen for the Haber process is often sourced from:",options:["Electrolysis of NaCl only","Steam reforming of natural gas (CH₄)","Only air","Only water photolysis"],correctIndex:1,explanation:"Industrial H₂ source."},
+    {id:"chem-T9-207",question:"When NH₃(g) dissolves in water, the solution is basic because:",options:["NH₃ fully ionises","NH₃ partially accepts H⁺ from water forming OH⁻","NH₃ removes all water","NH₃ is a strong acid"],correctIndex:1,explanation:"Equilibrium produces OH⁻."},
+    {id:"chem-T9-208",question:"Ammonium salts in soil can be converted to nitrate by:",options:["Only lightning","Nitrifying bacteria (part of nitrogen cycle)","Photosynthesis only","Distillation"],correctIndex:1,explanation:"Biological oxidation steps."},
+    {id:"chem-T9-209",question:"The N≡N triple bond in N₂ is very strong, so:",options:["N₂ reacts instantly at room temperature without catalyst","High temperatures and catalysts are needed for Haber kinetics","N₂ cannot be liquefied","N₂ always forms NO at room temperature"],correctIndex:1,explanation:"Kinetic barrier despite favourable thermodynamics at some conditions."},
+    {id:"chem-T9-301",question:"In the fountain experiment, water rushes into a flask containing NH₃(g) mainly because:",options:["NH₃ is heavier than air","NH₃ dissolves rapidly in the water droplet, greatly reducing gas pressure inside the flask","NH₃ reacts explosively with water","The flask is heated"],correctIndex:1,explanation:"High solubility of NH₃ creates a partial vacuum that draws water in."},
+    {id:"chem-T9-302",question:"Which statement best explains why the Haber process uses ~450 °C rather than a much higher or lower temperature?",options:["Higher temperature would melt the catalyst","It is a compromise: high enough for a useful rate, not so high that equilibrium yield drops too far","Lower temperatures produce NO instead of NH₃","The catalyst only works at exactly 450 °C"],correctIndex:1,explanation:"Exothermic forward reaction means higher T shifts equilibrium left; kinetics and yield are balanced at ~450 °C."},
+    {id:"chem-T9-303",question:"In the nitrogen cycle, denitrifying bacteria convert nitrates in the soil back to:",options:["Ammonia only","Atmospheric nitrogen gas (N₂)","Nitric acid","Carbon dioxide"],correctIndex:1,explanation:"Denitrification returns nitrogen to the atmosphere, completing the cycle."},
+    {id:"chem-T9-304",question:"Which fertiliser supplies BOTH nitrogen and potassium in one compound?",options:["(NH₄)₂SO₄","NH₄NO₃","KNO₃","Urea CO(NH₂)₂"],correctIndex:2,explanation:"Potassium nitrate (KNO₃) provides K⁺ and NO₃⁻ — both plant nutrients."},
+    {id:"chem-T9-305",question:"A gas has a pungent smell, turns damp red litmus blue, and produces white smoke when a rod dipped in concentrated HCl is held near it. The gas is:",options:["Cl₂","SO₂","NH₃","H₂S"],correctIndex:2,explanation:"NH₃ + HCl(g) → NH₄Cl(s) white smoke; litmus confirms alkaline gas."},
+    {id:"chem-T9-306",question:"In the Haber process, high pressure (200 atm) favours NH₃ because:",options:["It lowers activation energy","There are fewer gas moles on the right (N₂ + 3H₂ → 2NH₃: 4 → 2) so high pressure shifts equilibrium right","High pressure cools the reactor","Pressure has no effect on equilibrium"],correctIndex:1,explanation:"Le Chatelier: fewer moles on product side — higher pressure pushes right."},
+    {id:"chem-T9-307",question:"The industrial catalyst in the Haber process is:",options:["Platinum","Vanadium(V) oxide","Iron","Nickel"],correctIndex:2,explanation:"Iron with promoters (K₂O/Al₂O₃). Platinum is for Contact process."},
+    {id:"chem-T9-308",question:"Nitrogen can be 'fixed' naturally by lightning because:",options:["Lightning removes N₂","High-temperature electrical discharge provides enough energy for N₂ + O₂ → 2NO","Lightning adds H₂ to N₂","Soil bacteria need lightning"],correctIndex:1,explanation:"Thermal energy of lightning arc allows the very endothermic N₂/O₂ reaction."},
+    {id:"chem-T9-309",question:"Which fertiliser provides both nitrogen and potassium?",options:["(NH₄)₂SO₄","NH₄NO₃","KNO₃","Urea CO(NH₂)₂"],correctIndex:2,explanation:"Potassium nitrate KNO₃ contains both K and N — dual-nutrient fertiliser."},
+    {id:"chem-T9-310",question:"Excess nitrate fertiliser washing into rivers can cause:",options:["Acid rain only","Eutrophication — algal blooms deplete dissolved O₂","Ozone depletion","Only pH decrease in air"],correctIndex:1,explanation:"Nitrate → algal bloom → algae die → bacteria decompose → O₂ depleted → aquatic life dies."},
+    {id:"chem-T9-311",question:"The Haber process uses a compromise temperature of around 450°C because:",options:["High T gives very high NH₃ yield but Fe catalyst is not needed","Low T gives good yield but too slow (kinetics); high T is fast but yield falls (Le Chatelier). 450°C is the practical optimum","Fe catalyst only works at exactly 450°C","Higher pressures reduce temperature effects"],correctIndex:1,explanation:"Rate vs equilibrium trade-off: lower T = better equilibrium yield but too slow. 450°C balances acceptable rate and reasonable yield."},
+    {id:"chem-T9-312",question:"Industrial ammonia is also used to manufacture nitric acid HNO₃. The first step is:",options:["Reacting NH₃ with HCl","Catalytic oxidation of NH₃ with air over a Pt–Rh catalyst: 4NH₃ + 5O₂ → 4NO + 6H₂O","Electrolysis of NH₄NO₃","Dissolving NH₃ in H₂SO₄"],correctIndex:1,explanation:"Ostwald process: NH₃ → NO (over Pt/Rh, ~900°C) → NO₂ → HNO₃."}
+    ],
+    trueFalse: [
+    {statement:"Haber process runs at room temperature industrially.",correct:false,explain:"~450°C."},
+    {statement:"Ammonia is a base in Brønsted sense.",correct:true,explain:"Accepts H⁺."},
+    {statement:"All soil nitrogen is immediately plant-available.",correct:false,explain:"Mineralisation needed."},
+    {statement:"NH₄⁺ in solution acidic hydrolysis.",correct:true,explain:"Weak base conjugate."},
+    {statement:"Liquid ammonia autoionises like water.",correct:true,explain:"2NH₃⇌NH₄⁺+NH₂⁻ minimal."},
+    {statement:"Urea hydrolyses to ammonia in soil.",correct:true,explain:"Enzyme urease."},
+    {statement:"Haber fixed N enabled population growth.",correct:true,explain:"Historical impact."},
+    {statement:"NH₃ is stored as pressurised liquid.",correct:true,explain:"Liquefaction."},
+    {statement:"Ammonium salts with nitrate are always safe to heat.",correct:false,explain:"Decomposition/explosion risk."},
+    {statement:"N₂ is very inert at room T.",correct:true,explain:"Strong triple bond."},
+    {statement:"Catalyst increases equilibrium yield.",correct:false,explain:"Speeds both ways equally."},
+    {statement:"NH₃ is trigonal pyramidal.",correct:true,explain:" Lone pair on N."}
+    ],
+    });
+})();

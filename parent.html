@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LevelUp! Parent Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg:#060b1a; --card:#0f172a; --border:#23314a; --text:#e2e8f0; --muted:#94a3b8; --accent:#5eead4; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family:Outfit,system-ui,sans-serif; background:radial-gradient(circle at top,#111827,#020617); color:var(--text); }
+    .shell { max-width:960px; margin:0 auto; padding:24px 16px 40px; }
+    h1 { margin:0 0 12px; font-size:1.9rem; }
+    .card { border:1px solid var(--border); background:rgba(15,23,42,.9); border-radius:14px; padding:14px; margin-bottom:12px; }
+    .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    input { background:#020617; color:var(--text); border:1px solid var(--border); border-radius:10px; padding:10px 12px; min-width:220px; }
+    button { border:1px solid var(--border); background:#0b1220; color:var(--text); border-radius:10px; padding:10px 12px; cursor:pointer; font:inherit; }
+    button.primary { border-color:var(--accent); color:var(--accent); }
+    .hint { color:var(--muted); font-size:.9rem; margin-top:8px; }
+    .remember { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:.9rem; }
+    table { width:100%; border-collapse:collapse; margin-top:10px; }
+    th, td { padding:10px 8px; border-bottom:1px solid #1f2a40; text-align:left; }
+    th { color:#cbd5e1; font-size:.85rem; text-transform:uppercase; letter-spacing:.04em; }
+    .details { margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+    .mini { border:1px solid #1f2a40; border-radius:10px; padding:10px; background:#0b1220; }
+    .mini h4 { margin:0 0 6px; font-size:.9rem; color:#cbd5e1; }
+    .chips { display:flex; flex-wrap:wrap; gap:6px; }
+    .chip { border:1px solid #273449; border-radius:999px; padding:3px 8px; font-size:.78rem; color:#cbd5e1; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <h1>Parent Dashboard</h1>
+    <div class="card">
+      <div class="row">
+        <input id="project-code" placeholder="Project code" value="study-app" />
+        <input id="parent-code" type="password" placeholder="Parent access code" />
+        <label class="remember"><input type="checkbox" id="remember-code" /> Remember 30 days</label>
+        <button id="btn-refresh" class="primary">Load students</button>
+        <button id="btn-setup-keys">Supabase keys</button>
+      </div>
+      <p class="hint" id="status">Configure keys if needed, then load overview.</p>
+    </div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Student ID</th>
+            <th>XP Balance</th>
+            <th>XP Events</th>
+            <th>Topics</th>
+            <th>Purchases</th>
+            <th>Last Activity</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="7" class="hint">No data yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (function () {
+      const status = document.getElementById("status");
+      const rows = document.getElementById("rows");
+      const btnSetup = document.getElementById("btn-setup-keys");
+      const btnRefresh = document.getElementById("btn-refresh");
+      const projectCode = document.getElementById("project-code");
+      const parentCode = document.getElementById("parent-code");
+      const rememberCode = document.getElementById("remember-code");
+      const TOKEN_KEY = "PARENT_DASH_TOKEN_V1";
+      const TOKEN_EXP_KEY = "PARENT_DASH_TOKEN_EXP_V1";
+
+      function saveToken(token) {
+        const exp = Date.now() + 1000 * 60 * 60 * 24 * 30;
+        localStorage.setItem(TOKEN_KEY, token);
+        localStorage.setItem(TOKEN_EXP_KEY, String(exp));
+      }
+
+      function loadToken() {
+        const token = (localStorage.getItem(TOKEN_KEY) || "").trim();
+        const exp = Number(localStorage.getItem(TOKEN_EXP_KEY) || 0);
+        if (!token || !exp || Date.now() > exp) {
+          localStorage.removeItem(TOKEN_KEY);
+          localStorage.removeItem(TOKEN_EXP_KEY);
+          return "";
+        }
+        return token;
+      }
+
+      function clearToken() {
+        localStorage.removeItem(TOKEN_KEY);
+        localStorage.removeItem(TOKEN_EXP_KEY);
+      }
+
+      async function sha256Hex(input) {
+        const enc = new TextEncoder().encode(input);
+        const digest = await crypto.subtle.digest("SHA-256", enc);
+        return Array.from(new Uint8Array(digest))
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join("");
+      }
+
+      function getKeys() {
+        return {
+          url: (localStorage.getItem("SUPABASE_URL") || "").trim(),
+          key: (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim(),
+        };
+      }
+
+      function setupKeys() {
+        const { url, key } = getKeys();
+        const u = prompt("Supabase Project URL:", url || "https://xxxx.supabase.co");
+        if (!u) return;
+        const k = prompt("Supabase anon/public key:", key || "");
+        if (!k) return;
+        localStorage.setItem("SUPABASE_URL", u.trim());
+        localStorage.setItem("SUPABASE_ANON_KEY", k.trim());
+        status.textContent = "Keys saved.";
+      }
+
+      function fmt(ts) {
+        if (!ts) return "-";
+        const d = new Date(ts);
+        if (Number.isNaN(d.getTime())) return "-";
+        return d.toLocaleString();
+      }
+
+      function esc(s) {
+        return String(s == null ? "" : s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function topicList(topics, key) {
+        const arr = Array.isArray(topics) ? topics : [];
+        if (!arr.length) return "<span class='chip'>none</span>";
+        return arr
+          .slice(0, 8)
+          .map((t) => `<span class="chip">T${esc(t.topic_id)} · ${Number(t[key] || 0)}%</span>`)
+          .join("");
+      }
+
+      async function loadData() {
+        const { url, key } = getKeys();
+        if (!url || !key) {
+          status.textContent = "Missing Supabase keys. Click Supabase keys first.";
+          return;
+        }
+        let token = loadToken();
+        const pin = (parentCode.value || "").trim();
+        if (!token && !pin) {
+          status.textContent = "Enter parent access code.";
+          return;
+        }
+        if (!token && pin) token = await sha256Hex(pin);
+        status.textContent = "Loading...";
+        try {
+          const sb = window.supabase.createClient(url, key);
+          const { data, error } = await sb.rpc("study_parent_student_overview_token", {
+            p_project_code: (projectCode.value || "study-app").trim(),
+            p_parent_token: token,
+          });
+          if (error) throw error;
+          if (!data || !data.ok) {
+            status.textContent = "Failed: " + ((data && data.error) || "unknown");
+            if ((data && data.error) && String(data.error).includes("token")) clearToken();
+            return;
+          }
+          if (rememberCode.checked && token) saveToken(token);
+          if (!rememberCode.checked) clearToken();
+          const students = Array.isArray(data.students) ? data.students : [];
+          if (!students.length) {
+            rows.innerHTML = "<tr><td colspan='7' class='hint'>No student rows yet.</td></tr>";
+            status.textContent = "Loaded. No students found yet.";
+            return;
+          }
+          rows.innerHTML = students
+            .map((s, idx) => `
+              <tr>
+                <td>${(s.student_name || "").replace(/</g, "&lt;")}</td>
+                <td>${(s.student_id || "").replace(/</g, "&lt;")}</td>
+                <td>${Number(s.xp_balance || 0)}</td>
+                <td>${Number(s.xp_events || 0)}</td>
+                <td>${Number(s.chapters_covered || s.studied_topics || 0)}</td>
+                <td>${Number(s.purchases || 0)}</td>
+                <td>${fmt(s.last_activity)}</td>
+              </tr>
+              <tr>
+                <td colspan="7">
+                  <div class="details">
+                    <div class="mini">
+                      <h4>Last 7 days</h4>
+                      <div class="chips">
+                        <span class="chip">XP ${Number(s.xp_last_7d || 0)}</span>
+                        <span class="chip">Events ${Number(s.xp_events_last_7d || 0)}</span>
+                      </div>
+                    </div>
+                    <div class="mini">
+                      <h4>Areas studied (overall)</h4>
+                      <div class="chips">${
+                        (Array.isArray(s.areas_overall) && s.areas_overall.length)
+                          ? s.areas_overall.map((a) => `<span class="chip">${esc(a)}</span>`).join("")
+                          : "<span class='chip'>none</span>"
+                      }</div>
+                    </div>
+                    <div class="mini">
+                      <h4>Areas studied (last week)</h4>
+                      <div class="chips">${
+                        (Array.isArray(s.areas_week) && s.areas_week.length)
+                          ? s.areas_week.map((a) => `<span class="chip">${esc(a)}</span>`).join("")
+                          : "<span class='chip'>none</span>"
+                      }</div>
+                    </div>
+                    <div class="mini">
+                      <h4>Strong topics</h4>
+                      <div class="chips">${topicList(s.strong_topics, "mastery")}</div>
+                    </div>
+                    <div class="mini">
+                      <h4>Weak topics</h4>
+                      <div class="chips">${topicList(s.weak_topics, "mastery")}</div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            `)
+            .join("");
+          status.textContent = `Loaded ${students.length} student(s). Generated at ${fmt(data.generated_at)}.`;
+        } catch (e) {
+          status.textContent = "Error: " + (e && e.message ? e.message : String(e));
+        }
+      }
+
+      btnSetup.onclick = setupKeys;
+      btnRefresh.onclick = loadData;
+      if (loadToken()) rememberCode.checked = true;
+    })();
+  </script>
+</body>
+</html>

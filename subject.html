@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LevelUp! — Subject</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=JetBrains+Mono:wght@500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div id="app">
+      <header class="topbar">
+        <button
+          type="button"
+          class="logo-btn"
+          id="btn-home"
+          aria-label="Home"
+        >
+          LevelUp!
+        </button>
+        <div class="topbar-stats">
+          <span class="pill xp" id="stat-xp">0 XP</span>
+          <span class="pill streak" id="stat-streak">🔥 0 day</span>
+          <span
+            class="pill badge-boss"
+            id="stat-boss"
+            hidden
+            title="Theme boss beaten"
+            >🏆</span
+          >
+          <button
+            type="button"
+            class="pill pill-shop"
+            id="btn-shop"
+            title="Rewards shop"
+          >
+            🛒 Shop
+          </button>
+        </div>
+        <button
+          type="button"
+          class="icon-btn"
+          id="btn-settings"
+          title="Settings"
+        >
+          ⚙
+        </button>
+      </header>
+
+      <main id="main"></main>
+
+      <nav class="dock" id="dock" hidden>
+        <button type="button" data-tab="cheat">Notes</button>
+        <button type="button" data-tab="visual">Visuals</button>
+        <button type="button" data-tab="flash">Cards</button>
+        <button type="button" data-tab="quiz">Quiz</button>
+        <button type="button" data-tab="game">Games</button>
+      </nav>
+    </div>
+
+    <div
+      class="modal-overlay"
+      id="modal-root"
+      hidden
+      aria-hidden="true"
+    >
+      <div class="modal" id="panel-settings" hidden>
+        <h2>Settings</h2>
+        <label class="check-row">
+          <input type="checkbox" id="opt-unlock-all" />
+          <span>Unlock all topics (free study)</span>
+        </label>
+        <label class="check-row">
+          <input type="checkbox" id="opt-challenge" />
+          <span>Hard mode: 80% (not 70%) on previous topic to unlock next</span>
+        </label>
+        <p class="hint">
+          Uncheck "Unlock all" for guided path: Topic 1 open, then pass
+          threshold on each topic to unlock the next.
+        </p>
+        <div class="export-block">
+          <h3 class="export-title">Transfer progress between browsers</h3>
+          <p class="hint">
+            Set a short password, export to get a code, then import on another
+            browser with the <em>same</em> password.
+          </p>
+          <label class="export-row">
+            <span>Password</span>
+            <input
+              type="password"
+              id="export-password"
+              autocomplete="off"
+            />
+          </label>
+          <button
+            type="button"
+            class="btn"
+            id="btn-export-progress"
+          >
+            Export → code
+          </button>
+          <textarea
+            id="export-output"
+            class="progress-code"
+            rows="3"
+            readonly
+            placeholder="Encrypted code will appear here. Copy it somewhere safe."
+          ></textarea>
+          <label class="export-row">
+            <span>Import password</span>
+            <input
+              type="password"
+              id="import-password"
+              autocomplete="off"
+            />
+          </label>
+          <textarea
+            id="import-input"
+            class="progress-code"
+            rows="3"
+            placeholder="Paste encrypted code here to import."
+          ></textarea>
+          <button type="button" class="btn primary" id="btn-import-progress">
+            Import progress
+          </button>
+          <p class="hint" id="sync-status"></p>
+        </div>
+        <div class="export-block">
+          <h3 class="export-title">Parent study report</h3>
+          <p class="hint">
+            View a readable study audit or export the raw local data.
+          </p>
+          <button type="button" class="btn" id="btn-open-report">
+            Open study report
+          </button>
+        </div>
+        <button type="button" class="btn primary" id="btn-close-settings">
+          Done
+        </button>
+      </div>
+
+      <div class="modal explain-modal" id="panel-explain" hidden>
+        <h2 id="explain-title">Let's fix that</h2>
+        <p id="explain-body"></p>
+        <button type="button" class="btn primary" id="btn-explain-ok">
+          Got it — continue
+        </button>
+      </div>
+
+      <div class="modal modal-shop" id="panel-shop" hidden>
+        <h2>🛒 Rewards Shop</h2>
+        <p class="hint">Spend XP on rewards. Show the coupon to your parent to claim.</p>
+        <div id="shop-rewards-list"></div>
+        <hr class="shop-divider" />
+        <h3 class="shop-sub">My coupons</h3>
+        <div id="shop-coupons-list"></div>
+        <button type="button" class="btn primary" id="btn-close-shop">
+          Done
+        </button>
+      </div>
+
+      <div class="modal modal-report" id="panel-report" hidden>
+        <h2>Study Report</h2>
+        <div id="report-body"></div>
+        <div class="report-actions">
+          <button type="button" class="btn" id="btn-report-text">
+            Export text summary
+          </button>
+          <button type="button" class="btn" id="btn-report-json">
+            Export JSON
+          </button>
+          <button type="button" class="btn primary" id="btn-close-report">
+            Done
+          </button>
+        </div>
+        <textarea
+          id="report-export-output"
+          class="progress-code report-export"
+          rows="8"
+          readonly
+          placeholder="Report export will appear here."
+        ></textarea>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        const params = new URLSearchParams(window.location.search);
+        const subjectId = params.get("subject") || "chemistry";
+        const titles = {
+          chemistry: "O-Level Chemistry",
+          physics: "O-Level Physics",
+        };
+        const subjectTitle = titles[subjectId] || subjectId;
+
+        window.SUBJECT_ID = subjectId;
+        window.SUBJECT_TITLE = subjectTitle;
+        window.APP_VERSION = window.APP_VERSION || "2026-03-18";
+        window.SUPABASE_PROJECT_CODE = window.SUPABASE_PROJECT_CODE || "study-app";
+        const STUDENT_ID_KEY = "LEVELUP_STUDENT_ID";
+        const STUDENT_NAME_KEY = "LEVELUP_STUDENT_NAME";
+
+        const SUPABASE_SKIP_KEY = "SUPABASE_SETUP_SKIPPED_V1";
+        function setupSupabaseKeysPrompt(force) {
+          const existingUrl = localStorage.getItem("SUPABASE_URL") || "";
+          const existingAnon = localStorage.getItem("SUPABASE_ANON_KEY") || "";
+          if (!force && existingUrl && existingAnon) return;
+
+          const shouldAsk =
+            force ||
+            (window.location.search.includes("setupSupabase=1")
+              ? true
+              : localStorage.getItem(SUPABASE_SKIP_KEY) !== "1");
+          if (!shouldAsk) return;
+
+          const proceed = window.confirm(
+            "Configure Supabase now? You can skip and continue local-only mode."
+          );
+          if (!proceed) {
+            if (!force) localStorage.setItem(SUPABASE_SKIP_KEY, "1");
+            return;
+          }
+
+          const url = window
+            .prompt("Supabase Project URL (https://xxxx.supabase.co):", existingUrl)
+            ?.trim();
+          if (!url) return;
+
+          const anon = window
+            .prompt("Supabase Publishable (anon) key:", existingAnon)
+            ?.trim();
+          if (!anon) return;
+
+          localStorage.setItem("SUPABASE_URL", url);
+          localStorage.setItem("SUPABASE_ANON_KEY", anon);
+          localStorage.removeItem(SUPABASE_SKIP_KEY);
+          alert("Supabase config saved. Reloading...");
+          window.location.reload();
+        }
+
+        window.configureSupabaseKeys = () => setupSupabaseKeysPrompt(true);
+        setupSupabaseKeysPrompt(false);
+
+        function setupStudentProfilePrompt(force) {
+          const existingId = (localStorage.getItem(STUDENT_ID_KEY) || "").trim();
+          const existingName = (localStorage.getItem(STUDENT_NAME_KEY) || "").trim();
+          if (!force && existingId && existingName) return;
+          const shouldAsk = force || window.location.search.includes("setupStudent=1");
+          if (!shouldAsk && (existingId || existingName)) return;
+
+          const name = window
+            .prompt(
+              "Student display name (for parent reports / Supabase profile):",
+              existingName || ""
+            )
+            ?.trim();
+          if (!name) return;
+          const seed = name
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")
+            .replace(/^-+|-+$/g, "")
+            .slice(0, 24);
+          const generatedId = seed || "student";
+          const studentId = window
+            .prompt(
+              "Student ID (short unique id, e.g. carol-1):",
+              existingId || generatedId
+            )
+            ?.trim();
+          if (!studentId) return;
+          localStorage.setItem(STUDENT_ID_KEY, studentId);
+          localStorage.setItem(STUDENT_NAME_KEY, name);
+        }
+
+        window.configureStudentProfile = () => setupStudentProfilePrompt(true);
+        setupStudentProfilePrompt(false);
+        window.LEVELUP_STUDENT_ID =
+          window.LEVELUP_STUDENT_ID || localStorage.getItem(STUDENT_ID_KEY) || "";
+        window.LEVELUP_STUDENT_NAME =
+          window.LEVELUP_STUDENT_NAME || localStorage.getItem(STUDENT_NAME_KEY) || "";
+
+        window.SUPABASE_URL =
+          window.SUPABASE_URL || localStorage.getItem("SUPABASE_URL") || "";
+        window.SUPABASE_ANON_KEY =
+          window.SUPABASE_ANON_KEY ||
+          localStorage.getItem("SUPABASE_ANON_KEY") ||
+          "";
+      })();
+    </script>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    ></script>
+
+    <script>
+      (function () {
+        const v = encodeURIComponent(window.APP_VERSION || "dev");
+        const subjectId = window.SUBJECT_ID;
+
+        const mkV = (src) =>
+          src + (src.includes("?") ? "&" : "?") + "v=" + v;
+
+        // Avoid console noise for subjects that don't have infographics-images.js.
+        function tryExists(src) {
+          if (!src) return false;
+          if (window.location.protocol === "file:") return true;
+          try {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", src, false);
+            xhr.send(null);
+            return xhr.status >= 200 && xhr.status < 300;
+          } catch (_) {
+            return false;
+          }
+        }
+
+        const scripts = [
+          "data/subjects/" + subjectId + "/topics-manifest.js",
+        ];
+
+        const maybeMap = "data/subjects/" + subjectId + "/infographics-images.js";
+        if (tryExists(maybeMap)) scripts.push(maybeMap);
+
+        const maybeExtraQuiz = "data/subjects/" + subjectId + "/extra-quiz.js";
+        if (tryExists(maybeExtraQuiz)) scripts.push(maybeExtraQuiz);
+
+        // Needs to run before js/app.js so renderVisuals can synchronously look up markdown.
+        scripts.push("js/infographics-info-loader.js");
+        scripts.push("data/shop-rewards.js");
+        scripts.push("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2");
+        scripts.push("js/supabase-client.js");
+        scripts.push("js/progress-store.js");
+        scripts.push("js/app.js");
+
+        scripts.forEach((src) => {
+          const s = document.createElement("script");
+          s.src = mkV(src);
+          s.async = false;
+          document.body.appendChild(s);
+        });
+      })();
+    </script>
+  </body>
+</html>
+
