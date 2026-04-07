@@ -25,19 +25,25 @@
   const BOSS_QUESTION_MS_MULT = 0.8;
   const BOSS_XP = 800;
   const STATE_VERSION = 2;
+  const XP_POLICY = window.LEVELUP_XP_POLICY || {};
+  const TOPIC_FARM_LOCK_POLICY = XP_POLICY.topicFarmLock || {};
   const QUESTION_MASTERY_COOLDOWN_MS = 1000 * 60 * 60 * 24 * 5;
   const TOPIC_MASTERY_COOLDOWN_MS = 1000 * 60 * 60 * 24 * 5;
+  const TOPIC_FARM_LOCK_WINDOW_MS = Number(TOPIC_FARM_LOCK_POLICY.windowMs || 1000 * 60 * 60);
+  const TOPIC_FARM_LOCK_TRIGGER_XP = Number(TOPIC_FARM_LOCK_POLICY.triggerXp || 140);
+  const TOPIC_FARM_LOCK_MS = Number(TOPIC_FARM_LOCK_POLICY.lockMs || 1000 * 60 * 30);
   const PURCHASE_EVIDENCE_WINDOW_MS = 1000 * 60 * 60 * 24 * 7;
   const PURCHASE_REPEAT_COOLDOWN_MS = 1000 * 60 * 60 * 24;
   const DEFAULT_REWARD_DAILY_MAX = 1;
   const XP_RATE_LIMITS = {
-    flash: { windowMs: 1000 * 60 * 10, maxXp: 25 },
-    game_match: { windowMs: 1000 * 60 * 10, maxXp: 25 },
-    game_sequence: { windowMs: 1000 * 60 * 10, maxXp: 25 },
-    game_tf: { windowMs: 1000 * 60 * 10, maxXp: 25 },
-    quiz: { windowMs: 1000 * 60 * 10, maxXp: 45 },
-    quiz_review: { windowMs: 1000 * 60 * 10, maxXp: 35 },
+    flash: { windowMs: 1000 * 60 * 5, maxXp: 40 },
+    game_match: { windowMs: 1000 * 60 * 5, maxXp: 40 },
+    game_sequence: { windowMs: 1000 * 60 * 5, maxXp: 40 },
+    game_tf: { windowMs: 1000 * 60 * 5, maxXp: 40 },
+    quiz: { windowMs: 1000 * 60 * 5, maxXp: 80 },
+    quiz_review: { windowMs: 1000 * 60 * 5, maxXp: 60 },
   };
+  const ENABLE_ACTIVITY_XP_CAP = !!XP_POLICY.enableActivityXpCap;
   const loadScriptPromises = {};
 
   // Boss themes are derived from each topic's `theme` field in the manifest.
@@ -154,6 +160,8 @@
   function normalizeState(s) {
     const next = { ...defaultState(), ...(s || {}) };
     next.schemaVersion = STATE_VERSION;
+    next.xp = Number(next.xp || 0);
+    next.streak = Number(next.streak || 0);
     next.studyTimeMsByTopicTab = next.studyTimeMsByTopicTab || {};
     next.timeXpEarnedByTopicTab = next.timeXpEarnedByTopicTab || {};
     next.questionStats = next.questionStats || {};
@@ -382,6 +390,7 @@
       lastStudiedAt: 0,
       lastQuizAt: 0,
       masteredUntil: 0,
+      xpLockUntil: 0,
       errorFreeRounds: 0,
       totalQuestionsSeen: 0,
       totalWrong: 0,
@@ -419,6 +428,7 @@
   }
 
   function getXpRateLimit(activityType) {
+    if (!ENABLE_ACTIVITY_XP_CAP) return null;
     if (XP_RATE_LIMITS[activityType]) return XP_RATE_LIMITS[activityType];
     if (String(activityType || "").startsWith("game_")) return XP_RATE_LIMITS.game_tf;
     return null;
@@ -431,6 +441,131 @@
       if (!predicate(entry)) return sum;
       return sum + entry.deltaXp;
     }, 0);
+  }
+
+  function getRecentXpEntriesByActivity(activityType, windowMs) {
+    const cutoff = Date.now() - windowMs;
+    return (state.xpLedger || [])
+      .filter(
+        (entry) =>
+          entry &&
+          entry.deltaXp > 0 &&
+          entry.ts >= cutoff &&
+          String(entry.activityType || "") === String(activityType || "")
+      )
+      .sort((a, b) => a.ts - b.ts);
+  }
+
+  function getRecentTopicQuizXp(topicId, windowMs) {
+    const cutoff = Date.now() - windowMs;
+    return (state.xpLedger || []).reduce((sum, entry) => {
+      if (!entry || entry.deltaXp <= 0 || entry.ts < cutoff) return sum;
+      if (String(entry.topicId || "") !== String(topicId || "")) return sum;
+      if (!String(entry.activityType || "").startsWith("quiz")) return sum;
+      return sum + Number(entry.deltaXp || 0);
+    }, 0);
+  }
+
+  function isTopicXpLocked(topicId) {
+    if (topicId == null) return false;
+    return isCooldownActive(touchTopicStats(topicId).xpLockUntil || 0);
+  }
+
+  function ensureTopicFarmLock(topicId) {
+    if (topicId == null) return false;
+    const tStats = touchTopicStats(topicId);
+    if (isCooldownActive(tStats.xpLockUntil || 0)) return true;
+    const recentQuizXp = getRecentTopicQuizXp(topicId, TOPIC_FARM_LOCK_WINDOW_MS);
+    if (recentQuizXp >= TOPIC_FARM_LOCK_TRIGGER_XP) {
+      tStats.xpLockUntil = Date.now() + TOPIC_FARM_LOCK_MS;
+      saveState();
+      return true;
+    }
+    return false;
+  }
+
+  function formatMsShort(ms) {
+    const n = Math.max(0, Number(ms || 0));
+    const mins = Math.ceil(n / 60000);
+    if (mins < 1) return "<1 min";
+    return `${mins} min`;
+  }
+
+  function getActivityLabel(activityType) {
+    const a = String(activityType || "");
+    if (a.startsWith("quiz_review")) return "Quiz (review)";
+    if (a.startsWith("quiz")) return "Quiz";
+    if (a.startsWith("flash")) return "Flashcards";
+    if (a.startsWith("game_")) return "Games";
+    return "Study";
+  }
+
+  function topicLockMessage(topicId) {
+    const tStats = touchTopicStats(topicId);
+    const remainingMs = Math.max(0, Number(tStats.xpLockUntil || 0) - Date.now());
+    return `XP for this chapter is paused for ${formatMsShort(
+      remainingMs
+    )} because this chapter was repeated too much in a short time. Try another chapter for full XP.`;
+  }
+
+  function formatDurationCountdown(ms) {
+    const totalSec = Math.max(0, Math.ceil(Number(ms || 0) / 1000));
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    if (mins <= 0) return `${secs}s`;
+    if (mins < 60) return `${mins}m ${secs}s`;
+    const hours = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    return `${hours}h ${remMins}m`;
+  }
+
+  function getServerPurchaseErrorMessage(reason) {
+    const r = String(reason || "").toLowerCase();
+    if (r.includes("daily_limit_reached")) {
+      return "Daily reward limit reached for this item. Try again tomorrow.";
+    }
+    if (r.includes("insufficient_xp")) {
+      return "Not enough XP yet for this reward.";
+    }
+    if (r.includes("invalid_daily_max")) {
+      return "Reward configuration issue. Please refresh and try again.";
+    }
+    if (r.includes("student_id_required")) {
+      return "Student profile is missing. Please set Student profile and try again.";
+    }
+    return "Purchase blocked by server rules. Keep studying and try again.";
+  }
+
+  function getSuggestedNextTopics(currentTopicId, limit) {
+    const currentMeta = getTopicMeta(currentTopicId);
+    const unlocked = manifest.filter(
+      (m) => String(m.id) !== String(currentTopicId) && isUnlocked(m.id)
+    );
+    const prioritized = unlocked.sort((a, b) => {
+      const aStats = touchTopicStats(a.id);
+      const bStats = touchTopicStats(b.id);
+      const aMastery = Number(aStats.mastery || 0);
+      const bMastery = Number(bStats.mastery || 0);
+      const aSeen = Number(aStats.totalQuestionsSeen || 0);
+      const bSeen = Number(bStats.totalQuestionsSeen || 0);
+      const aTheme = currentMeta && a.theme === currentMeta.theme ? 1 : 0;
+      const bTheme = currentMeta && b.theme === currentMeta.theme ? 1 : 0;
+      return (
+        aTheme - bTheme ||
+        aMastery - bMastery ||
+        aSeen - bSeen ||
+        String(a.id).localeCompare(String(b.id))
+      );
+    });
+    return prioritized.slice(0, Math.max(1, Number(limit || 3)));
+  }
+
+  function showXpPauseHint(activityType, waitMs) {
+    const msg = `XP pause for ${getActivityLabel(activityType)}: try again in ${formatMsShort(waitMs)}.`;
+    const status = document.getElementById("sync-status");
+    if (status) status.textContent = msg;
+    const xpPill = document.getElementById("stat-xp");
+    if (xpPill) xpPill.title = msg;
   }
 
   function getRepeatAttemptMultiplier(meta) {
@@ -492,6 +627,16 @@
 
   function addXp(deltaXp, meta) {
     if (!deltaXp) return;
+    if (
+      meta &&
+      meta.topicId != null &&
+      String(meta.activityType || "").startsWith("quiz") &&
+      ensureTopicFarmLock(meta.topicId)
+    ) {
+      const status = document.getElementById("sync-status");
+      if (status) status.textContent = topicLockMessage(meta.topicId);
+      return;
+    }
     if (meta && meta.topicId != null) {
       touchTopicStats(meta.topicId).lastStudiedAt = Date.now();
     }
@@ -523,17 +668,31 @@
     if (repeatMult < 1 && adjusted > 0) {
       adjusted = Math.max(1, Math.round(adjusted * repeatMult));
       entry.reason += "_repeat_reduced";
+      const status = document.getElementById("sync-status");
+      if (status) {
+        status.textContent =
+          "XP is slightly reduced for repeating the same chapter too much in a short time. Try another chapter for full XP.";
+      }
     }
     const rateLimit = getXpRateLimit(entry.activityType);
     if (rateLimit && adjusted > 0) {
-      const gainedRecently = sumRecentXpBy(
-        (item) => String(item.activityType || "") === String(entry.activityType || ""),
+      const recentEntries = getRecentXpEntriesByActivity(
+        entry.activityType,
         rateLimit.windowMs
+      );
+      const gainedRecently = recentEntries.reduce(
+        (sum, item) => sum + Number(item.deltaXp || 0),
+        0
       );
       const remaining = Math.max(0, rateLimit.maxXp - gainedRecently);
       adjusted = Math.min(adjusted, remaining);
       if (remaining === 0) entry.reason += "_cap_blocked";
       else if (adjusted < deltaXp) entry.reason += "_cap_reduced";
+      if (remaining === 0) {
+        const oldestTs = recentEntries.length ? Number(recentEntries[0].ts || 0) : Date.now();
+        const waitMs = Math.max(0, oldestTs + rateLimit.windowMs - Date.now());
+        showXpPauseHint(entry.activityType, waitMs);
+      }
     }
     if (adjusted <= 0) return;
     entry.deltaXp = adjusted;
@@ -1175,6 +1334,14 @@
             <span class="quiz-chip">New ${insight.unseenCount}</span>
             <span class="quiz-chip">Mastered ${insight.masteredCount}</span>
             <span class="quiz-chip">Cooling ${insight.coolingCount}</span>
+            <span class="quiz-chip">Fresh ${insight.freshEligible}</span>
+            ${
+              isCooldownActive(insight.topicXpLockUntil)
+                ? `<span class="quiz-chip" title="${escapeHtml(
+                    topicLockMessage(t.id)
+                  )}">XP paused ${escapeHtml(formatMsShort(insight.topicXpLockUntil - Date.now()))}</span>`
+                : ""
+            }
           </div>
           <div class="quiz-start-actions">
             <button type="button" class="btn primary" id="quiz-start" ${topicCooling ? "disabled" : ""}>${topicCooling ? "Adaptive quiz cooling down" : "Start adaptive quiz"}</button>
@@ -1184,7 +1351,13 @@
             topicCooling
               ? `Mastered recently — adaptive quiz returns on ${escapeHtml(
                   formatShortDate(insight.topicMasteredUntil)
-                )}. Review mode still works.`
+                )} (${escapeHtml(formatDurationCountdown(insight.topicMasteredUntil - Date.now()))} left). Review mode still works.`
+              : isCooldownActive(insight.topicXpLockUntil)
+                ? `XP pause active for this chapter (${escapeHtml(
+                    formatDurationCountdown(insight.topicXpLockUntil - Date.now())
+                  )} left). You can study Notes/Cards, or switch chapter for quiz XP.`
+              : insight.total >= 10 && (insight.unseenCount <= 2 || insight.freshEligible <= 3 || insight.exhaustedShare >= 0.7)
+                ? `Most questions here are now repeated. For better learning, try another chapter after this round.`
               : `Daily: ${Math.min(daily.answered, DAILY_CHALLENGE.answered)}/${DAILY_CHALLENGE.answered} answered · ${Math.min(daily.reviewRounds, DAILY_CHALLENGE.reviewRounds)}/${DAILY_CHALLENGE.reviewRounds} review rounds · ${Math.min(daily.weakTopics, DAILY_CHALLENGE.weakTopics)}/${DAILY_CHALLENGE.weakTopics} weak topic.`
           }</p>
         </div>
@@ -1394,8 +1567,47 @@
     const wrap = document.getElementById("quiz-start-wrap");
     const play = document.getElementById("quiz-play");
     const insight = getTopicQuizInsights(t);
+    const suggested = getSuggestedNextTopics(t.id, 3);
+    const suggestionText = suggested.length
+      ? suggested.map((m) => `T${m.id} ${m.title}`).join(", ")
+      : "another chapter";
+    const exhaustionMessage =
+      "You have mostly repeated questions in this chapter now. " +
+      "For better learning and fair XP, try: " +
+      suggestionText +
+      ".";
+    const shouldNudgeChapterSwitch =
+      insight.total >= 10 &&
+      !isCooldownActive(insight.topicMasteredUntil) &&
+      (insight.unseenCount <= 2 || insight.freshEligible <= 3 || insight.exhaustedShare >= 0.7);
     start.onclick = () => {
       if (isCooldownActive(insight.topicMasteredUntil)) return;
+      if (isTopicXpLocked(t.id)) {
+        showExplain(
+          "Chapter XP pause",
+          topicLockMessage(t.id),
+          () => {
+            route = { view: "home" };
+            renderHome();
+          },
+          "Pick another chapter from Home."
+        );
+        return;
+      }
+      if (shouldNudgeChapterSwitch) {
+        showExplain(
+          "Chapter mostly completed",
+          exhaustionMessage,
+          () => {
+            if (insight.weakCount > 0) markDailyWeakTopic(t.id);
+            wrap.hidden = true;
+            play.hidden = false;
+            runQuiz(t, play);
+          },
+          "You can still continue here, but switching chapters is recommended."
+        );
+        return;
+      }
       if (insight.weakCount > 0) markDailyWeakTopic(t.id);
       wrap.hidden = true;
       play.hidden = false;
@@ -1403,6 +1615,32 @@
     };
     if (review) {
       review.onclick = () => {
+        if (isTopicXpLocked(t.id)) {
+          showExplain(
+            "Chapter XP pause",
+            topicLockMessage(t.id),
+            () => {
+              route = { view: "home" };
+              renderHome();
+            },
+            "You can still study Notes/Cards, but quiz XP here is paused."
+          );
+          return;
+        }
+        if (shouldNudgeChapterSwitch && insight.weakCount <= 2) {
+          showExplain(
+            "Review is getting repetitive",
+            exhaustionMessage,
+            () => {
+              if (insight.weakCount > 0) markDailyWeakTopic(t.id);
+              wrap.hidden = true;
+              play.hidden = false;
+              runQuiz(t, play, { review: true });
+            },
+            "You can still continue if you want."
+          );
+          return;
+        }
         if (insight.weakCount > 0) markDailyWeakTopic(t.id);
         wrap.hidden = true;
         play.hidden = false;
@@ -1471,6 +1709,15 @@
           0
         ) / annotated.length
       : 0;
+    const freshEligible = annotated.filter(
+      (item) =>
+        item.bucket === "new" ||
+        item.bucket === "weak" ||
+        item.bucket === "improving"
+    ).length;
+    const exhaustedShare = annotated.length
+      ? (annotated.length - freshEligible) / annotated.length
+      : 0;
     let label = "New";
     if (annotated.some((item) => item.stats.seen > 0)) {
       label = "Improving";
@@ -1484,8 +1731,11 @@
       masteredCount,
       coolingCount,
       avgMastery,
+      freshEligible,
+      exhaustedShare,
       label,
       topicMasteredUntil: topicStats.masteredUntil || 0,
+      topicXpLockUntil: topicStats.xpLockUntil || 0,
     };
   }
 
@@ -1706,6 +1956,12 @@
     opts = opts || {};
     const isBoss = !!opts.boss;
     const isReview = !!opts.review;
+    if (!isBoss && isTopicXpLocked(t.id)) {
+      container.innerHTML = `<div class="game-win"><h3>Chapter XP paused</h3><p>${escapeHtml(
+        topicLockMessage(t.id)
+      )}</p></div>`;
+      return;
+    }
     const healthMax = isBoss ? 1 : HEALTH_START;
     const questionMs = isBoss ? Math.round(QUESTION_MS * BOSS_QUESTION_MS_MULT) : QUESTION_MS;
     const topicStats = !isBoss && t.id ? touchTopicStats(t.id) : null;
@@ -1729,6 +1985,7 @@
     let timerId = null;
     let qStart = 0;
     let wrongCount = 0;
+    let timedOutCurrent = false;
 
     function renderQ() {
       if (qi >= qs.length) {
@@ -1827,8 +2084,22 @@
       bar.style.transition = `width ${questionMs}ms linear`;
       bar.style.width = "0%";
       qStart = Date.now();
+      timedOutCurrent = false;
       if (timerId) clearTimeout(timerId);
-      timerId = setTimeout(() => finish(false, true), questionMs);
+      timerId = setTimeout(() => {
+        // Boss keeps strict timeout. Normal/review quiz allows overtime answer with reduced XP.
+        if (isBoss) {
+          finish(false, true);
+          return;
+        }
+        timedOutCurrent = true;
+        if (bar) bar.style.width = "0%";
+        const confidence = document.getElementById("quiz-confidence");
+        if (confidence) {
+          confidence.innerHTML =
+            "<div class='question-confidence weak'><div class='question-confidence-reason'>Time is up for bonus speed XP, but you can still answer this question. Overtime correct answers give reduced XP.</div></div>";
+        }
+      }, questionMs);
 
       const optEl = document.getElementById("q-opts");
       optionItems.forEach(({ o, i }) => {
@@ -1893,14 +2164,20 @@
             cooled: wasCooled,
           });
           const fastGuess = elapsed < 1.2;
+          let xpMultiplier = fastGuess ? 0.4 : 1;
+          let reason = fastGuess ? `${reward.reason}_very_fast` : reward.reason;
+          if (timedOutCurrent) {
+            xpMultiplier *= 0.5;
+            reason += "_overtime";
+          }
           addXp(reward.delta, {
             topicId: getQuestionTopicId(q, t.id),
             theme: t.theme,
             tab: "quiz",
             activityType: isReview ? "quiz_review" : "quiz",
             sourceId: q.__questionKey || getQuestionKey(q, t.id),
-            reason: fastGuess ? `${reward.reason}_very_fast` : reward.reason,
-            xpMultiplier: fastGuess ? 0.4 : 1,
+            reason,
+            xpMultiplier,
           });
         }
         combo++;
@@ -1954,7 +2231,7 @@
             "Not quite",
             q.explanation,
             next,
-            `${confidenceMeta.label} · ${confidenceMeta.reason}`
+            `${confidenceMeta.label} · ${confidenceMeta.reason} · No XP for wrong answer${timedOutCurrent ? " (answered after time)" : ""}, but this question will show up again for practice.`
           );
         }
       }
@@ -2738,7 +3015,7 @@
           });
           if (!rpcResult || !rpcResult.ok) {
             const reason = (rpcResult && rpcResult.error) || "purchase_blocked";
-            alert(`Purchase blocked by server: ${reason}`);
+            alert(getServerPurchaseErrorMessage(reason));
             return;
           }
           rpcCouponCode = rpcResult.coupon_code || null;
