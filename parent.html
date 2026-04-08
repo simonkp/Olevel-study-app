@@ -238,6 +238,20 @@
           .join("");
       }
 
+      function subjectList(subjects) {
+        const arr = Array.isArray(subjects) ? subjects : [];
+        if (!arr.length) return "<span class='chip'>none</span>";
+        return arr
+          .slice(0, 8)
+          .map((s) => {
+            const id = esc((s && s.subject_id) || "general");
+            const xp = Number((s && s.xp) || 0);
+            const events = Number((s && s.events) || 0);
+            return `<span class="chip">${id} · XP ${xp} · events ${events}</span>`;
+          })
+          .join("");
+      }
+
       function studentDetailBlocks(s) {
         return `
           <div class="actions-row">
@@ -280,6 +294,10 @@
             <div class="mini">
               <h4>Weak topics</h4>
               <div class="chips">${topicList(s.weak_topics, "mastery")}</div>
+            </div>
+            <div class="mini">
+              <h4>Subjects</h4>
+              <div class="chips">${subjectList(s.subject_stats)}</div>
             </div>
           </div>
         `;

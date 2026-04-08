@@ -874,6 +874,35 @@ begin
     where ts.project_id = v_project_id
     group by ts.profile_id
   ),
+  subject_breakdown as (
+    select
+      s.profile_id,
+      jsonb_agg(
+        jsonb_build_object(
+          'subject_id', s.subject_id,
+          'xp', s.xp,
+          'events', s.events,
+          'xp_last_7d', s.xp_last_7d,
+          'events_last_7d', s.events_last_7d
+        )
+        order by s.xp desc, s.subject_id
+      ) as subjects
+    from (
+      select
+        x.profile_id,
+        coalesce(x.meta->>'subjectId', 'general') as subject_id,
+        coalesce(sum(x.delta), 0) as xp,
+        count(*) filter (where x.delta > 0) as events,
+        coalesce(sum(x.delta) filter (where x.created_at >= now() - interval '7 days'), 0) as xp_last_7d,
+        count(*) filter (
+          where x.delta > 0 and x.created_at >= now() - interval '7 days'
+        ) as events_last_7d
+      from public.study_xp_ledger x
+      where x.project_id = v_project_id
+      group by x.profile_id, coalesce(x.meta->>'subjectId', 'general')
+    ) s
+    group by s.profile_id
+  ),
   areas as (
     select
       x.profile_id,
@@ -907,7 +936,8 @@ begin
         'areas_overall', coalesce(ar.areas_overall, '[]'::jsonb),
         'areas_week', coalesce(ar.areas_week, '[]'::jsonb),
         'strong_topics', coalesce(ts2.strong_topics, '[]'::jsonb),
-        'weak_topics', coalesce(ts2.weak_topics, '[]'::jsonb)
+        'weak_topics', coalesce(ts2.weak_topics, '[]'::jsonb),
+        'subject_stats', coalesce(sb.subjects, '[]'::jsonb)
       )
       order by p.xp_balance desc, p.last_activity desc
     ),
@@ -916,7 +946,8 @@ begin
   into v_students
   from per_profile p
   left join topic_strength ts2 on ts2.profile_id = p.profile_id
-  left join areas ar on ar.profile_id = p.profile_id;
+  left join areas ar on ar.profile_id = p.profile_id
+  left join subject_breakdown sb on sb.profile_id = p.profile_id;
 
   return jsonb_build_object(
     'ok', true,

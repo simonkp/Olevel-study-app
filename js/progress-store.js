@@ -174,6 +174,42 @@
     return { report, source: "supabase" };
   }
 
+  async function fetchBootstrapState() {
+    if (!hasClient()) return null;
+    const remote = await safe(() => window.LevelupSupabase.fetchReportData(state.subjectId));
+    if (!remote) return null;
+    const xpLedger = (remote.xpLedger || []).map((row) => ({
+      deltaXp: Number(row.delta || 0),
+      reason: String(row.reason || ""),
+      activityType: String((row.meta && row.meta.activityType) || "study"),
+      topicId: row.meta && row.meta.topicId != null ? String(row.meta.topicId) : null,
+      subjectId: row.meta && row.meta.subjectId != null ? String(row.meta.subjectId) : null,
+      ts: Date.parse(row.created_at || "") || Date.now(),
+    }));
+    const xp = xpLedger.reduce((sum, e) => sum + Number(e.deltaXp || 0), 0);
+    const topicStats = {};
+    (remote.topicStats || []).forEach((row) => {
+      const topicId = String(row.topic_id || "");
+      if (!topicId) return;
+      const seen = Number(row.seen || 0);
+      const correct = Number(row.correct || 0);
+      topicStats[topicId] = {
+        mastery: Number(row.mastery || 0),
+        totalQuestionsSeen: seen,
+        totalWrong: Math.max(0, seen - correct),
+        errorFreeRounds: Number(row.streak || 0),
+        lastStudiedAt: Date.parse(row.updated_at || "") || 0,
+        masteredUntil: row.mastered_until ? Date.parse(row.mastered_until) || 0 : 0,
+      };
+    });
+    return {
+      xp,
+      xpLedger,
+      topicStats,
+      purchaseLedgerCount: (remote.purchases || []).length,
+    };
+  }
+
   window.ProgressStore = {
     init,
     hasClient,
@@ -184,6 +220,7 @@
     purchaseRewardServer,
     migrateFromLocalState,
     fetchReportWithFallback,
+    fetchBootstrapState,
     ensureReady,
     getLastError: () => state.lastError,
   };
