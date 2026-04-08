@@ -1,24 +1,3 @@
-/* -a---           3/18/2026 11:55 AM         213345 matter-01-experimental-design.jpg
--a---           3/18/2026 11:57 AM         216547 matter-02-purification.jpg
--a---           3/18/2026 12:11 PM        1005603 matter-03-kinetic-theory.jpg
--a---           3/18/2026 11:57 AM         209925 matter-04-atomic-structure.jpg
--a---           3/18/2026 12:07 PM         642656 matter-05-Bonding.jpg
--a---           3/18/2026 11:58 AM         139306 reactions-01-calculations.jpg
--a---           3/18/2026 12:00 PM         193372 reactions-02-acids-bases.jpg
--a---           3/18/2026 12:01 PM         204442 reactions-03-salts.jpg
--a---           3/18/2026 12:01 PM         213619 reactions-04-ammonia.jpg
--a---           3/18/2026 12:02 PM         221942 reactions-05-qualitative-analysis.jpg
--a---           3/18/2026 12:02 PM         266924 reactions-06-redox.jpg
--a---           3/18/2026 12:03 PM         283316 reactions-07-electrochemistry.jpg
--a---           3/18/2026 12:03 PM         267741 reactions-08-periodic-table.jpg
--a---           3/18/2026 12:03 PM         259231 reactions-09-reactivity-series.jpg
--a---           3/18/2026 12:04 PM         276314 reactions-10-energetics.jpg
--a---           3/18/2026 12:04 PM         294605 reactions-11-rates.jpg
--a---           3/18/2026  4:22 PM        1118788 sustainable-01-organic.jpg
--a---           3/18/2026  4:24 PM        1128067 sustainable-02-polymers.jpg
--a---           3/18/2026  4:23 PM        1143738 sustainable-03-air-qualityjpg.jpg
-*/
-
 #### Topic 1: Experimental design
 ### File: matter-01-experimental-design.jpg
 

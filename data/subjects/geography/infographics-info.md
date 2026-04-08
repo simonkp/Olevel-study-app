@@ -1,5 +1,5 @@
 #### Topic 1.1 Thinking Geographically
-### File: everyday-1-1-thinking-geographically.jpg
+### File: everyday-1-1-thinking-geographically.png
 
 **Geography is about place, space, environment and scale.**
 
@@ -12,7 +12,7 @@ The right section introduces **Geographical Inquiry** — the process of asking 
 ***
 
 #### Topic 1.2 Sustainable Development
-### File: everyday-1-2-sustainable-development.jpg
+### File: everyday-1-2-sustainable-development.png
 
 **Sustainable Development: meeting today's needs without compromising future generations.**
 
@@ -25,7 +25,7 @@ A callout box contrasts **needs vs wants** and **renewable vs non-renewable reso
 ***
 
 #### Topic 1.3 Geographical Methods & Fieldwork
-### File: everyday-1-3-geographical-methods.jpg
+### File: everyday-1-3-geographical-methods.png
 
 **From question to conclusion — the geographical enquiry toolkit.**
 
@@ -39,7 +39,7 @@ The infographic is split into four horizontal bands:
 ***
 
 #### Topic 2.1 Tourism Activity
-### File: tourism-2-1-tourism-activity.jpg
+### File: tourism-2-1-tourism-activity.png
 
 **What drives people to travel — and where do they go?**
 
@@ -52,7 +52,7 @@ The bottom section introduces the **Butler Tourism Area Life Cycle (TALC)** S-cu
 ***
 
 #### Topic 2.2 Tourism Development & Economic Impacts
-### File: tourism-2-2-tourism-development.jpg
+### File: tourism-2-2-tourism-development.png
 
 **Tourism transforms economies — but not always equally.**
 
@@ -67,7 +67,7 @@ A world map panel highlights top tourist-receiving nations (France, Spain, USA) 
 ***
 
 #### Topic 2.2 Multiplier Effect & Economic Leakage
-### File: tourism-2-2-multiplier-leakage.jpg
+### File: tourism-2-2-multiplier-leakage.png
 
 **The same dollar — spent many times vs. spent abroad.**
 
@@ -81,7 +81,7 @@ A leakage gauge at the bottom shows the contrast. Callout: developing countries 
 ***
 
 #### Topic 2.3 Sustainable Tourism Development
-### File: tourism-2-3-sustainable-tourism.jpg
+### File: tourism-2-3-sustainable-tourism.png
 
 **Tourism that lasts — protecting people, place and planet.**
 
@@ -96,7 +96,7 @@ The right section lists **strategies for sustainable tourism development**: comm
 ***
 
 #### Topic 3.1 Weather, Climate & Singapore's Equatorial Climate
-### File: climate-3-1-weather-climate.jpg
+### File: climate-3-1-weather-climate.png
 
 **Weather is today; climate is the average over 30 years.**
 
@@ -115,7 +115,7 @@ The bottom panel is dedicated to **Singapore's equatorial climate**: a climate g
 ***
 
 #### Topic 3.2 Greenhouse Effect & Enhanced Greenhouse Effect
-### File: climate-3-2-greenhouse-effect.jpg
+### File: climate-3-2-greenhouse-effect.png
 
 **The natural greenhouse effect keeps Earth warm. The enhanced version overheats it.**
 
@@ -128,7 +128,7 @@ This infographic is a cross-section diagram of Earth's atmosphere.
 ***
 
 #### Topic 3.2 Evidence & Impacts of Climate Change
-### File: climate-3-2-climate-change-impacts.jpg
+### File: climate-3-2-climate-change-impacts.png
 
 **The evidence is clear — and the impacts are already being felt.**
 
@@ -150,7 +150,7 @@ Split into two equal halves.
 ***
 
 #### Topic 3.3 Climate Action: Mitigation & Adaptation
-### File: climate-3-3-climate-action.jpg
+### File: climate-3-3-climate-action.png
 
 **Two strategies: slow the problem (mitigation) and adjust to it (adaptation).**
 
@@ -181,7 +181,7 @@ A small thermometer scale at the bottom contrasts: 1.5°C target (amber) vs busi
 ***
 
 #### Topic 4.1 Tectonic Plate Boundaries
-### File: tectonics-4-1-plate-boundaries.jpg
+### File: tectonics-4-1-plate-boundaries.png
 
 **The Earth's crust is broken into moving plates — where they meet, dramatic things happen.**
 
@@ -196,7 +196,7 @@ A world map at the bottom marks the major plates (Eurasian, Pacific, African, In
 ***
 
 #### Topic 4.1 Plate Movement & Convection Currents
-### File: tectonics-4-1-plate-movement.jpg
+### File: tectonics-4-1-plate-movement.png
 
 **Plates move because mantle rock circulates like a slow conveyor belt.**
 
@@ -210,7 +210,7 @@ This diagram focuses on the mechanism of plate motion.
 ***
 
 #### Topic 4.2 Earthquakes: Causes & Seismic Waves
-### File: tectonics-4-2-earthquakes.jpg
+### File: tectonics-4-2-earthquakes.png
 
 **Earthquakes release energy stored by tectonic stress — in seconds.**
 
@@ -229,7 +229,7 @@ The infographic has three sections.
 ***
 
 #### Topic 4.2 Volcanoes: Structure & Types of Eruption
-### File: tectonics-4-2-volcanoes.jpg
+### File: tectonics-4-2-volcanoes.png
 
 **Not all volcanoes are equal — the magma's chemistry controls the explosion.**
 
@@ -253,7 +253,7 @@ A hazard comparison mini-panel at the bottom shows the relative threat of each t
 ***
 
 #### Topic 4.3 Disaster Risk Management
-### File: tectonics-4-3-disaster-risk.jpg
+### File: tectonics-4-3-disaster-risk.png
 
 **Disaster risk = Hazard × Vulnerability / Capacity.**
 
@@ -273,7 +273,7 @@ A case-study comparison panel at the bottom: **Haiti 2010 earthquake** (high vul
 ***
 
 #### Topic 5.1 Singapore: Small Island City-State
-### File: singapore-5-1-small-island.jpg
+### File: singapore-5-1-small-island.png
 
 **Singapore — a tiny island with outsized global impact.**
 
@@ -287,7 +287,7 @@ This poster presents Singapore's physical and human geographical profile.
 ***
 
 #### Topic 5.2 Singapore: Challenges & Opportunities
-### File: singapore-5-2-challenges.jpg
+### File: singapore-5-2-challenges.png
 
 **Small size, no resources — Singapore's existential constraints and pragmatic solutions.**
 
@@ -301,7 +301,7 @@ The infographic is organised around four key resource/development challenges, ea
 ***
 
 #### Topic 5.3 Singapore's Water Management
-### File: singapore-5-3-water-management.jpg
+### File: singapore-5-3-water-management.png
 
 **From scarcity to security — Singapore's world-renowned water story.**
 
@@ -316,7 +316,7 @@ This infographic traces Singapore's complete water cycle management strategy.
 ***
 
 #### Topic 5.3 Sustainable & Resilient Singapore
-### File: singapore-5-3-green-resilience.jpg
+### File: singapore-5-3-green-resilience.png
 
 **Turning constraints into design — Singapore as a model of urban sustainability.**
 
