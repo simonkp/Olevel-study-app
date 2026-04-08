@@ -238,6 +238,31 @@
     saveState();
   }
 
+  function mergeRemoteBootstrap(remote) {
+    if (!remote || typeof remote !== "object") return false;
+    let changed = false;
+    const remoteXp = Number(remote.xp || 0);
+    if (remoteXp > Number(state.xp || 0)) {
+      state.xp = remoteXp;
+      changed = true;
+    }
+    const remoteLedger = Array.isArray(remote.xpLedger) ? remote.xpLedger : [];
+    if (remoteLedger.length > (state.xpLedger || []).length) {
+      state.xpLedger = remoteLedger;
+      changed = true;
+    }
+    const remoteTopicStats = remote.topicStats || {};
+    if (remoteTopicStats && Object.keys(remoteTopicStats).length) {
+      state.topicStats = { ...(state.topicStats || {}), ...remoteTopicStats };
+      changed = true;
+    }
+    if (changed) {
+      state = normalizeState(state);
+      saveState();
+    }
+    return changed;
+  }
+
   function saveState() {
     state = normalizeState(state);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -3432,6 +3457,10 @@
           syncStatus.textContent = `Supabase not connected: ${(result && result.error) || progressStore.getLastError() || "unknown error"}`;
         }
       }
+      progressStore.fetchBootstrapState().then((remoteBootstrap) => {
+        const pulled = mergeRemoteBootstrap(remoteBootstrap);
+        if (pulled && route.view === "home") renderHome();
+      });
       progressStore.migrateFromLocalState(portableState()).then(() => {
         progressStore.scheduleSnapshot(portableState());
         progressStore.scheduleTopicStats(state.topicStats || {});
