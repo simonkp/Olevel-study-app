@@ -1,5 +1,5 @@
 #### Topic 1 Physical Quantities, Units and Measurement
-### File: measurement-01-topic01.jpg
+### File: measurement-01-topic-01.jpg
 
 This  infographic provides a fundamental overview of the measurement system. It features a prominent **SI Base Units Table** (m, kg, s, A, K), alongside a list of common **Derived Units** (N, J, W, Pa) with their correct unit breakdowns. To the right, a dedicated panel compares **Scalar vs. Vector Examples** using clean icons and directional arrows for vectors. At the bottom, a detailed measurement panel shows illustrative schematics of the **Metre Rule, Vernier Calipers, and Micrometer**, with precise least count labels and a callout highlighting **Zero Error**.
 
