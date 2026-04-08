@@ -57,7 +57,7 @@ function getTopicKey(fileContent, fallbackFileName) {
   return toIdSafeToken(path.basename(fallbackFileName, ".js"));
 }
 
-function collectTopicFiles(dir) {
+function collectTopicFiles(dir, fileRegex = /^topic.*\.js$/i) {
   const out = [];
   const stack = [dir];
   while (stack.length) {
@@ -65,8 +65,11 @@ function collectTopicFiles(dir) {
     const entries = fs.readdirSync(current, { withFileTypes: true });
     for (const entry of entries) {
       const full = path.join(current, entry.name);
-      if (entry.isDirectory()) stack.push(full);
-      else if (entry.isFile() && /^topic-\d+\.js$/i.test(entry.name)) out.push(full);
+      if (entry.isDirectory()) {
+        stack.push(full);
+      } else if (entry.isFile() && fileRegex.test(entry.name)) {
+        out.push(full);
+      }
     }
   }
   return out.sort();
@@ -169,7 +172,9 @@ function main() {
     return;
   }
 
-  const files = collectTopicFiles(SUBJECTS_ROOT);
+  // const files = collectTopicFiles(SUBJECTS_ROOT);
+  const fileRegex = /^topic(?!-).*\.js$/i;
+  const files = collectTopicFiles(SUBJECTS_ROOT, fileRegex);
   let touched = 0;
   let addedTotal = 0;
 
