@@ -785,6 +785,15 @@
     return Math.max(0, Number(last.ts || 0) + PURCHASE_REPEAT_COOLDOWN_MS - Date.now());
   }
 
+  function getPurchaseEffectiveCooldownMs(couponId, dailyMax, todayCount) {
+    const max = Math.max(1, Number(dailyMax || DEFAULT_REWARD_DAILY_MAX));
+    const count = Math.max(0, Number(todayCount || 0));
+    // Do not block repeat purchases when daily allowance is still available.
+    // Daily max is the primary limiter for kid-facing rewards.
+    if (count < max) return 0;
+    return getPurchaseCooldownRemainingMs(couponId);
+  }
+
   function buildSyncSnapshot() {
     return {
       schema: "study-audit-v1",
@@ -1724,11 +1733,20 @@
     const once = () => {
       ok.removeEventListener("click", once);
       panelExplain.hidden = true;
-      root.hidden = true;
-      root.setAttribute("aria-hidden", "true");
+      closeModalRoot(root);
       then();
     };
     ok.addEventListener("click", once);
+  }
+
+  function closeModalRoot(root) {
+    if (!root) return;
+    const active = document.activeElement;
+    if (active && root.contains(active) && typeof active.blur === "function") {
+      active.blur();
+    }
+    root.hidden = true;
+    root.setAttribute("aria-hidden", "true");
   }
 
   function getTopicQuizBank(t) {
@@ -3128,11 +3146,11 @@
     list.innerHTML = rewards
       .map(
         (r) => {
-          const cooldownMs = getPurchaseCooldownRemainingMs(r.id);
-          const cooldownHrs = Math.ceil(cooldownMs / (1000 * 60 * 60));
           const dailyMax = getRewardDailyMax(r);
           const todayCount = getRewardPurchasesOnDate(r.id, getTodayIsoDate());
           const dailyRemaining = Math.max(0, dailyMax - todayCount);
+          const cooldownMs = getPurchaseEffectiveCooldownMs(r.id, dailyMax, todayCount);
+          const cooldownHrs = Math.ceil(cooldownMs / (1000 * 60 * 60));
           const disabled = state.xp < r.xp || cooldownMs > 0 || !purchaseGate.ok;
           const disabledByDailyMax = dailyRemaining <= 0;
           const reallyDisabled = disabled || disabledByDailyMax;
@@ -3178,10 +3196,16 @@
         const label = btn.dataset.label;
         const id = btn.dataset.id;
         const dailyMax = Number(btn.dataset.dailyMax || DEFAULT_REWARD_DAILY_MAX);
+        const todayCount = getRewardPurchasesOnDate(id, getTodayIsoDate());
+        const effectiveCooldownMs = getPurchaseEffectiveCooldownMs(
+          id,
+          dailyMax,
+          todayCount
+        );
         if (state.xp < xp) return;
-        if (getPurchaseCooldownRemainingMs(id) > 0) return;
+        if (effectiveCooldownMs > 0) return;
         if (!canPurchaseReward().ok) return;
-        if (getRewardPurchasesOnDate(id, getTodayIsoDate()) >= dailyMax) return;
+        if (todayCount >= dailyMax) return;
         let rpcCouponCode = null;
         if (progressStore && progressStore.hasClient()) {
           const rpcResult = await progressStore.purchaseRewardServer({
@@ -3259,8 +3283,7 @@
   document.getElementById("btn-close-shop").onclick = () => {
     const root = document.getElementById("modal-root");
     document.getElementById("panel-shop").hidden = true;
-    root.hidden = true;
-    root.setAttribute("aria-hidden", "true");
+    closeModalRoot(root);
     if (route.view === "home") renderHome();
   };
 
@@ -3420,8 +3443,7 @@
     saveState();
     const root = document.getElementById("modal-root");
     document.getElementById("panel-settings").hidden = true;
-    root.hidden = true;
-    root.setAttribute("aria-hidden", "true");
+    closeModalRoot(root);
     if (route.view === "home") renderHome();
   };
 
@@ -3430,8 +3452,7 @@
     closeReportBtn.onclick = () => {
       const root = document.getElementById("modal-root");
       document.getElementById("panel-report").hidden = true;
-      root.hidden = true;
-      root.setAttribute("aria-hidden", "true");
+      closeModalRoot(root);
       if (route.view === "home") renderHome();
     };
   }

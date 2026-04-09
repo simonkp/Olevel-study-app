@@ -234,6 +234,8 @@ as $$
 declare
   v_project_id uuid;
   v_profile_id uuid;
+  v_existing_student_id text;
+  v_generated_student_id text;
   v_today date := (now() at time zone 'utc')::date;
   v_used int;
   v_balance int;
@@ -252,10 +254,30 @@ begin
     return jsonb_build_object('ok', false, 'error', 'project_not_found');
   end if;
 
-  insert into public.profiles(project_id, device_id)
-  values (v_project_id, p_device_id)
-  on conflict (project_id, device_id) do update set device_id = excluded.device_id
-  returning id into v_profile_id;
+  select id, student_id into v_profile_id, v_existing_student_id
+  from public.profiles
+  where project_id = v_project_id
+    and device_id = p_device_id
+  limit 1;
+
+  if v_profile_id is null then
+    v_generated_student_id := 'student-' || left(md5(coalesce(p_device_id, gen_random_uuid()::text)), 12);
+    insert into public.profiles(project_id, device_id, student_id, meta)
+    values (
+      v_project_id,
+      p_device_id,
+      v_generated_student_id,
+      jsonb_build_object('studentId', v_generated_student_id, 'lastDeviceId', p_device_id)
+    )
+    returning id into v_profile_id;
+  elsif coalesce(v_existing_student_id, '') = '' then
+    v_generated_student_id := 'student-' || left(md5(coalesce(p_device_id, v_profile_id::text)), 12);
+    update public.profiles
+    set student_id = v_generated_student_id,
+        meta = coalesce(meta, '{}'::jsonb)
+          || jsonb_build_object('studentId', v_generated_student_id, 'lastDeviceId', p_device_id)
+    where id = v_profile_id;
+  end if;
 
   insert into public.study_daily_counters(project_id, profile_id, day, reward_id, count)
   values (v_project_id, v_profile_id, v_today, p_reward_id, 0)
@@ -291,7 +313,7 @@ begin
     and day = v_today
     and reward_id = p_reward_id;
 
-  v_coupon := encode(gen_random_bytes(5), 'hex');
+  v_coupon := substring(md5(random()::text || clock_timestamp()::text || p_reward_id), 1, 10);
   insert into public.study_reward_purchases(project_id, profile_id, reward_id, reward_label, xp_cost, coupon_code)
   values (v_project_id, v_profile_id, p_reward_id, p_reward_label, p_xp_cost, v_coupon)
   returning id into v_purchase_id;
@@ -548,7 +570,7 @@ begin
     and day = v_today
     and reward_id = p_reward_id;
 
-  v_coupon := encode(gen_random_bytes(5), 'hex');
+  v_coupon := substring(md5(random()::text || clock_timestamp()::text || p_reward_id), 1, 10);
   insert into public.study_reward_purchases(project_id, profile_id, reward_id, reward_label, xp_cost, coupon_code)
   values (v_project_id, v_profile_id, p_reward_id, p_reward_label, p_xp_cost, v_coupon)
   returning id into v_purchase_id;
