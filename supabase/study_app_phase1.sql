@@ -313,7 +313,7 @@ begin
     and day = v_today
     and reward_id = p_reward_id;
 
-  v_coupon := encode(gen_random_bytes(5), 'hex');
+  v_coupon := substring(md5(random()::text || clock_timestamp()::text || p_reward_id), 1, 10);
   insert into public.study_reward_purchases(project_id, profile_id, reward_id, reward_label, xp_cost, coupon_code)
   values (v_project_id, v_profile_id, p_reward_id, p_reward_label, p_xp_cost, v_coupon)
   returning id into v_purchase_id;
@@ -570,7 +570,7 @@ begin
     and day = v_today
     and reward_id = p_reward_id;
 
-  v_coupon := encode(gen_random_bytes(5), 'hex');
+  v_coupon := substring(md5(random()::text || clock_timestamp()::text || p_reward_id), 1, 10);
   insert into public.study_reward_purchases(project_id, profile_id, reward_id, reward_label, xp_cost, coupon_code)
   values (v_project_id, v_profile_id, p_reward_id, p_reward_label, p_xp_cost, v_coupon)
   returning id into v_purchase_id;
