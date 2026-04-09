@@ -108,6 +108,7 @@
         .upsert(
           {
             project_id: project.id,
+            student_id: studentId,
             device_id: deviceId,
             display_name: studentName,
             meta: {

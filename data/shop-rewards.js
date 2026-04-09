@@ -6,7 +6,7 @@ window.LEVELUP_XP_POLICY = {
   topicFarmLock: {
     windowMs: 1000 * 60 * 60, // 1 hour
     triggerXp: 140,
-    lockMs: 1000 * 60 * 60 * 1, // 1 hours
+    lockMs: 1000 * 60 * 60 * 0.5, // 0.5 hours
   },
 };
 
