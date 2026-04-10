@@ -3396,12 +3396,9 @@
           return;
         }
         rpcCouponCode = rpcResult.coupon_code || null;
+        // Server RPC already deducts XP in study_xp_ledger. Do NOT spendXp/recordXp here
+        // or the same -xp is applied twice on the server (negative balance bug).
         const purchase = recordPurchaseEntry({ id, label, xp });
-        spendXp(xp, {
-          activityType: "purchase",
-          sourceId: id,
-          reason: "reward_purchase",
-        });
         state.purchaseLedger.push(purchase);
         state.coupons = state.coupons || [];
         state.coupons.push({
