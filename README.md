@@ -141,19 +141,50 @@ The script includes:
 
 ### 2) Configure client keys in app
 
-On first load, the app prompts for:
-- `SUPABASE_URL` (Project URL)
-- `SUPABASE_ANON_KEY` (anon/public API key)
+Use the **Setup package** tool (subject hub, subject Settings, or parent page): paste a Base64 string or JSON with `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and optional `LEVELUP_STUDENT_*`, `llm`, `parent`, etc. Values are stored in `localStorage`.
 
-They are stored in browser `localStorage`.
+On the hub you can also use **Offline defaults** to skip cloud sync (when no Supabase keys are set yet) and fill a placeholder student for local-only use.
 
-You can re-open setup prompts with:
-- `?setupSupabase=1` (for Supabase keys)
-- `?setupStudent=1` (for student profile)
+From the console (opens the same package UI):
+- `window.configureConfigPackage()` (hub)
+- `window.configureSupabaseKeys()` / `window.configureStudentProfile()` (subject — aliases for the package tool)
 
-Or from console:
-- `window.configureSupabaseKeys()`
-- `window.configureStudentProfile()`
+### Setup package (one copy/paste string)
+
+To simplify parent/student setup, use the **Setup package** tool (Hub / Subject Settings / Parent pages).
+
+- **Generate** builds a full JSON template (every key we embed: Supabase, student, `llm`; empty strings where nothing is stored yet) and the matching Base64 string, so you can edit blanks and share.
+- **Apply** accepts either Base64 string **or raw JSON**.
+- This is convenience only (not security/encryption).
+
+Recommended JSON shape:
+
+```json
+{
+  "v": 2,
+  "SUPABASE_URL": "https://xxxx.supabase.co",
+  "SUPABASE_ANON_KEY": "eyJ...",
+  "LEVELUP_STUDENT_ID": "carol-1",
+  "LEVELUP_STUDENT_NAME": "Carol",
+  "llm": {
+    "enabled": true,
+    "mode": "fastapi",
+    "proxyBaseUrl": "https://your-render-app.onrender.com",
+    "appToken": "same-as-APP_TOKEN",
+    "features": { "quizExplain": true },
+    "cache": { "maxEntries": 200, "ttlDays": 60 }
+  }
+}
+```
+
+Parent dashboard project/parent codes are **not** part of generated packages — enter them on **`parent.html`** (same Supabase as the student app is enough).
+
+Compatibility notes:
+- `fastapi` is accepted as an alias for `llm` when importing.
+- `LEVELUP_STUDENT_NAME` is optional on import (omit if you only need to refresh other keys).
+- Legacy pastes may still include a `parent` object; **Apply** will still write those keys if present.
+- **`llm`**: a block with `enabled: true` but empty `proxyBaseUrl` / `appToken` is **not** written (avoids “I applied the template” with no Supabase/student yet). Use `"enabled": false` to persist a disabled stub, or set both URL and token.
+- Only known keys are applied; unknown fields are ignored.
 
 Important:
 - Do **not** use DB connection string or service role in browser.

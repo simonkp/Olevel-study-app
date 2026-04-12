@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-levelup-build="2026-04-13-11">
+<html lang="en" data-levelup-build="2026-04-13-18">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -140,6 +140,11 @@
       color: var(--accent2);
     }
     .hub-identity[hidden] { display: none !important; }
+    a.card.subject-access-locked {
+      opacity: 0.42;
+      cursor: not-allowed;
+      filter: grayscale(0.35);
+    }
   </style>
 </head>
 <body>
@@ -150,8 +155,8 @@
     <div id="setup-banner" class="setup">
       <span class="msg" id="setup-msg"></span>
       <div class="actions">
-        <button type="button" id="btn-setup-student">Student profile</button>
-        <button type="button" id="btn-setup-supabase" class="primary">Supabase setup</button>
+        <button type="button" id="btn-setup-package" class="primary">Setup package</button>
+        <button type="button" id="btn-offline-defaults">Offline defaults</button>
       </div>
     </div>
     <div class="grid">

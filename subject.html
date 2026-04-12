@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-levelup-build="2026-04-13-11">
+<html lang="en" data-levelup-build="2026-04-13-18">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -87,11 +87,8 @@
           OpenAI / provider API keys live in the server <code>.env</code>, not in this app.
         </p>
         <p class="hint">
-          <strong>Cloud sync (Supabase)</strong> — URL and anon key are usually set the first time you open the app or from the subject hub. To change them later, use the button here or open the hub’s setup.
+          <strong>Cloud sync &amp; student ID</strong> — use <em>Open setup package tool</em> below (paste the string from a parent, or generate/edit JSON there).
         </p>
-        <button type="button" class="btn" id="btn-supabase-setup">
-          Change Supabase / cloud sync…
-        </button>
         <label class="check-row">
           <input type="checkbox" id="opt-unlock-all" />
           <span>Unlock all topics (free study)</span>
@@ -114,6 +111,16 @@
             Configure LLM proxy…
           </button>
           <p class="hint" id="llm-proxy-status"></p>
+        </div>
+        <div class="export-block">
+          <h3 class="export-title">Setup package (quick copy/paste)</h3>
+          <p class="hint">
+            Generate or apply one Base64 setup string for Supabase, optional LLM proxy config,
+            and optional student fields.
+          </p>
+          <button type="button" class="btn" id="btn-config-package-setup">
+            Open setup package tool…
+          </button>
         </div>
         <div class="export-block">
           <h3 class="export-title">Transfer progress between browsers</h3>

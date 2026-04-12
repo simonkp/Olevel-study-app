@@ -103,6 +103,7 @@
     "js/ui/topbar.js",
     "js/ui/modals.js",
     "js/features/llm/llm-config.js",
+    "js/features/llm/llm-keepalive.js",
     "js/features/llm/llm-cache.js",
     "js/features/llm/llm-client.js",
     "js/features/llm/llm-setup-forms.js",

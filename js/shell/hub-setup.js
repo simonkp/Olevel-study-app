@@ -4,91 +4,49 @@
   var STUDENT_NAME_KEY = "LEVELUP_STUDENT_NAME";
   var LAST_SUBJECT_KEY = "LEVELUP_LAST_SUBJECT";
 
-  function setupSupabaseKeysPrompt(force) {
-    return new Promise(function (resolve) {
-      var existingUrl = localStorage.getItem("SUPABASE_URL") || "";
-      var existingAnon = localStorage.getItem("SUPABASE_ANON_KEY") || "";
-      if (!force && existingUrl && existingAnon) {
-        resolve(true);
-        return;
-      }
-      var shouldAsk =
-        force ||
-        window.location.search.includes("setupSupabase=1") ||
-        localStorage.getItem(SUPABASE_SKIP_KEY) !== "1";
-      if (!shouldAsk) {
-        resolve(false);
-        return;
-      }
-      if (!window.LevelupSetupForms) {
-        console.warn("LevelupSetupForms not loaded");
-        resolve(false);
-        return;
-      }
-      window.LevelupSetupForms
-        .openSupabaseSetup({
-          force: !!force,
-          existingUrl: existingUrl,
-          existingAnon: existingAnon,
-        })
-        .then(function (r) {
-          if (r.action === "skip" && !force) {
-            localStorage.setItem(SUPABASE_SKIP_KEY, "1");
-          }
-          if (r.action === "save") {
-            resolve(true);
-            return;
-          }
-          var u = (localStorage.getItem("SUPABASE_URL") || "").trim();
-          var k = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
-          resolve(!!(u && k));
-        });
-    });
+  function hasSupabaseKeys() {
+    return !!(
+      (localStorage.getItem("SUPABASE_URL") || "").trim() &&
+      (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim()
+    );
   }
 
-  function setupStudentProfilePrompt(force) {
-    return new Promise(function (resolve) {
-      var existingId = (localStorage.getItem(STUDENT_ID_KEY) || "").trim();
-      var existingName = (localStorage.getItem(STUDENT_NAME_KEY) || "").trim();
-      if (!force && existingId && existingName) {
-        resolve(true);
-        return;
+  function hubSetupComplete() {
+    return !!(
+      window.LevelupSetupForms &&
+      typeof window.LevelupSetupForms.isClientSetupComplete === "function" &&
+      window.LevelupSetupForms.isClientSetupComplete()
+    );
+  }
+
+  /** No Supabase keys yet: mark cloud skipped. Fill missing student fields so the hub can proceed. */
+  function applyOfflineDefaults() {
+    if (!hasSupabaseKeys()) {
+      localStorage.setItem(SUPABASE_SKIP_KEY, "1");
+    }
+    if (!(localStorage.getItem(STUDENT_ID_KEY) || "").trim()) {
+      localStorage.setItem(STUDENT_ID_KEY, "local-device");
+    }
+    if (!(localStorage.getItem(STUDENT_NAME_KEY) || "").trim()) {
+      localStorage.setItem(STUDENT_NAME_KEY, "Student");
+    }
+    refreshBanner();
+  }
+
+  function updateSubjectCardsAccess() {
+    var ok = hubSetupComplete();
+    document.querySelectorAll("a.card[data-subject]").forEach(function (card) {
+      if (ok) {
+        card.classList.remove("subject-access-locked");
+        card.removeAttribute("aria-disabled");
+      } else {
+        card.classList.add("subject-access-locked");
+        card.setAttribute("aria-disabled", "true");
       }
-      var shouldAsk = force || window.location.search.includes("setupStudent=1");
-      if (!shouldAsk && (existingId || existingName)) {
-        resolve(false);
-        return;
-      }
-      if (!window.LevelupSetupForms) {
-        resolve(false);
-        return;
-      }
-      window.LevelupSetupForms.openStudentSetup({ existingId: existingId, existingName: existingName }).then(
-        function (r) {
-          if (r.action === "save" && r.studentId && r.name) {
-            localStorage.setItem(STUDENT_ID_KEY, r.studentId);
-            localStorage.setItem(STUDENT_NAME_KEY, r.name);
-            resolve(true);
-            return;
-          }
-          var ok =
-            !!(localStorage.getItem(STUDENT_ID_KEY) || "").trim() &&
-            !!(localStorage.getItem(STUDENT_NAME_KEY) || "").trim();
-          resolve(ok);
-        }
-      );
     });
   }
 
   function refreshBanner() {
-    var hasSupabase = !!(
-      (localStorage.getItem("SUPABASE_URL") || "").trim() &&
-      (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim()
-    );
-    var hasStudent = !!(
-      (localStorage.getItem(STUDENT_ID_KEY) || "").trim() &&
-      (localStorage.getItem(STUDENT_NAME_KEY) || "").trim()
-    );
     var idEl = document.getElementById("hub-identity");
     if (idEl) {
       var nm = (localStorage.getItem(STUDENT_NAME_KEY) || "").trim();
@@ -103,44 +61,69 @@
     }
     var banner = document.getElementById("setup-banner");
     var msg = document.getElementById("setup-msg");
-    if (!banner || !msg) return;
-    if (hasSupabase && hasStudent) {
-      banner.classList.remove("show");
-      return;
+    if (banner && msg) {
+      if (hubSetupComplete()) {
+        banner.classList.remove("show");
+      } else {
+        var gaps =
+          window.LevelupSetupForms && typeof window.LevelupSetupForms.describeClientSetupGaps === "function"
+            ? window.LevelupSetupForms.describeClientSetupGaps()
+            : [];
+        msg.textContent =
+          gaps.length > 0
+            ? "Finish setup to unlock subjects: " +
+              gaps.join(" · ") +
+              ". Use Setup package (fill blanks) or Offline defaults."
+            : "Before picking a subject: open Setup package (paste from a parent), or Offline defaults for local-only on this device.";
+        banner.classList.add("show");
+      }
     }
-    var missing = [];
-    if (!hasSupabase) missing.push("Supabase");
-    if (!hasStudent) missing.push("student profile");
-    msg.textContent = "Before picking subjects, finish setup: " + missing.join(" + ") + ".";
-    banner.classList.add("show");
+    updateSubjectCardsAccess();
   }
 
-  window.configureSupabaseKeys = function () {
-    setupSupabaseKeysPrompt(true).then(function () {
-      refreshBanner();
-    });
-  };
-  window.configureStudentProfile = function () {
-    setupStudentProfilePrompt(true).then(function () {
-      refreshBanner();
-    });
-  };
-
-  document.getElementById("btn-setup-supabase").onclick = window.configureSupabaseKeys;
-  document.getElementById("btn-setup-student").onclick = window.configureStudentProfile;
-
-  document.querySelectorAll("a.card[data-subject]").forEach(function (card) {
-    card.addEventListener("click", function () {
-      var subject = card.getAttribute("data-subject");
-      if (subject) localStorage.setItem(LAST_SUBJECT_KEY, subject);
-    });
-  });
-
-  setupSupabaseKeysPrompt(false).then(function (hasSupabaseNow) {
-    return setupStudentProfilePrompt(false).then(function (hasStudentNow) {
-      if (hasSupabaseNow && !hasStudentNow) {
-        return setupStudentProfilePrompt(true);
+  window.configureConfigPackage = function () {
+    if (!window.LevelupSetupForms || typeof window.LevelupSetupForms.openConfigPackageSetup !== "function") {
+      return;
+    }
+    window.LevelupSetupForms.openConfigPackageSetup().then(function (r) {
+      if (r && r.action === "save") {
+        refreshBanner();
+        if (!hubSetupComplete() && window.LevelupSetupForms.describeClientSetupGaps) {
+          var g = window.LevelupSetupForms.describeClientSetupGaps();
+          if (g.length) {
+            window.alert(
+              "Package applied, but subjects stay locked until this is done:\n\n• " +
+                g.join("\n• ") +
+                "\n\nTip: use Offline defaults on the hub, or edit the JSON and add Supabase + student fields, then Apply again."
+            );
+          }
+        }
       }
     });
-  }).then(refreshBanner);
+  };
+
+  window.configureSupabaseKeys = window.configureConfigPackage;
+  window.configureStudentProfile = window.configureConfigPackage;
+
+  var _pkgBtn = document.getElementById("btn-setup-package");
+  if (_pkgBtn) _pkgBtn.onclick = window.configureConfigPackage;
+  var _offBtn = document.getElementById("btn-offline-defaults");
+  if (_offBtn) _offBtn.onclick = applyOfflineDefaults;
+
+  document.querySelectorAll("a.card[data-subject]").forEach(function (card) {
+    card.addEventListener(
+      "click",
+      function (e) {
+        if (!hubSetupComplete()) {
+          e.preventDefault();
+          return;
+        }
+        var subject = card.getAttribute("data-subject");
+        if (subject) localStorage.setItem(LAST_SUBJECT_KEY, subject);
+      },
+      true
+    );
+  });
+
+  refreshBanner();
 })();
