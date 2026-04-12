@@ -10,6 +10,10 @@
    */
   function quizExplain(cfg, body, opt) {
     opt = opt || {};
+    if (global.LevelupLlmKeepalive && typeof global.LevelupLlmKeepalive.poke === "function") {
+      // Warm proxy before heavier LLM request (best-effort).
+      global.LevelupLlmKeepalive.poke("quiz_explain", true);
+    }
     if (!cfg || !cfg.proxyBaseUrl || !cfg.appToken) {
       return Promise.resolve({
         ok: false,

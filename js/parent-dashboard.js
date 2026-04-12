@@ -1,7 +1,7 @@
 (function () {
   var status       = document.getElementById("status");
   var studentCards = document.getElementById("student-cards");
-  var btnSetup     = document.getElementById("btn-setup-keys");
+  var btnSetupPkg  = document.getElementById("btn-setup-package");
   var btnRefresh   = document.getElementById("btn-refresh");
   var projectCode  = document.getElementById("project-code");
   var parentCode   = document.getElementById("parent-code");
@@ -15,6 +15,9 @@
 
   var TOKEN_KEY     = "PARENT_DASH_TOKEN_V1";
   var TOKEN_EXP_KEY = "PARENT_DASH_TOKEN_EXP_V1";
+  var PARENT_PROJECT_KEY = "LEVELUP_PARENT_PROJECT_CODE";
+  var PARENT_CODE_KEY = "LEVELUP_PARENT_CODE";
+  var PARENT_REMEMBER_KEY = "LEVELUP_PARENT_REMEMBER_CODE";
 
   function saveToken(token) {
     var exp = Date.now() + 1000 * 60 * 60 * 24 * 30;
@@ -51,15 +54,15 @@
     };
   }
 
-  function setupKeys() {
-    var k = getKeys();
-    var u = prompt("Supabase Project URL:", k.url || "https://xxxx.supabase.co");
-    if (!u) return;
-    var a = prompt("Supabase anon/public key:", k.key || "");
-    if (!a) return;
-    localStorage.setItem("SUPABASE_URL", u.trim());
-    localStorage.setItem("SUPABASE_ANON_KEY", a.trim());
-    status.textContent = "Keys saved.";
+  function applyParentDefaults() {
+    var pProject = (localStorage.getItem(PARENT_PROJECT_KEY) || "").trim();
+    var pCode = (localStorage.getItem(PARENT_CODE_KEY) || "").trim();
+    var pRemember = localStorage.getItem(PARENT_REMEMBER_KEY);
+    if (pProject) projectCode.value = pProject;
+    if (pCode) parentCode.value = pCode;
+    if (pRemember === "1" || pRemember === "0") {
+      rememberCode.checked = pRemember === "1";
+    }
   }
 
   function fmt(ts) {
@@ -257,7 +260,7 @@
   async function loadData() {
     var keys = getKeys();
     if (!keys.url || !keys.key) {
-      status.textContent = "Missing Supabase keys. Click Supabase keys first.";
+      status.textContent = "Missing Supabase keys. Open Setup package and apply your config.";
       return;
     }
     var token = loadToken();
@@ -280,6 +283,11 @@
       }
       if (rememberCode.checked && token) saveToken(token);
       if (!rememberCode.checked) clearToken();
+      localStorage.setItem(PARENT_PROJECT_KEY, (projectCode.value || "study-app").trim());
+      localStorage.setItem(PARENT_REMEMBER_KEY, rememberCode.checked ? "1" : "0");
+      if (rememberCode.checked) {
+        localStorage.setItem(PARENT_CODE_KEY, (parentCode.value || "").trim());
+      }
       var students = Array.isArray(data.students) ? data.students : [];
       lastStudents = students;
       if (!students.length) {
@@ -426,9 +434,19 @@
     }
   }
 
-  btnSetup.onclick   = setupKeys;
+  if (btnSetupPkg && window.LevelupSetupForms && typeof window.LevelupSetupForms.openConfigPackageSetup === "function") {
+    btnSetupPkg.onclick = function () {
+      window.LevelupSetupForms.openConfigPackageSetup().then(function (r) {
+        if (r && r.action === "save") {
+          applyParentDefaults();
+          status.textContent = "Setup package applied.";
+        }
+      });
+    };
+  }
   btnRefresh.onclick = loadData;
 
+  applyParentDefaults();
   var initialToken = loadToken();
   if (initialToken) {
     rememberCode.checked = true;
