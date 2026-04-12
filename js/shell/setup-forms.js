@@ -43,15 +43,53 @@
   var PARENT_REMEMBER_KEY = "LEVELUP_PARENT_REMEMBER_CODE";
   var SUPABASE_SETUP_SKIPPED_KEY = "SUPABASE_SETUP_SKIPPED_V1";
 
+  /**
+   * Prefer localStorage; fall back to window/globals (subject: subject-config + app.js may set
+   * STUDENT_ID / STUDENT_NAME without persisting when using built-in defaults).
+   */
+  function effectiveSupabaseUrl() {
+    var v = (localStorage.getItem("SUPABASE_URL") || "").trim();
+    if (v) return v;
+    return String(global.SUPABASE_URL || "").trim();
+  }
+
+  function effectiveSupabaseAnon() {
+    var v = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
+    if (v) return v;
+    return String(global.SUPABASE_ANON_KEY || "").trim();
+  }
+
+  function effectiveStudentId() {
+    var v = (localStorage.getItem("LEVELUP_STUDENT_ID") || "").trim();
+    if (v) return v;
+    v = String(global.LEVELUP_STUDENT_ID || "").trim();
+    if (v) return v;
+    if (typeof global.STUDENT_ID !== "undefined" && global.STUDENT_ID != null) {
+      return String(global.STUDENT_ID).trim();
+    }
+    return "";
+  }
+
+  function effectiveStudentName() {
+    var v = (localStorage.getItem("LEVELUP_STUDENT_NAME") || "").trim();
+    if (v) return v;
+    v = String(global.LEVELUP_STUDENT_NAME || "").trim();
+    if (v) return v;
+    if (typeof global.STUDENT_NAME !== "undefined" && global.STUDENT_NAME != null) {
+      return String(global.STUDENT_NAME).trim();
+    }
+    return "";
+  }
+
   /** Same rule as hub: Supabase URL+anon OR explicit offline skip, plus student id and display name. */
   function isClientSetupComplete() {
     try {
-      var url = (localStorage.getItem("SUPABASE_URL") || "").trim();
-      var anon = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
+      var url = effectiveSupabaseUrl();
+      var anon = effectiveSupabaseAnon();
       var skipped = localStorage.getItem(SUPABASE_SETUP_SKIPPED_KEY) === "1";
       var syncOk = !!(url && anon) || skipped;
-      var sid = (localStorage.getItem("LEVELUP_STUDENT_ID") || "").trim();
-      var sname = (localStorage.getItem("LEVELUP_STUDENT_NAME") || "").trim();
+      var sid = effectiveStudentId();
+      var sname = effectiveStudentName();
       return syncOk && !!sid && !!sname;
     } catch (_) {
       return false;
@@ -62,14 +100,14 @@
   function describeClientSetupGaps() {
     var gaps = [];
     try {
-      var url = (localStorage.getItem("SUPABASE_URL") || "").trim();
-      var anon = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
+      var url = effectiveSupabaseUrl();
+      var anon = effectiveSupabaseAnon();
       var skipped = localStorage.getItem(SUPABASE_SETUP_SKIPPED_KEY) === "1";
       if (!((url && anon) || skipped)) {
         gaps.push("Supabase project URL + anon key (or tap Offline defaults to skip cloud)");
       }
-      var sid = (localStorage.getItem("LEVELUP_STUDENT_ID") || "").trim();
-      var sname = (localStorage.getItem("LEVELUP_STUDENT_NAME") || "").trim();
+      var sid = effectiveStudentId();
+      var sname = effectiveStudentName();
       if (!sid || !sname) {
         gaps.push("student ID and display name (or Offline defaults)");
       }
@@ -141,10 +179,10 @@
     var payload = {
       v: CONFIG_PACKAGE_VERSION,
     };
-    var sbUrl = (localStorage.getItem("SUPABASE_URL") || "").trim();
-    var sbAnon = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
-    var sid = (localStorage.getItem("LEVELUP_STUDENT_ID") || "").trim();
-    var sname = (localStorage.getItem("LEVELUP_STUDENT_NAME") || "").trim();
+    var sbUrl = effectiveSupabaseUrl();
+    var sbAnon = effectiveSupabaseAnon();
+    var sid = effectiveStudentId();
+    var sname = effectiveStudentName();
     if (sbUrl) payload.SUPABASE_URL = sbUrl;
     if (sbAnon) payload.SUPABASE_ANON_KEY = sbAnon;
     if (sid) payload.LEVELUP_STUDENT_ID = sid;
@@ -169,10 +207,10 @@
    * Full package shape for editing: every known key is present; missing localStorage values are "" / defaults.
    */
   function readSetupPackageTemplatePayload() {
-    var sbUrl = (localStorage.getItem("SUPABASE_URL") || "").trim();
-    var sbAnon = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
-    var sid = (localStorage.getItem("LEVELUP_STUDENT_ID") || "").trim();
-    var sname = (localStorage.getItem("LEVELUP_STUDENT_NAME") || "").trim();
+    var sbUrl = effectiveSupabaseUrl();
+    var sbAnon = effectiveSupabaseAnon();
+    var sid = effectiveStudentId();
+    var sname = effectiveStudentName();
 
     var llmCfg = null;
     if (global.LevelupLlmConfig && typeof global.LevelupLlmConfig.get === "function") {
