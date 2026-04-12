@@ -1,6 +1,7 @@
 /**
- * First-run / settings UI for Supabase URL+anon key and student id+name.
- * Used by subject-config.js and hub-setup.js. No dependencies.
+ * Setup package UI and helpers (Base64/JSON: Supabase, LLM, student).
+ * Parent dashboard codes stay on the parent page; `apply` still accepts legacy `parent` in pasted JSON.
+ * Used by hub-setup.js, subject-config chain, parent dashboard. No dependencies.
  */
 (function (global) {
   var STYLE_ID = "levelup-setup-forms-style";
@@ -33,120 +34,276 @@
     if (root && root.parentNode) root.parentNode.removeChild(root);
   }
 
-  /**
-   * @param {object} opts
-   * @param {boolean} [opts.force] — from Settings: skip intro, no "local only" skip
-   * @param {string} [opts.existingUrl]
-   * @param {string} [opts.existingAnon]
-   * @returns {Promise<{ action: 'save'|'skip'|'cancel' }>}
-   */
-  function openSupabaseSetup(opts) {
-    opts = opts || {};
-    return new Promise(function (resolve) {
-      injectStyles();
-      var overlay = document.createElement("div");
-      overlay.id = "levelup-setup-overlay";
+  // ────────────────────────────────────────────────────────────────────────────
+  // Unified config package (Base64 JSON) for easy parent/student setup
+  // ────────────────────────────────────────────────────────────────────────────
+  var CONFIG_PACKAGE_VERSION = 2;
+  var PARENT_PROJECT_KEY = "LEVELUP_PARENT_PROJECT_CODE";
+  var PARENT_CODE_KEY = "LEVELUP_PARENT_CODE";
+  var PARENT_REMEMBER_KEY = "LEVELUP_PARENT_REMEMBER_CODE";
+  var SUPABASE_SETUP_SKIPPED_KEY = "SUPABASE_SETUP_SKIPPED_V1";
 
-      function done(action) {
-        closeOverlay(overlay);
-        resolve({ action: action });
+  /** Same rule as hub: Supabase URL+anon OR explicit offline skip, plus student id and display name. */
+  function isClientSetupComplete() {
+    try {
+      var url = (localStorage.getItem("SUPABASE_URL") || "").trim();
+      var anon = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
+      var skipped = localStorage.getItem(SUPABASE_SETUP_SKIPPED_KEY) === "1";
+      var syncOk = !!(url && anon) || skipped;
+      var sid = (localStorage.getItem("LEVELUP_STUDENT_ID") || "").trim();
+      var sname = (localStorage.getItem("LEVELUP_STUDENT_NAME") || "").trim();
+      return syncOk && !!sid && !!sname;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /** Human-readable list of what still blocks subject access (hub / subject gate). */
+  function describeClientSetupGaps() {
+    var gaps = [];
+    try {
+      var url = (localStorage.getItem("SUPABASE_URL") || "").trim();
+      var anon = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
+      var skipped = localStorage.getItem(SUPABASE_SETUP_SKIPPED_KEY) === "1";
+      if (!((url && anon) || skipped)) {
+        gaps.push("Supabase project URL + anon key (or tap Offline defaults to skip cloud)");
       }
-
-      function showIntro() {
-        overlay.innerHTML =
-          "<div class='lu-panel'>" +
-          "<h2>Connect Supabase?</h2>" +
-          "<p class='lu-lead'>Optional cloud sync for XP, shop purchases, and parent reports. " +
-          "You can skip and use the app fully offline on this device.</p>" +
-          "<div class='lu-actions'>" +
-          "<button type='button' class='lu-ghost' data-act='skip'>Use local only</button>" +
-          "<button type='button' class='lu-primary' data-act='form'>Enter project details</button>" +
-          "</div></div>";
-        overlay.querySelector("[data-act='skip']").onclick = function () {
-          done("skip");
-        };
-        overlay.querySelector("[data-act='form']").onclick = function () {
-          showForm();
-        };
+      var sid = (localStorage.getItem("LEVELUP_STUDENT_ID") || "").trim();
+      var sname = (localStorage.getItem("LEVELUP_STUDENT_NAME") || "").trim();
+      if (!sid || !sname) {
+        gaps.push("student ID and display name (or Offline defaults)");
       }
+    } catch (_) {}
+    return gaps;
+  }
 
-      function showForm() {
-        var url0 = (opts.existingUrl || "").replace(/"/g, "&quot;");
-        var anon0 = (opts.existingAnon || "").replace(/"/g, "&quot;");
-        overlay.innerHTML =
-          "<div class='lu-panel'>" +
-          "<h2>Supabase project</h2>" +
-          "<p class='lu-lead'>From the Supabase dashboard: Project Settings → API. Paste the project URL and the <code>anon</code> public key.</p>" +
-          "<form class='lu-form'>" +
-          "<label for='lu-sb-url'>Project URL</label>" +
-          "<input id='lu-sb-url' name='url' type='url' autocomplete='off' placeholder='https://xxxx.supabase.co' value='" +
-          url0 +
-          "' />" +
-          "<label for='lu-sb-anon'>Anon (public) key</label>" +
-          "<input id='lu-sb-anon' name='anon' type='password' autocomplete='off' placeholder='eyJhbGciOiJIUzI1NiIsInR5cCI6…' value='" +
-          anon0 +
-          "' />" +
-          "<div class='lu-err' id='lu-sb-err' hidden></div>" +
-          "<div class='lu-actions'>" +
-          (!opts.force ? "<button type='button' class='lu-ghost' data-act='back'>Back</button>" : "") +
-          "<button type='button' class='lu-ghost' data-act='cancel'>Cancel</button>" +
-          "<button type='submit' class='lu-primary'>Save</button>" +
-          "</div></form></div>";
-        var errEl = overlay.querySelector("#lu-sb-err");
-        var backBtn = overlay.querySelector("[data-act='back']");
-        if (backBtn) {
-          backBtn.onclick = function () {
-            showIntro();
-          };
-        }
-        overlay.querySelector("[data-act='cancel']").onclick = function () {
-          done("cancel");
-        };
-        overlay.querySelector("form").onsubmit = function (e) {
-          e.preventDefault();
-          var url = (overlay.querySelector("#lu-sb-url").value || "").trim();
-          var anon = (overlay.querySelector("#lu-sb-anon").value || "").trim();
-          if (!url || !anon) {
-            errEl.textContent = "URL and anon key are required.";
-            errEl.hidden = false;
-            return;
-          }
-          if (url.indexOf("http") !== 0) {
-            errEl.textContent = "URL should start with https://";
-            errEl.hidden = false;
-            return;
-          }
-          localStorage.setItem("SUPABASE_URL", url);
-          localStorage.setItem("SUPABASE_ANON_KEY", anon);
-          localStorage.removeItem("SUPABASE_SETUP_SKIPPED_V1");
-          done("save");
-        };
+  function toBase64Utf8(str) {
+    try {
+      return btoa(unescape(encodeURIComponent(String(str || ""))));
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function fromBase64Utf8(b64) {
+    try {
+      return decodeURIComponent(escape(atob(String(b64 || ""))));
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function toBase64Url(b64) {
+    return String(b64 || "")
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=+$/g, "");
+  }
+
+  function fromBase64Url(s) {
+    var n = String(s || "")
+      .trim()
+      .replace(/-/g, "+")
+      .replace(/_/g, "/");
+    var pad = n.length % 4;
+    if (pad) n += "====".slice(pad);
+    return n;
+  }
+
+  function normalizeLlmPayload(raw) {
+    var o = raw && typeof raw === "object" ? raw : {};
+    if (global.LevelupLlmConfig && typeof global.LevelupLlmConfig.defaultConfig === "function") {
+      return global.LevelupLlmConfig.defaultConfig(o);
+    }
+    return {
+      v: 2,
+      enabled: o.enabled !== false,
+      mode: o.mode || "fastapi",
+      proxyBaseUrl: String(o.proxyBaseUrl || "").trim().replace(/\/+$/g, ""),
+      appToken: String(o.appToken || "").trim(),
+      features: {
+        quizExplain: !(o.features && o.features.quizExplain === false),
+      },
+      cache: {
+        maxEntries:
+          o.cache && typeof o.cache.maxEntries === "number" && o.cache.maxEntries > 0
+            ? o.cache.maxEntries
+            : 200,
+        ttlDays:
+          o.cache && typeof o.cache.ttlDays === "number" && o.cache.ttlDays > 0
+            ? o.cache.ttlDays
+            : 60,
+      },
+    };
+  }
+
+  function readCurrentConfigPayload() {
+    var payload = {
+      v: CONFIG_PACKAGE_VERSION,
+    };
+    var sbUrl = (localStorage.getItem("SUPABASE_URL") || "").trim();
+    var sbAnon = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
+    var sid = (localStorage.getItem("LEVELUP_STUDENT_ID") || "").trim();
+    var sname = (localStorage.getItem("LEVELUP_STUDENT_NAME") || "").trim();
+    if (sbUrl) payload.SUPABASE_URL = sbUrl;
+    if (sbAnon) payload.SUPABASE_ANON_KEY = sbAnon;
+    if (sid) payload.LEVELUP_STUDENT_ID = sid;
+    if (sname) payload.LEVELUP_STUDENT_NAME = sname;
+
+    var llmCfg = null;
+    if (global.LevelupLlmConfig && typeof global.LevelupLlmConfig.get === "function") {
+      llmCfg = global.LevelupLlmConfig.get();
+    } else {
+      try {
+        llmCfg = JSON.parse(localStorage.getItem("LEVELUP_LLM_CONFIG_JSON") || "null");
+      } catch (_) {
+        llmCfg = null;
       }
+    }
+    if (llmCfg && typeof llmCfg === "object") payload.llm = llmCfg;
 
-      if (opts.force) {
-        showForm();
-      } else {
-        showIntro();
-      }
-
-      document.body.appendChild(overlay);
-    });
+    return payload;
   }
 
   /**
-   * @param {object} opts
-   * @param {string} [opts.existingId]
-   * @param {string} [opts.existingName]
-   * @returns {Promise<{ action: 'save'|'cancel', studentId?: string, name?: string }>}
+   * Full package shape for editing: every known key is present; missing localStorage values are "" / defaults.
    */
-  function openStudentSetup(opts) {
-    opts = opts || {};
+  function readSetupPackageTemplatePayload() {
+    var sbUrl = (localStorage.getItem("SUPABASE_URL") || "").trim();
+    var sbAnon = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
+    var sid = (localStorage.getItem("LEVELUP_STUDENT_ID") || "").trim();
+    var sname = (localStorage.getItem("LEVELUP_STUDENT_NAME") || "").trim();
+
+    var llmCfg = null;
+    if (global.LevelupLlmConfig && typeof global.LevelupLlmConfig.get === "function") {
+      llmCfg = global.LevelupLlmConfig.get();
+    } else {
+      try {
+        llmCfg = JSON.parse(localStorage.getItem("LEVELUP_LLM_CONFIG_JSON") || "null");
+      } catch (_) {
+        llmCfg = null;
+      }
+    }
+    var llmMerged = normalizeLlmPayload(llmCfg && typeof llmCfg === "object" ? llmCfg : {});
+
+    return {
+      v: CONFIG_PACKAGE_VERSION,
+      SUPABASE_URL: sbUrl,
+      SUPABASE_ANON_KEY: sbAnon,
+      LEVELUP_STUDENT_ID: sid,
+      LEVELUP_STUDENT_NAME: sname,
+      llm: llmMerged,
+    };
+  }
+
+  function encodeConfigPayload(payloadObj) {
+    var json = JSON.stringify(payloadObj);
+    return toBase64Url(toBase64Utf8(json));
+  }
+
+  function parseConfigPackage(input) {
+    var raw = String(input || "").trim();
+    if (!raw) return { ok: false, error: "Paste a package string or JSON first." };
+
+    var obj = null;
+    if (raw[0] === "{") {
+      try {
+        obj = JSON.parse(raw);
+      } catch (_) {
+        return { ok: false, error: "Invalid JSON." };
+      }
+    } else {
+      var json = fromBase64Utf8(fromBase64Url(raw));
+      if (!json) return { ok: false, error: "Invalid Base64 package string." };
+      try {
+        obj = JSON.parse(json);
+      } catch (_) {
+        return { ok: false, error: "Decoded package is not valid JSON." };
+      }
+    }
+    if (!obj || typeof obj !== "object") {
+      return { ok: false, error: "Package must decode to an object." };
+    }
+    return { ok: true, value: obj };
+  }
+
+  function applyConfigPayload(obj) {
+    var applied = [];
+    var o = obj && typeof obj === "object" ? obj : {};
+
+    var sbUrl = String(o.SUPABASE_URL || "").trim();
+    var sbAnon = String(o.SUPABASE_ANON_KEY || "").trim();
+    if (sbUrl) {
+      localStorage.setItem("SUPABASE_URL", sbUrl);
+      applied.push("SUPABASE_URL");
+    }
+    if (sbAnon) {
+      localStorage.setItem("SUPABASE_ANON_KEY", sbAnon);
+      applied.push("SUPABASE_ANON_KEY");
+    }
+
+    var sid = String(o.LEVELUP_STUDENT_ID || "").trim();
+    var sname = String(o.LEVELUP_STUDENT_NAME || "").trim();
+    if (sid) {
+      localStorage.setItem("LEVELUP_STUDENT_ID", sid);
+      applied.push("LEVELUP_STUDENT_ID");
+    }
+    if (sname) {
+      localStorage.setItem("LEVELUP_STUDENT_NAME", sname);
+      applied.push("LEVELUP_STUDENT_NAME");
+    }
+
+    // Accept both llm and fastapi aliases for compatibility.
+    var llmRaw = null;
+    if (o.llm && typeof o.llm === "object") llmRaw = o.llm;
+    if (!llmRaw && o.fastapi && typeof o.fastapi === "object") llmRaw = o.fastapi;
+    if (llmRaw) {
+      var normalizedLlm = normalizeLlmPayload(llmRaw);
+      var proxyU = String(normalizedLlm.proxyBaseUrl || "").trim();
+      var tok = String(normalizedLlm.appToken || "").trim();
+      var llmOff = normalizedLlm.enabled === false;
+      // Avoid saving a hollow enabled:true stub from an unfilled template (confusing + blocks no unlock).
+      if (llmOff || (proxyU && tok)) {
+        localStorage.setItem("LEVELUP_LLM_CONFIG_JSON", JSON.stringify(normalizedLlm));
+        applied.push("LEVELUP_LLM_CONFIG_JSON");
+      }
+    }
+
+    // Legacy: older packages included parent.*; parent UI still collects codes separately.
+    var p = o.parent && typeof o.parent === "object" ? o.parent : null;
+    if (p) {
+      var pProject = String(p.projectCode || "").trim();
+      var pCode = String(p.parentCode || "").trim();
+      if (pProject) {
+        localStorage.setItem(PARENT_PROJECT_KEY, pProject);
+        applied.push(PARENT_PROJECT_KEY);
+      }
+      if (pCode) {
+        localStorage.setItem(PARENT_CODE_KEY, pCode);
+        applied.push(PARENT_CODE_KEY);
+      }
+      if (typeof p.rememberCode === "boolean") {
+        localStorage.setItem(PARENT_REMEMBER_KEY, p.rememberCode ? "1" : "0");
+        applied.push(PARENT_REMEMBER_KEY);
+      }
+    }
+
+    if (sbUrl || sbAnon) {
+      localStorage.removeItem(SUPABASE_SETUP_SKIPPED_KEY);
+    }
+
+    return applied;
+  }
+
+  /**
+   * Small encode/decode/apply UI for setup package.
+   * @returns {Promise<{ action: 'save'|'cancel', applied?: string[] }>}
+   */
+  function openConfigPackageSetup() {
     return new Promise(function (resolve) {
       injectStyles();
       var overlay = document.createElement("div");
       overlay.id = "levelup-setup-overlay";
-      var name0 = (opts.existingName || "").replace(/"/g, "&quot;");
-      var id0 = (opts.existingId || "").replace(/"/g, "&quot;");
 
       function done(result) {
         closeOverlay(overlay);
@@ -154,68 +311,93 @@
       }
 
       overlay.innerHTML =
-        "<div class='lu-panel'>" +
-        "<h2>Student profile</h2>" +
-        "<p class='lu-lead'>Used in parent reports and when syncing to Supabase. Pick a stable short ID (e.g. carol-1).</p>" +
-        "<form>" +
-        "<label for='lu-st-name'>Display name</label>" +
-        "<input id='lu-st-name' name='name' autocomplete='name' placeholder='Carol' value='" +
-        name0 +
-        "' />" +
-        "<label for='lu-st-id'>Student ID</label>" +
-        "<input id='lu-st-id' name='studentId' autocomplete='username' placeholder='carol-1' value='" +
-        id0 +
-        "' />" +
-        "<div class='lu-err' id='lu-st-err' hidden></div>" +
+        "<div class='lu-panel' style='width:min(700px,100%)'>" +
+        "<h2>Setup package (copy/paste)</h2>" +
+        "<p class='lu-lead'>Use one Base64 package string for Supabase, optional LLM proxy, and optional student fields. Parent dashboard still uses project/parent codes on <code>parent.html</code>. This is convenience, not encryption. " +
+        "<strong>Generate</strong> fills the JSON preview with every key we embed here (blanks where missing). " +
+        "Subjects unlock only after Supabase (or offline skip) <em>and</em> student ID + name are applied — fill those or use hub Offline defaults. " +
+        "<code>llm</code> is stored only if both proxy URL and app token are set, or if <code>\"enabled\": false</code>. " +
+        "Legacy <code>parent</code> in pasted JSON is still applied.</p>" +
+        "<label for='lu-pkg-str'>Package string (Base64 URL-safe) or raw JSON</label>" +
+        "<textarea id='lu-pkg-str' rows='4' style='width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid #2a3344;background:#0c0e12;color:#e8ecf4;font-size:.88rem;margin-bottom:8px;resize:vertical'></textarea>" +
+        "<div class='lu-actions' style='justify-content:flex-start;margin:0 0 8px 0'>" +
+        "<button type='button' id='lu-pkg-generate' class='lu-primary'>Generate from current settings</button>" +
+        "<button type='button' id='lu-pkg-decode'>Decode</button>" +
+        "<button type='button' id='lu-pkg-apply'>Apply package</button>" +
+        "</div>" +
+        "<label for='lu-pkg-json'>Decoded JSON preview</label>" +
+        "<textarea id='lu-pkg-json' rows='9' style='width:100%;box-sizing:border-box;padding:10px 12px;border-radius:10px;border:1px solid #2a3344;background:#0c0e12;color:#e8ecf4;font-size:.86rem;margin-bottom:8px;resize:vertical'></textarea>" +
+        "<div class='lu-err' id='lu-pkg-err' hidden></div>" +
         "<div class='lu-actions'>" +
-        "<button type='button' class='lu-ghost' data-act='cancel'>Cancel</button>" +
-        "<button type='submit' class='lu-primary'>Save</button>" +
-        "</div></form></div>";
+        "<button type='button' class='lu-ghost' id='lu-pkg-cancel'>Close</button>" +
+        "</div></div>";
 
-      overlay.querySelector("[data-act='cancel']").onclick = function () {
-        done({ action: "cancel" });
+      var strEl = overlay.querySelector("#lu-pkg-str");
+      var jsonEl = overlay.querySelector("#lu-pkg-json");
+      var errEl = overlay.querySelector("#lu-pkg-err");
+
+      function setErr(msg) {
+        errEl.textContent = msg || "";
+        errEl.hidden = !msg;
+      }
+
+      overlay.querySelector("#lu-pkg-generate").onclick = function () {
+        var payload = readSetupPackageTemplatePayload();
+        jsonEl.value = JSON.stringify(payload, null, 2);
+        strEl.value = encodeConfigPayload(payload);
+        setErr("");
       };
-      overlay.querySelector("form").onsubmit = function (e) {
-        e.preventDefault();
-        var errEl = overlay.querySelector("#lu-st-err");
-        var name = (overlay.querySelector("#lu-st-name").value || "").trim();
-        var studentId = (overlay.querySelector("#lu-st-id").value || "").trim();
-        if (!name) {
-          errEl.textContent = "Display name is required.";
-          errEl.hidden = false;
+
+      overlay.querySelector("#lu-pkg-decode").onclick = function () {
+        var parsed = parseConfigPackage(strEl.value || jsonEl.value || "");
+        if (!parsed.ok) {
+          setErr(parsed.error);
           return;
         }
-        if (!studentId) {
-          var seed = name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/^-+|-+$/g, "")
-            .slice(0, 24);
-          studentId = seed || "student";
+        jsonEl.value = JSON.stringify(parsed.value, null, 2);
+        setErr("");
+      };
+
+      overlay.querySelector("#lu-pkg-apply").onclick = function () {
+        var parsed = parseConfigPackage(strEl.value || jsonEl.value || "");
+        if (!parsed.ok) {
+          setErr(parsed.error);
+          return;
         }
-        done({ action: "save", name: name, studentId: studentId });
+        jsonEl.value = JSON.stringify(parsed.value, null, 2);
+        var applied = applyConfigPayload(parsed.value);
+        if (!applied.length) {
+          setErr(
+            "No keys applied. Add Supabase URL+anon and/or student fields, or llm with both proxy URL and app token (or enabled:false), or legacy parent fields."
+          );
+          return;
+        }
+        if (global.LevelupLlmKeepalive && typeof global.LevelupLlmKeepalive.start === "function") {
+          global.LevelupLlmKeepalive.start();
+        }
+        if (global.LevelupLlmKeepalive && typeof global.LevelupLlmKeepalive.poke === "function") {
+          global.LevelupLlmKeepalive.poke("config_package_apply", true);
+        }
+        done({ action: "save", applied: applied });
+      };
+
+      overlay.querySelector("#lu-pkg-cancel").onclick = function () {
+        done({ action: "cancel" });
       };
 
       document.body.appendChild(overlay);
-      var nameInput = overlay.querySelector("#lu-st-name");
-      var idInput = overlay.querySelector("#lu-st-id");
-      nameInput.focus();
-      nameInput.addEventListener("blur", function () {
-        if (idInput.value.replace(/\s/g, "")) return;
-        var n = (nameInput.value || "").trim();
-        if (!n) return;
-        var seed = n
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, "-")
-          .replace(/^-+|-+$/g, "")
-          .slice(0, 24);
-        if (seed) idInput.placeholder = seed;
-      });
     });
   }
 
   global.LevelupSetupForms = {
-    openSupabaseSetup: openSupabaseSetup,
-    openStudentSetup: openStudentSetup,
+    openConfigPackageSetup: openConfigPackageSetup,
+    isClientSetupComplete: isClientSetupComplete,
+    describeClientSetupGaps: describeClientSetupGaps,
+    // Exposed for tests and non-UI utility use.
+    encodeConfigPayload: encodeConfigPayload,
+    parseConfigPackage: parseConfigPackage,
+    applyConfigPayload: applyConfigPayload,
+    readCurrentConfigPayload: readCurrentConfigPayload,
+    readSetupPackageTemplatePayload: readSetupPackageTemplatePayload,
   };
 })(window);

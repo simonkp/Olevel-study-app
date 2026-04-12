@@ -112,6 +112,12 @@
           cache: (existing && existing.cache) || {},
         });
         global.LevelupLlmConfig.save(next);
+        if (global.LevelupLlmKeepalive && typeof global.LevelupLlmKeepalive.start === "function") {
+          global.LevelupLlmKeepalive.start();
+        }
+        if (global.LevelupLlmKeepalive && typeof global.LevelupLlmKeepalive.poke === "function") {
+          global.LevelupLlmKeepalive.poke("settings_save", true);
+        }
         done("save");
       };
 

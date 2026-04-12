@@ -132,14 +132,17 @@ if (!manifest || !manifest.length) {
     };
   }
 
-  var _sbSetupBtn = document.getElementById("btn-supabase-setup");
-  if (_sbSetupBtn && typeof window.configureSupabaseKeys === "function") {
-    _sbSetupBtn.onclick = function () {
-      var _root = document.getElementById("modal-root");
-      document.getElementById("panel-settings").hidden = true;
-      closeModalRoot(_root);
-      if (route.view === "home") renderHome();
-      window.configureSupabaseKeys();
+  var _configPackBtn = document.getElementById("btn-config-package-setup");
+  if (_configPackBtn && window.LevelupSetupForms && typeof window.LevelupSetupForms.openConfigPackageSetup === "function") {
+    _configPackBtn.onclick = function () {
+      window.LevelupSetupForms.openConfigPackageSetup().then(function (r) {
+        if (r && r.action === "save") {
+          window.alert("Setup package applied. Reloading to use updated profile/sync config.");
+          window.location.reload();
+          return;
+        }
+        refreshLlmProxyStatusLine();
+      });
     };
   }
 

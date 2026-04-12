@@ -1137,7 +1137,7 @@ html:has(#modal-root:not([hidden])) {
   line-height: 1.45;
 }
 
-.modal-settings #btn-supabase-setup {
+.modal-settings #btn-config-package-setup {
   margin-bottom: 16px;
 }
 

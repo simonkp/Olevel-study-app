@@ -1,10 +1,18 @@
 (function () {
+  if (
+    window.LevelupSetupForms &&
+    typeof window.LevelupSetupForms.isClientSetupComplete === "function" &&
+    !window.LevelupSetupForms.isClientSetupComplete()
+  ) {
+    window.location.replace("index.html?needsSetup=1");
+    return;
+  }
+
   var params = new URLSearchParams(window.location.search);
   var KNOWN_SUBJECTS = ["chemistry", "physics", "geography"];
   var LAST_SUBJECT_KEY = "LEVELUP_LAST_SUBJECT";
   var STUDENT_ID_KEY = "LEVELUP_STUDENT_ID";
   var STUDENT_NAME_KEY = "LEVELUP_STUDENT_NAME";
-  var SUPABASE_SKIP_KEY = "SUPABASE_SETUP_SKIPPED_V1";
 
   function normalizeSubject(value) {
     var n = (value || "").trim().toLowerCase();
@@ -52,97 +60,25 @@
       window.SUPABASE_ANON_KEY || localStorage.getItem("SUPABASE_ANON_KEY") || "";
   }
 
-  function setupSupabaseKeysPrompt(force) {
-    return new Promise(function (resolve) {
-      var existingUrl = localStorage.getItem("SUPABASE_URL") || "";
-      var existingAnon = localStorage.getItem("SUPABASE_ANON_KEY") || "";
-      if (!force && existingUrl && existingAnon) {
-        resolve({ saved: false });
-        return;
-      }
-      var shouldAsk =
-        force ||
-        window.location.search.includes("setupSupabase=1") ||
-        localStorage.getItem(SUPABASE_SKIP_KEY) !== "1";
-      if (!shouldAsk) {
-        resolve({ saved: false });
-        return;
-      }
-      if (!window.LevelupSetupForms) {
-        console.warn("LevelupSetupForms not loaded (add setup-forms.js before subject-config.js)");
-        resolve({ saved: false });
-        return;
-      }
-      window.LevelupSetupForms
-        .openSupabaseSetup({
-          force: !!force,
-          existingUrl: existingUrl,
-          existingAnon: existingAnon,
-        })
-        .then(function (r) {
-          if (r.action === "skip" && !force) {
-            localStorage.setItem(SUPABASE_SKIP_KEY, "1");
-          }
-          resolve({ saved: r.action === "save" });
-        });
-    });
-  }
-
-  function setupStudentProfilePrompt(force) {
-    return new Promise(function (resolve) {
-      var existingId = (localStorage.getItem(STUDENT_ID_KEY) || "").trim();
-      var existingName = (localStorage.getItem(STUDENT_NAME_KEY) || "").trim();
-      if (!force && existingId && existingName) {
-        resolve();
-        return;
-      }
-      var shouldAsk = force || window.location.search.includes("setupStudent=1");
-      if (!shouldAsk && (existingId || existingName)) {
-        resolve();
-        return;
-      }
-      if (!window.LevelupSetupForms) {
-        console.warn("LevelupSetupForms not loaded");
-        resolve();
-        return;
-      }
-      window.LevelupSetupForms.openStudentSetup({ existingId: existingId, existingName: existingName }).then(
-        function (r) {
-          if (r.action === "save" && r.studentId && r.name) {
-            localStorage.setItem(STUDENT_ID_KEY, r.studentId);
-            localStorage.setItem(STUDENT_NAME_KEY, r.name);
-          }
-          resolve();
-        }
-      );
-    });
-  }
-
-  window.configureSupabaseKeys = function () {
-    setupSupabaseKeysPrompt(true).then(function (r) {
-      if (r.saved) {
-        window.alert("Supabase config saved. Reloading…");
+  function openSetupPackageThenMaybeReload() {
+    if (!window.LevelupSetupForms || typeof window.LevelupSetupForms.openConfigPackageSetup !== "function") {
+      console.warn("LevelupSetupForms not loaded (add setup-forms.js before subject-config.js)");
+      return;
+    }
+    window.LevelupSetupForms.openConfigPackageSetup().then(function (r) {
+      if (r && r.action === "save") {
+        window.alert("Setup package applied. Reloading…");
         window.location.reload();
         return;
       }
       applyWindowFromStorage();
     });
-  };
-  window.configureStudentProfile = function () {
-    setupStudentProfilePrompt(true).then(function () {
-      applyWindowFromStorage();
-    });
-  };
+  }
 
-  window.__LEVELUP_SUBJECT_SETUP = setupSupabaseKeysPrompt(false)
-    .then(function (r) {
-      if (r.saved) {
-        window.alert("Supabase config saved. Reloading…");
-        window.location.reload();
-        return new Promise(function () {});
-      }
-      return setupStudentProfilePrompt(false);
-    })
+  window.configureSupabaseKeys = openSetupPackageThenMaybeReload;
+  window.configureStudentProfile = openSetupPackageThenMaybeReload;
+
+  window.__LEVELUP_SUBJECT_SETUP = Promise.resolve()
     .then(function () {
       applyWindowFromStorage();
     })
