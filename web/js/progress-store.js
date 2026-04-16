@@ -73,7 +73,12 @@
     if (!hasClient()) return;
     clearTimeout(state.snapshotTimer);
     state.snapshotTimer = setTimeout(() => {
-      safe(() => window.LevelupSupabase.logStateSnapshot(portableState));
+      // Full state sync to user_subject_state (multi-device sync).
+      if (typeof window.LevelupSupabase.syncSubjectState === "function") {
+        safe(() => window.LevelupSupabase.syncSubjectState(state.subjectId, portableState));
+      } else {
+        safe(() => window.LevelupSupabase.logStateSnapshot(portableState));
+      }
     }, SNAPSHOT_DEBOUNCE_MS);
   }
 
@@ -390,6 +395,12 @@
     };
   }
 
+  async function fetchSubjectState() {
+    if (!hasClient()) return null;
+    if (typeof window.LevelupSupabase.fetchSubjectState !== "function") return null;
+    return safe(() => window.LevelupSupabase.fetchSubjectState(state.subjectId));
+  }
+
   window.ProgressStore = {
     init,
     hasClient,
@@ -407,6 +418,7 @@
     migrateFromLocalState,
     fetchReportWithFallback,
     fetchBootstrapState,
+    fetchSubjectState,
     ensureReady,
     getLastError: () => state.lastError,
   };

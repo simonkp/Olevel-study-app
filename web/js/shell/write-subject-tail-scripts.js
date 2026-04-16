@@ -31,6 +31,13 @@
     loadChain(corePaths);
   }
 
+  // Config unavailable → can't authenticate → redirect to landing
+  document.addEventListener("levelup:config-error", function () {
+    if (!window.SUPABASE_URL) {
+      window.location.replace("landing.html");
+    }
+  });
+
   if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
     startApp();
   } else {

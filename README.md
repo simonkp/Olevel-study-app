@@ -10,6 +10,28 @@ npx serve .
 
 Open the URL (required for runtime script loading).
 
+### Configuring the API endpoint
+
+The FastAPI proxy (`api/`) and the static web app (`web/`) are deployed on **separate servers**, so the app needs to know the API base URL.
+
+**Local development setup:**
+1. Copy `web/config/api.json.example` → `web/config/api.json`
+2. Edit `web/config/api.json` to point to your API:
+   ```json
+   {
+     "apiBase": "http://localhost:8080"
+   }
+   ```
+3. **Important:** `web/config/api.json` is git-ignored (never checked in). Each environment (local/staging/prod) needs its own copy.
+
+**Production deployment:**
+- `web/config/api.json.example` is checked in as a template
+- Your CI/CD or deployment script should generate `web/config/api.json` with the appropriate API domain before deployment
+- Example: `echo '{"apiBase":"https://api.example.com"}' > web/config/api.json`
+
+**Default fallback:**
+- If `web/config/api.json` is missing, the app falls back to `http://localhost:8080` (local dev default)
+
 ## Content layout (subjects)
 
 The app supports multiple subjects. In production POC mode, `js/app.js` reads `window.SUBJECT_ID` and subject data is loaded from Supabase Storage (`study-materials` bucket) only.

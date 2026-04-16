@@ -9,7 +9,7 @@ create table if not exists public.parent_student_links (
 alter table public.parent_student_links enable row level security;
 
 create policy "parent_reads_own_links" on public.parent_student_links
-  for select to authenticated using (auth.uid() = parent_user_id);
+  for select to authenticated using ((select auth.uid()) = parent_user_id);
 -- Only service_role can insert (admin/webhook creates the link at purchase time)
 
 -- Pending invites (parent adds child email; child must accept by signing in)
@@ -25,7 +25,7 @@ create table if not exists public.pending_parent_invites (
 alter table public.pending_parent_invites enable row level security;
 -- Parent can see their own sent invites; no public access
 create policy "parent_reads_own_invites" on public.pending_parent_invites
-  for select to authenticated using (auth.uid() = parent_user_id);
+  for select to authenticated using ((select auth.uid()) = parent_user_id);
 
 -- RPC: called client-side when child signs in via invite link
 -- Accepts invite matching auth.uid()'s email, creates confirmed link

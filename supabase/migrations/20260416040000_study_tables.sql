@@ -106,8 +106,8 @@ do $$ declare t text; begin
       'drop policy if exists %I_own on public.%I;
        create policy %I_own on public.%I
          for all to authenticated
-         using (auth.uid() = user_id)
-         with check (auth.uid() = user_id)',
+         using ((select auth.uid()) = user_id)
+         with check ((select auth.uid()) = user_id)',
       t, t, t, t
     );
   end loop;

@@ -11,7 +11,7 @@ alter table public.profiles enable row level security;
 
 -- Trigger: auto-create profile on Google sign-up
 create or replace function public.handle_new_user()
-returns trigger language plpgsql security definer as $$
+returns trigger language plpgsql security definer set search_path = public as $$
 begin
   insert into public.profiles (user_id, display_name, avatar_url)
   values (
@@ -29,6 +29,6 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 create policy "profiles_select_own" on public.profiles
-  for select to authenticated using (auth.uid() = user_id);
+  for select to authenticated using ((select auth.uid()) = user_id);
 create policy "profiles_update_own" on public.profiles
-  for update to authenticated using (auth.uid() = user_id);
+  for update to authenticated using ((select auth.uid()) = user_id);

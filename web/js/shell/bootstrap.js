@@ -39,10 +39,21 @@
   }
 
   // First visit — must fetch before proceeding
+  // TIP for local dev without the API: open the browser console and run:
+  //   localStorage.setItem('SUPABASE_URL', 'http://localhost:54321');
+  //   localStorage.setItem('SUPABASE_ANON_KEY', '<your-local-anon-key>');
+  // then reload. The API is only needed to bootstrap the config on first visit.
   fetch(API_BASE + "/config")
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
     .then(initFromConfig)
     .catch(function(e) {
+      console.warn(
+        "[LevelUp] Could not load Supabase config from API (" + API_BASE + "/config): " + e +
+        "\nFor local dev, set SUPABASE_URL and SUPABASE_ANON_KEY in localStorage to bypass the API."
+      );
       document.dispatchEvent(new CustomEvent('levelup:config-error', {
         detail: { message: String(e) }
       }));

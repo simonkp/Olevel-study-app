@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     stripe_default_entitlement: str = Field(
         default="olevel_chem", validation_alias="STRIPE_DEFAULT_ENTITLEMENT"
     )
+    # Admin API key — set a strong random value in .env; keep secret
+    admin_api_key: str = Field(default="", validation_alias="ADMIN_API_KEY")
 
 
 def get_settings() -> Settings:
@@ -120,6 +122,14 @@ async def auth_guard_middleware(request: Request, call_next):
         except HTTPException as exc:
             return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
         request.state.auth_user_id = ctx.user_id
+    if path.startswith("/admin/"):
+        api_key = (request.headers.get("x-admin-api-key") or "").strip()
+        expected = (settings.admin_api_key or "").strip()
+        if not expected or api_key != expected:
+            return JSONResponse(
+                status_code=401,
+                content={"detail": "Missing or invalid X-Admin-Api-Key header"},
+            )
     return await call_next(request)
 
 
@@ -165,6 +175,88 @@ async def get_client_config() -> dict[str, str]:
         "supabaseUrl": settings.supabase_url,
         "supabaseAnonKey": settings.supabase_anon_key_public,
     }
+
+
+class LinkStudentBody(BaseModel):
+    parent_user_id: str = Field(..., min_length=1, max_length=64)
+    student_user_id: str = Field(..., min_length=1, max_length=64)
+    label: str | None = Field(default=None, max_length=100)
+
+
+class GrantEntitlementBody(BaseModel):
+    student_user_id: str = Field(..., min_length=1, max_length=64)
+    entitlement: str = Field(..., min_length=1, max_length=64)
+    access_to: str | None = Field(default=None, description="ISO 8601 expiry datetime, or null for no expiry")
+
+
+def _get_service_client():
+    """Return a Supabase service-role client (httpx-based) for admin writes."""
+    import httpx
+    url = (settings.supabase_url or "").rstrip("/")
+    key = (settings.supabase_service_role_key or "").strip()
+    if not url or not key:
+        raise HTTPException(status_code=503, detail="Supabase service role not configured")
+    return httpx.AsyncClient(
+        base_url=url,
+        headers={
+            "apikey": key,
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json",
+            "Prefer": "return=representation,resolution=merge-duplicates",
+        },
+        timeout=10.0,
+    )
+
+
+@app.post("/admin/link-student")
+async def link_student(body: LinkStudentBody) -> dict:
+    """Create a parent_student_links row. Requires X-Admin-Api-Key header."""
+    async with _get_service_client() as client:
+        res = await client.post(
+            "/rest/v1/parent_student_links",
+            json={
+                "parent_user_id": body.parent_user_id,
+                "student_user_id": body.student_user_id,
+                "label": body.label,
+            },
+        )
+    if res.status_code not in (200, 201):
+        raise HTTPException(status_code=502, detail=f"Supabase error: {res.text[:400]}")
+    return {"ok": True, "parent_user_id": body.parent_user_id, "student_user_id": body.student_user_id}
+
+
+@app.post("/admin/grant-entitlement")
+async def grant_entitlement(body: GrantEntitlementBody) -> dict:
+    """
+    Upsert a user_entitlements row. Adds the entitlement to the array if not present.
+    Requires X-Admin-Api-Key header.
+    """
+    async with _get_service_client() as client:
+        # Fetch current row first
+        fetch = await client.get(
+            f"/rest/v1/user_entitlements?user_id=eq.{body.student_user_id}&select=entitlements"
+        )
+        current: list[str] = []
+        if fetch.status_code == 200:
+            rows = fetch.json()
+            if rows:
+                current = rows[0].get("entitlements") or []
+        if body.entitlement not in current:
+            current.append(body.entitlement)
+
+        from datetime import datetime, timezone
+        payload: dict = {
+            "user_id": body.student_user_id,
+            "entitlements": current,
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        if body.access_to:
+            payload["access_to"] = body.access_to
+
+        res = await client.post("/rest/v1/user_entitlements", json=payload)
+    if res.status_code not in (200, 201):
+        raise HTTPException(status_code=502, detail=f"Supabase error: {res.text[:400]}")
+    return {"ok": True, "student_user_id": body.student_user_id, "entitlements": current}
 
 
 @app.post("/llm/quiz-explain")
@@ -296,16 +388,33 @@ async def quiz_explain(body: QuizExplainBody, request: Request) -> dict:
     }
 
 
-if (settings.supabase_url or "").strip() and (settings.supabase_service_role_key or "").strip():
-    app.include_router(
-        create_stripe_webhook_router(
-            stripe_secret_key=settings.stripe_secret_key,
-            stripe_webhook_secret=settings.stripe_webhook_secret,
-            default_entitlement=settings.stripe_default_entitlement,
-            supabase_url=settings.supabase_url,
-            supabase_service_role_key=settings.supabase_service_role_key,
+_stripe_webhook_enabled = all(
+    [
+        (settings.stripe_secret_key or "").strip(),
+        (settings.stripe_webhook_secret or "").strip(),
+        (settings.supabase_url or "").strip(),
+        (settings.supabase_service_role_key or "").strip(),
+    ]
+)
+if _stripe_webhook_enabled:
+    try:
+        app.include_router(
+            create_stripe_webhook_router(
+                stripe_secret_key=settings.stripe_secret_key,
+                stripe_webhook_secret=settings.stripe_webhook_secret,
+                default_entitlement=settings.stripe_default_entitlement,
+                supabase_url=settings.supabase_url,
+                supabase_service_role_key=settings.supabase_service_role_key,
+            )
         )
-    )
+        print("[levelup-llm-proxy] Stripe webhook router enabled")
+    except Exception as exc:
+        print(
+            "[levelup-llm-proxy] WARNING: Stripe webhook router disabled due to invalid configuration: "
+            f"{exc!s}"
+        )
+else:
+    print("[levelup-llm-proxy] Stripe webhook router disabled (missing Stripe/Supabase webhook env vars)")
 
 
 # Allow `uvicorn app.main:app` with cwd = api/

@@ -4,7 +4,7 @@ on conflict (id) do update set public = excluded.public;
 
 -- helper (immutable, used in storage RLS)
 create or replace function public.required_entitlement_for_subject(subject_slug text)
-returns text language sql immutable as $$
+returns text language sql immutable set search_path = public as $$
   select case lower(coalesce(subject_slug,''))
     when 'chemistry' then 'olevel_chem'
     when 'physics'   then 'olevel_phys'
@@ -23,7 +23,7 @@ create policy study_materials_read on storage.objects
       split_part(name, '/', 2) = 'free'
       -- entitled access
       or public.user_has_entitlement(
-          auth.uid(),
+          (select auth.uid()),
           public.required_entitlement_for_subject(split_part(name, '/', 1))
          )
     )

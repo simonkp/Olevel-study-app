@@ -125,10 +125,31 @@
     return session;
   }
 
+  /**
+   * Server-validated user fetch. Unlike getSession() which returns a locally
+   * cached token, getUser() makes a network round-trip to Supabase and returns
+   * null (+ auto-signs-out) if the token is stale/revoked/user-deleted.
+   * Use this on protected page load to detect ghost sessions.
+   */
+  async function getValidatedUser() {
+    var sb = getClient();
+    if (!sb) return null;
+    var res = await sb.auth.getUser();
+    if (res.error || !res.data || !res.data.user) {
+      // Stale or invalid session — clear it so the user sees the sign-in screen
+      try { await sb.auth.signOut(); } catch (_) {}
+      entitlementsCache = null;
+      cachedForUserId = "";
+      return null;
+    }
+    return res.data.user;
+  }
+
   global.LevelupAuth = {
     getClient: getClient,
     getSession: getSession,
     getAccessToken: getAccessToken,
+    getValidatedUser: getValidatedUser,
     signInWithGoogle: signInWithGoogle,
     signOut: signOut,
     onAuthStateChange: onAuthStateChange,

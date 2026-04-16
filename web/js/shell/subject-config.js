@@ -40,58 +40,38 @@
   window.SUBJECT_TITLE = titles[subjectId] || subjectId;
   window.APP_VERSION = window.APP_VERSION || "dev";
   window.SUPABASE_PROJECT_CODE = window.SUPABASE_PROJECT_CODE || "study-app";
-
-  function applyWindowFromStorage() {
-    window.LEVELUP_STUDENT_ID =
-      window.LEVELUP_STUDENT_ID || localStorage.getItem(STUDENT_ID_KEY) || "";
-    window.LEVELUP_STUDENT_NAME =
-      window.LEVELUP_STUDENT_NAME || localStorage.getItem(STUDENT_NAME_KEY) || "";
-    window.SUPABASE_URL = window.SUPABASE_URL || localStorage.getItem("SUPABASE_URL") || "";
-    window.SUPABASE_ANON_KEY =
-      window.SUPABASE_ANON_KEY || localStorage.getItem("SUPABASE_ANON_KEY") || "";
-  }
-
-  function openSetupPackageThenMaybeReload() {
-    if (!window.LevelupSetupForms || typeof window.LevelupSetupForms.openConfigPackageSetup !== "function") {
-      console.warn("LevelupSetupForms not loaded (add setup-forms.js before subject-config.js)");
-      return;
-    }
-    window.LevelupSetupForms.openConfigPackageSetup().then(function (r) {
-      if (r && r.action === "save") {
-        window.alert("Setup package applied. Reloading…");
-        window.location.reload();
-        return;
-      }
-      applyWindowFromStorage();
-    });
-  }
-
-  window.configureSupabaseKeys = openSetupPackageThenMaybeReload;
-  window.configureStudentProfile = openSetupPackageThenMaybeReload;
+  window.SUBJECT_PREVIEW_MODE = params.get("preview") === "1";
 
   window.__LEVELUP_SUBJECT_SETUP = Promise.resolve()
     .then(function () {
-      applyWindowFromStorage();
-      if (!window.LevelupAuth || typeof window.LevelupAuth.requireSession !== "function") {
+      if (!window.LevelupAuth || typeof window.LevelupAuth.getValidatedUser !== "function") {
         throw new Error("auth_client_missing");
       }
-      return window.LevelupAuth.requireSession();
+      // Server-validate the session so stale/ghost tokens redirect to landing
+      return window.LevelupAuth.getValidatedUser();
     })
-    .then(function (session) {
-      if (!session || !session.user) {
-        window.location.replace("index.html?needsAuth=1");
+    .then(function (user) {
+      if (!user) {
+        window.location.replace("landing.html");
         throw new Error("redirected_needs_auth");
       }
-      if (subjectId !== "chemistry") return null;
+
+      window.LEVELUP_STUDENT_ID = user.id;
+      window.LEVELUP_STUDENT_NAME = String((user.user_metadata && user.user_metadata.full_name) || user.email || "").trim();
+
       return window.LevelupAuth.isSubjectEntitled(subjectId).then(function (ok) {
-        if (!ok) {
-          window.location.replace("index.html?subjectLocked=" + encodeURIComponent(subjectId));
+        if (!ok && !window.SUBJECT_PREVIEW_MODE) {
+          // Force preview mode if they load the page without preview flag but have no entitlement
+          window.location.replace("subject.html?subject=" + encodeURIComponent(subjectId) + "&preview=1");
           throw new Error("redirected_entitlement_required");
         }
+        
+        // If they have entitlement but the URL had preview=1, just remove it? Or just let it run but they have full access anyway.
+        // Actually! the manifest loader will limit topics if SUBJECT_PREVIEW_MODE is true. 
+        // If they are entitled, we should disable preview mode to ensure full access.
+        if (ok) {
+          window.SUBJECT_PREVIEW_MODE = false; 
+        }
       });
-    })
-    .catch(function (err) {
-      applyWindowFromStorage();
-      throw err;
     });
 })();

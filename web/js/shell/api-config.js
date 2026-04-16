@@ -1,4 +1,19 @@
-// The only configuration needed on the client.
-// This is NOT sensitive — it's just a domain name.
-window.LEVELUP_API_BASE = "http://localhost:8080";
-// For production, change to the real API domain (e.g. https://api.levelup.com)
+/**
+ * Load API base URL from config file (git-ignored per environment).
+ * Falls back to localhost:8080 if config file is missing.
+ */
+(function() {
+  var apiBase = "http://localhost:8080"; // fallback if config missing
+
+  fetch("config/api.json")
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(cfg) {
+      if (cfg && cfg.apiBase) apiBase = cfg.apiBase;
+      window.LEVELUP_API_BASE = apiBase;
+      document.dispatchEvent(new CustomEvent("levelup:api-config-ready"));
+    })
+    .catch(function() {
+      window.LEVELUP_API_BASE = apiBase;
+      document.dispatchEvent(new CustomEvent("levelup:api-config-ready"));
+    });
+})();

@@ -1,147 +1,41 @@
 (function () {
-  const PROJECT_CODE = window.SUPABASE_PROJECT_CODE || "study-app";
-  const DEVICE_KEY = "levelup_device_id_v1";
-  const SOURCE_APP = "study-app";
-  let client = null;
-  let ctx = null;
-
-  function getDeviceId() {
-    let id = "";
-    try {
-      id = localStorage.getItem(DEVICE_KEY) || "";
-      if (!id) {
-        if (window.crypto && crypto.randomUUID) id = crypto.randomUUID();
-        else id = "dev-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
-        localStorage.setItem(DEVICE_KEY, id);
-      }
-    } catch (_) {
-      id = "ephemeral-" + Date.now();
-    }
-    return id;
-  }
-
-  function canInit() {
-    return !!(
-      window.supabase &&
-      typeof window.supabase.createClient === "function" &&
-      window.SUPABASE_URL &&
-      window.SUPABASE_ANON_KEY
-    );
-  }
-
-  function getStudentId() {
-    return (
-      window.LEVELUP_STUDENT_ID ||
-      localStorage.getItem("LEVELUP_STUDENT_ID") ||
-      ("student-" + getDeviceId().slice(0, 8))
-    );
-  }
-
-  function getStudentName() {
-    return (
-      window.LEVELUP_STUDENT_NAME ||
-      localStorage.getItem("LEVELUP_STUDENT_NAME") ||
-      "Student"
-    );
-  }
+  var SOURCE_APP = "levelup";
 
   function getClient() {
-    if (client || !canInit()) return client;
-    client = window.supabase.createClient(
-      window.SUPABASE_URL,
-      window.SUPABASE_ANON_KEY,
-      {
-        global: {
-          headers: {
-            "x-device-id": getDeviceId(),
-            "x-student-id": getStudentId(),
-          },
-        },
-      }
-    );
-    return client;
+    // Reuse auth-client's shared Supabase instance (carries the auth session).
+    if (window.LevelupAuth && typeof window.LevelupAuth.getClient === "function") {
+      return window.LevelupAuth.getClient();
+    }
+    // Fallback: create own client from localStorage config.
+    if (!(window.supabase && typeof window.supabase.createClient === "function")) return null;
+    var url  = String(window.SUPABASE_URL  || localStorage.getItem("SUPABASE_URL")  || "").trim();
+    var anon = String(window.SUPABASE_ANON_KEY || localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
+    if (!url || !anon) return null;
+    return window.supabase.createClient(url, anon);
   }
 
-  async function ensureContext() {
-    if (ctx) return ctx;
-    const sb = getClient();
+  function isEnabled() { return !!getClient(); }
+
+  async function getCurrentUserId() {
+    var sb = getClient();
     if (!sb) return null;
-    const deviceId = getDeviceId();
-    const studentId = getStudentId();
-    const studentName = getStudentName();
-    let { data: project, error: pErr } = await sb
-      .from("projects")
-      .select("id,code")
-      .eq("code", PROJECT_CODE)
-      .maybeSingle();
-    if (pErr) throw pErr;
-    if (!project) {
-      const ins = await sb
-        .from("projects")
-        .insert({ code: PROJECT_CODE, name: "Study App" })
-        .select("id,code")
-        .single();
-      if (ins.error) throw ins.error;
-      project = ins.data;
-    }
-    let up = await sb
-      .from("profiles")
-      .upsert(
-        {
-          project_id: project.id,
-          student_id: studentId,
-          device_id: deviceId,
-          display_name: studentName,
-          meta: {
-            studentId,
-            subjectHint: window.SUBJECT_ID || null,
-            lastDeviceId: deviceId,
-          },
-        },
-        { onConflict: "project_id,student_id", ignoreDuplicates: false }
-      )
-      .select("id,project_id,device_id,student_id,display_name,meta")
-      .single();
-    if (up.error) {
-      up = await sb
-        .from("profiles")
-        .upsert(
-          {
-            project_id: project.id,
-            student_id: studentId,
-            device_id: deviceId,
-            display_name: studentName,
-            meta: {
-              studentId,
-              subjectHint: window.SUBJECT_ID || null,
-              lastDeviceId: deviceId,
-            },
-          },
-          { onConflict: "project_id,device_id", ignoreDuplicates: false }
-        )
-        .select("id,project_id,device_id,display_name,meta")
-        .single();
-      if (up.error) throw up.error;
-    }
-    ctx = {
-      projectId: project.id,
-      profileId: up.data.id,
-      deviceId,
-      projectCode: PROJECT_CODE,
-      studentId:
-        up.data.student_id ||
-        (up.data.meta && up.data.meta.studentId ? up.data.meta.studentId : studentId),
-      studentName: up.data.display_name || studentName,
-    };
-    return ctx;
+    var res = await sb.auth.getUser();
+    return (res && res.data && res.data.user && res.data.user.id) || null;
+  }
+
+  /** Lightweight context — just confirms we are authenticated. */
+  async function ensureContext() {
+    var uid = await getCurrentUserId();
+    if (!uid) return null;
+    return { userId: uid };
   }
 
   async function testConnection() {
     try {
-      const sb = getClient();
+      var sb = getClient();
       if (!sb) return { ok: false, error: "supabase_not_configured" };
-      const c = await ensureContext();
-      if (!c) return { ok: false, error: "context_unavailable" };
+      var c = await ensureContext();
+      if (!c) return { ok: false, error: "unauthenticated" };
       return { ok: true, context: c };
     } catch (e) {
       return { ok: false, error: (e && e.message) || String(e) };
@@ -149,259 +43,318 @@
   }
 
   async function insertXpEntry(entry) {
-    const sb = getClient();
+    var sb = getClient();
     if (!sb) return { ok: false, reason: "disabled" };
-    const c = await ensureContext();
-    if (!c) return { ok: false, reason: "no_context" };
-    const row = {
-      project_id: c.projectId,
-      profile_id: c.profileId,
-      delta: Number(entry.deltaXp || 0),
-      reason: String(entry.reason || "manual"),
+    var uid = await getCurrentUserId();
+    if (!uid) return { ok: false, reason: "unauthenticated" };
+    var row = {
+      user_id:  uid,
+      delta:    Number(entry.deltaXp || 0),
+      reason:   String(entry.reason || "manual"),
+      subject_id: entry.subjectId || null,
       meta: {
-        ts: Number(entry.ts || Date.now()),
-        subjectId: entry.subjectId || null,
-        topicId: entry.topicId || null,
-        theme: entry.theme || "",
-        tab: entry.tab || null,
+        ts:           Number(entry.ts || Date.now()),
+        topicId:      entry.topicId      || null,
+        theme:        entry.theme        || "",
+        tab:          entry.tab          || null,
         activityType: entry.activityType || "study",
-        sourceId: entry.sourceId || null,
-        studentId: c.studentId,
-        studentName: c.studentName,
+        sourceId:     entry.sourceId     || null,
       },
       client_event_id:
         entry.clientEventId ||
-        `xp-${entry.ts || Date.now()}-${entry.topicId || "g"}-${entry.reason || "manual"}-${entry.deltaXp || 0}`,
+        ("xp-" + (entry.ts || Date.now()) + "-" + (entry.topicId || "g") + "-" +
+         (entry.reason || "manual") + "-" + (entry.deltaXp || 0)),
       created_at: new Date(Number(entry.ts || Date.now())).toISOString(),
     };
-    const { error } = await sb
-      .from("study_xp_ledger")
-      .upsert(row, { onConflict: "project_id,profile_id,client_event_id", ignoreDuplicates: true });
-    if (error) throw error;
+    var res = await sb.from("study_xp_ledger")
+      .upsert(row, { onConflict: "user_id,client_event_id", ignoreDuplicates: true });
+    if (res.error) throw res.error;
     return { ok: true };
   }
 
   async function upsertTopicStats(subjectId, topicStats) {
-    const sb = getClient();
+    var sb = getClient();
     if (!sb) return { ok: false, reason: "disabled" };
-    const c = await ensureContext();
-    if (!c) return { ok: false, reason: "no_context" };
-    const rows = Object.entries(topicStats || {}).map(([topicId, stats]) => ({
-      project_id: c.projectId,
-      profile_id: c.profileId,
-      subject_id: String(subjectId || ""),
-      topic_id: String(topicId),
-      seen: Number(stats.totalQuestionsSeen || 0),
-      correct: Math.max(0, Number(stats.totalQuestionsSeen || 0) - Number(stats.totalWrong || 0)),
-      mastery: Math.round(Number(stats.mastery || 0)),
-      streak: Number(stats.errorFreeRounds || 0),
-      last_result: null,
-      mastered_until: Number(stats.masteredUntil || 0)
-        ? new Date(Number(stats.masteredUntil)).toISOString()
-        : null,
-      updated_at: new Date().toISOString(),
-    }));
+    var uid = await getCurrentUserId();
+    if (!uid) return { ok: false, reason: "unauthenticated" };
+    var rows = Object.keys(topicStats || {}).map(function (topicId) {
+      var stats = topicStats[topicId];
+      return {
+        user_id:       uid,
+        subject_id:    String(subjectId || ""),
+        topic_id:      String(topicId),
+        seen:          Number(stats.totalQuestionsSeen || 0),
+        correct:       Math.max(0, Number(stats.totalQuestionsSeen || 0) - Number(stats.totalWrong || 0)),
+        mastery:       Math.round(Number(stats.mastery || 0)),
+        streak:        Number(stats.errorFreeRounds || 0),
+        last_result:   null,
+        mastered_until: Number(stats.masteredUntil || 0)
+          ? new Date(Number(stats.masteredUntil)).toISOString()
+          : null,
+        updated_at:    new Date().toISOString(),
+      };
+    });
     if (!rows.length) return { ok: true };
-    const { error } = await sb
-      .from("study_topic_stats")
-      .upsert(rows, { onConflict: "project_id,profile_id,subject_id,topic_id" });
-    if (error) throw error;
+    var res = await sb.from("study_topic_stats")
+      .upsert(rows, { onConflict: "user_id,subject_id,topic_id" });
+    if (res.error) throw res.error;
     return { ok: true };
   }
 
   async function insertPurchase(purchase) {
-    const sb = getClient();
+    var sb = getClient();
     if (!sb) return { ok: false, reason: "disabled" };
-    const c = await ensureContext();
-    if (!c) return { ok: false, reason: "no_context" };
-    const row = {
-      project_id: c.projectId,
-      profile_id: c.profileId,
-      reward_id: String(purchase.couponId || purchase.id || ""),
-      reward_label: String(purchase.label || ""),
-      xp_cost: Math.abs(Number(purchase.xpSpent || purchase.xp || 0)),
-      coupon_code: purchase.couponCode || null,
+    var uid = await getCurrentUserId();
+    if (!uid) return { ok: false, reason: "unauthenticated" };
+    var row = {
+      user_id:           uid,
+      reward_id:         String(purchase.couponId || purchase.id || ""),
+      reward_label:      String(purchase.label || ""),
+      xp_cost:           Math.abs(Number(purchase.xpSpent || purchase.xp || 0)),
+      coupon_code:       purchase.couponCode || null,
       client_purchase_id: purchase.clientPurchaseId || purchase.id || null,
-      purchased_at: new Date(Number(purchase.ts || Date.now())).toISOString(),
+      purchased_at:      new Date(Number(purchase.ts || Date.now())).toISOString(),
     };
-    const { error } = await sb
-      .from("study_reward_purchases")
-      .upsert(row, { onConflict: "project_id,profile_id,client_purchase_id", ignoreDuplicates: true });
-    if (error) throw error;
+    var res = await sb.from("study_reward_purchases")
+      .upsert(row, { onConflict: "user_id,client_purchase_id", ignoreDuplicates: true });
+    if (res.error) throw res.error;
     return { ok: true };
   }
 
   async function getDailyCounts() {
-    const sb = getClient();
+    var sb = getClient();
     if (!sb) return null;
-    const c = await ensureContext();
-    if (!c) return null;
-    const res = await sb.rpc("study_get_daily_counts", {
-      p_project_code: c.projectCode,
-      p_student_id: c.studentId,
-      p_device_id: c.deviceId,
-    });
+    var uid = await getCurrentUserId();
+    if (!uid) return null;
+    var today = new Date().toISOString().slice(0, 10);
+    var res = await sb.from("study_daily_counters")
+      .select("reward_id, count")
+      .eq("user_id", uid)
+      .eq("day", today);
     if (res.error) return null;
-    return res.data || null;
+    var counts = {};
+    (res.data || []).forEach(function (row) {
+      counts[String(row.reward_id)] = Number(row.count || 0);
+    });
+    return { ok: true, counts: counts };
   }
 
   async function getShopSnapshot() {
-    const sb = getClient();
+    var sb = getClient();
     if (!sb) return null;
-    const c = await ensureContext();
-    if (!c) return null;
-    const res = await sb.rpc("study_get_shop_snapshot", {
-      p_project_code: c.projectCode,
-      p_student_id: c.studentId,
-      p_device_id: c.deviceId,
+    var uid = await getCurrentUserId();
+    if (!uid) return null;
+    var today = new Date().toISOString().slice(0, 10);
+    var results = await Promise.all([
+      sb.from("study_xp_ledger").select("delta").eq("user_id", uid),
+      sb.from("study_reward_purchases")
+        .select("reward_id,reward_label,xp_cost,coupon_code,client_purchase_id,purchased_at,claimed_at")
+        .eq("user_id", uid)
+        .order("purchased_at", { ascending: false })
+        .limit(50),
+      sb.from("study_daily_counters")
+        .select("reward_id,count")
+        .eq("user_id", uid)
+        .eq("day", today),
+    ]);
+    if (results[0].error || results[1].error) return null;
+    var xpBalance = (results[0].data || []).reduce(function (s, r) { return s + Number(r.delta || 0); }, 0);
+    var dailyCounts = {};
+    (results[2].data || []).forEach(function (row) {
+      dailyCounts[String(row.reward_id)] = Number(row.count || 0);
     });
-    if (res.error) return null;
-    return res.data || null;
+    return {
+      ok:             true,
+      xp_balance:     xpBalance,
+      coupons_recent: results[1].data || [],
+      daily_counts:   dailyCounts,
+    };
   }
 
   async function logStateSnapshot(payload) {
-    const sb = getClient();
+    var sb = getClient();
     if (!sb) return { ok: false, reason: "disabled" };
-    const c = await ensureContext();
-    if (!c) return { ok: false, reason: "no_context" };
-    const compact = {
-      xp: Number(payload.xp || 0),
-      streak: Number(payload.streak || 0),
-      topicCount: Object.keys(payload.topicStats || {}).length,
-      ledgerCount: Array.isArray(payload.xpLedger) ? payload.xpLedger.length : 0,
+    var uid = await getCurrentUserId();
+    if (!uid) return { ok: false, reason: "unauthenticated" };
+    var compact = {
+      xp:            Number(payload.xp || 0),
+      streak:        Number(payload.streak || 0),
+      topicCount:    Object.keys(payload.topicStats || {}).length,
+      ledgerCount:   Array.isArray(payload.xpLedger)      ? payload.xpLedger.length      : 0,
       purchaseCount: Array.isArray(payload.purchaseLedger) ? payload.purchaseLedger.length : 0,
       dailyChallenge: payload.dailyChallenge || null,
       ts: Date.now(),
     };
-    const { error } = await sb.from("event_log").insert({
-      project_id: c.projectId,
-      profile_id: c.profileId,
+    var res = await sb.from("event_log").insert({
+      user_id:    uid,
       source_app: SOURCE_APP,
       event_type: "state_snapshot",
       event_data: compact,
     });
-    if (error) throw error;
+    if (res.error) throw res.error;
     return { ok: true };
   }
 
   async function logStudyReportDigest(payload) {
-    const sb = getClient();
+    var sb = getClient();
     if (!sb) return { ok: false, reason: "disabled" };
-    const c = await ensureContext();
-    if (!c) return { ok: false, reason: "no_context" };
-    const p = payload || {};
-    const max =
-      typeof REPORT_DIGEST_TEXT_MAX_CHARS === "number" ? REPORT_DIGEST_TEXT_MAX_CHARS : 6000;
-    const text = String(p.text || "").slice(0, max);
-    const { error } = await sb.from("event_log").insert({
-      project_id: c.projectId,
-      profile_id: c.profileId,
+    var uid = await getCurrentUserId();
+    if (!uid) return { ok: false, reason: "unauthenticated" };
+    var p   = payload || {};
+    var max = typeof REPORT_DIGEST_TEXT_MAX_CHARS === "number" ? REPORT_DIGEST_TEXT_MAX_CHARS : 6000;
+    var text = String(p.text || "").slice(0, max);
+    var res = await sb.from("event_log").insert({
+      user_id:    uid,
       source_app: SOURCE_APP,
       event_type: "study_report_digest",
       event_data: {
-        subject_id: String(p.subjectId || ""),
+        subject_id:    String(p.subjectId    || ""),
         subject_title: String(p.subjectTitle || ""),
-        generated_at: String(p.generatedAt || new Date().toISOString()),
-        fp: String(p.fp || ""),
-        reason: String(p.reason || ""),
-        text,
-        text_length: text.length,
+        generated_at:  String(p.generatedAt  || new Date().toISOString()),
+        fp:            String(p.fp           || ""),
+        reason:        String(p.reason       || ""),
+        text:          text,
+        text_length:   text.length,
       },
     });
-    if (error) throw error;
+    if (res.error) throw res.error;
     return { ok: true };
   }
 
   async function purchaseReward(params) {
-    const sb = getClient();
+    var sb = getClient();
     if (!sb) return { ok: false, reason: "disabled" };
-    const c = await ensureContext();
-    if (!c) return { ok: false, reason: "no_context" };
-    let res = await sb.rpc("study_purchase_reward_v2", {
-      p_project_code: c.projectCode,
-      p_student_id: c.studentId,
-      p_student_name: c.studentName || "",
-      p_device_id: c.deviceId,
-      p_reward_id: String(params.id),
-      p_reward_label: String(params.label),
-      p_xp_cost: Number(params.xp),
-      p_daily_max: Math.max(1, Number(params.dailyMax || 1)),
-    });
-    if (res.error) {
-      res = await sb.rpc("study_purchase_reward", {
-        p_project_code: c.projectCode,
-        p_device_id: c.deviceId,
-        p_reward_id: String(params.id),
-        p_reward_label: String(params.label),
-        p_xp_cost: Number(params.xp),
-        p_daily_max: Math.max(1, Number(params.dailyMax || 1)),
-      });
-      if (res.error) throw res.error;
+    var uid = await getCurrentUserId();
+    if (!uid) return { ok: false, reason: "unauthenticated" };
+
+    var today    = new Date().toISOString().slice(0, 10);
+    var rewardId = String(params.id);
+    var dailyMax = Math.max(1, Number(params.dailyMax || 1));
+
+    // Check daily limit
+    var dailyRes = await sb.from("study_daily_counters")
+      .select("count")
+      .eq("user_id", uid)
+      .eq("day", today)
+      .eq("reward_id", rewardId)
+      .maybeSingle();
+    var currentCount = (dailyRes.data && Number(dailyRes.data.count)) || 0;
+    if (currentCount >= dailyMax) {
+      return { ok: false, error: "daily_limit_reached" };
     }
-    return res.data || { ok: false, error: "unknown" };
+
+    // Generate coupon code and insert purchase
+    var couponCode = "LU-" + Math.random().toString(36).toUpperCase().slice(2, 10);
+    var clientPurchaseId = "purch-" + Date.now() + "-" + rewardId;
+    var purchRes = await sb.from("study_reward_purchases").insert({
+      user_id:           uid,
+      reward_id:         rewardId,
+      reward_label:      String(params.label),
+      xp_cost:           Math.abs(Number(params.xp)),
+      coupon_code:       couponCode,
+      client_purchase_id: clientPurchaseId,
+      purchased_at:      new Date().toISOString(),
+    });
+    if (purchRes.error) throw purchRes.error;
+
+    // Update daily counter
+    await sb.from("study_daily_counters").upsert({
+      user_id:    uid,
+      day:        today,
+      reward_id:  rewardId,
+      count:      currentCount + 1,
+      updated_at: new Date().toISOString(),
+    }, { onConflict: "user_id,day,reward_id" });
+
+    return { ok: true, coupon_code: couponCode, client_purchase_id: clientPurchaseId };
   }
 
   async function fetchReportData(subjectId) {
-    const sb = getClient();
+    var sb = getClient();
     if (!sb) return null;
-    const c = await ensureContext();
-    if (!c) return null;
-    const [xpRes, purchaseRes, topicRes, missRes] = await Promise.all([
-      sb
-        .from("study_xp_ledger")
-        .select("delta, reason, meta, created_at")
-        .eq("project_id", c.projectId)
-        .eq("profile_id", c.profileId)
+    var uid = await getCurrentUserId();
+    if (!uid) return null;
+    var results = await Promise.all([
+      sb.from("study_xp_ledger")
+        .select("delta,reason,meta,subject_id,created_at")
+        .eq("user_id", uid)
         .order("created_at", { ascending: false })
         .limit(500),
-      sb
-        .from("study_reward_purchases")
-        .select("reward_id, reward_label, xp_cost, coupon_code, purchased_at")
-        .eq("project_id", c.projectId)
-        .eq("profile_id", c.profileId)
+      sb.from("study_reward_purchases")
+        .select("reward_id,reward_label,xp_cost,coupon_code,purchased_at")
+        .eq("user_id", uid)
         .order("purchased_at", { ascending: false })
         .limit(200),
-      sb
-        .from("study_topic_stats")
-        .select("subject_id, topic_id, mastery, seen, correct, streak, updated_at")
-        .eq("project_id", c.projectId)
-        .eq("profile_id", c.profileId)
+      sb.from("study_topic_stats")
+        .select("subject_id,topic_id,mastery,seen,correct,streak,updated_at")
+        .eq("user_id", uid)
         .eq("subject_id", String(subjectId))
         .order("updated_at", { ascending: false }),
-      sb
-        .from("study_question_misses")
-        .select("subject_id, topic_id, question_key, miss_count, last_missed_at")
-        .eq("project_id", c.projectId)
-        .eq("profile_id", c.profileId)
+      sb.from("study_question_misses")
+        .select("subject_id,topic_id,question_key,miss_count,last_missed_at")
+        .eq("user_id", uid)
         .eq("subject_id", String(subjectId))
         .order("miss_count", { ascending: false })
         .limit(100),
     ]);
-    if (xpRes.error || purchaseRes.error || topicRes.error || missRes.error) {
-      throw xpRes.error || purchaseRes.error || topicRes.error || missRes.error;
+    if (results[0].error || results[1].error || results[2].error || results[3].error) {
+      throw results[0].error || results[1].error || results[2].error || results[3].error;
     }
     return {
-      xpLedger: xpRes.data || [],
-      purchases: purchaseRes.data || [],
-      topicStats: topicRes.data || [],
-      misses: missRes.data || [],
+      xpLedger:   results[0].data || [],
+      purchases:  results[1].data || [],
+      topicStats: results[2].data || [],
+      misses:     results[3].data || [],
       source: "supabase",
     };
   }
 
+  // ── user_subject_state: full local-state sync ────────────────────────────
+
+  async function syncSubjectState(subjectId, clientState) {
+    var sb = getClient();
+    if (!sb) return { ok: false, reason: "disabled" };
+    var uid = await getCurrentUserId();
+    if (!uid) return { ok: false, reason: "unauthenticated" };
+    var res = await sb.from("user_subject_state").upsert({
+      user_id:      uid,
+      subject_id:   String(subjectId),
+      client_state: clientState,
+      updated_at:   new Date().toISOString(),
+    }, { onConflict: "user_id,subject_id" });
+    if (res.error) throw res.error;
+    return { ok: true };
+  }
+
+  async function fetchSubjectState(subjectId) {
+    var sb = getClient();
+    if (!sb) return null;
+    var uid = await getCurrentUserId();
+    if (!uid) return null;
+    var res = await sb.from("user_subject_state")
+      .select("client_state,updated_at")
+      .eq("user_id", uid)
+      .eq("subject_id", String(subjectId))
+      .maybeSingle();
+    if (res.error || !res.data) return null;
+    return { clientState: res.data.client_state, updatedAt: res.data.updated_at };
+  }
+
   window.LevelupSupabase = {
-    isEnabled: () => !!getClient(),
-    ensureContext,
-    getDeviceId,
-    insertXpEntry,
-    upsertTopicStats,
-    insertPurchase,
-    getDailyCounts,
-    getShopSnapshot,
-    logStateSnapshot,
-    logStudyReportDigest,
-    purchaseReward,
-    fetchReportData,
-    testConnection,
+    isEnabled:            isEnabled,
+    ensureContext:        ensureContext,
+    getCurrentUserId:     getCurrentUserId,
+    insertXpEntry:        insertXpEntry,
+    upsertTopicStats:     upsertTopicStats,
+    insertPurchase:       insertPurchase,
+    getDailyCounts:       getDailyCounts,
+    getShopSnapshot:      getShopSnapshot,
+    logStateSnapshot:     logStateSnapshot,
+    logStudyReportDigest: logStudyReportDigest,
+    purchaseReward:       purchaseReward,
+    fetchReportData:      fetchReportData,
+    syncSubjectState:     syncSubjectState,
+    fetchSubjectState:    fetchSubjectState,
+    testConnection:       testConnection,
   };
 })();

@@ -17,9 +17,9 @@
       s.src = path.indexOf("http") === 0 ? path : path + "?v=" + v;
       s.async = false;
       s.onload = function () { i++; next(); };
-      s.onerror = function () { 
+      s.onerror = function () {
         console.error("LevelUp: failed to load script", path);
-        i++; next(); 
+        i++; next();
       };
       parent.appendChild(s);
     }
@@ -29,6 +29,14 @@
   function startApp() {
     loadChain(corePaths);
   }
+
+  // If Supabase config is unavailable (API down + no cached keys), send the
+  // user to landing.html rather than leaving the hub in a broken unlocked state.
+  document.addEventListener("levelup:config-error", function () {
+    if (!window.SUPABASE_URL) {
+      window.location.replace("landing.html");
+    }
+  });
 
   if (window.SUPABASE_URL && window.SUPABASE_ANON_KEY) {
     startApp();

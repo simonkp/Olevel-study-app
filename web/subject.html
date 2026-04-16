@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>LevelUp! — Subject</title>
+    <!-- Analytics: set data-website-id to your Umami site ID before going live -->
+    <script async src="https://analytics.umami.is/script.js"
+            data-website-id="UMAMI_WEBSITE_ID"
+            data-domains="levelupstudyhub.com"></script>
     <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -82,12 +86,7 @@
       <div class="modal modal-settings" id="panel-settings" hidden>
         <h2>Settings</h2>
         <p class="hint settings-lead">
-          <strong>AI quiz “Why?”</strong> — use <em>Configure LLM proxy…</em> below. You only enter the
-          <strong>proxy URL</strong>. Authorization uses your signed-in Supabase session automatically.
-          OpenAI / provider API keys live in the server <code>.env</code>, not in this app.
-        </p>
-        <p class="hint">
-          <strong>Cloud sync &amp; student ID</strong> — use <em>Open setup package tool</em> below (paste the string from a parent, or generate/edit JSON there).
+          Use these settings to adjust your study path. Progress is automatically synced to the cloud.
         </p>
         <label class="check-row">
           <input type="checkbox" id="opt-unlock-all" />
@@ -101,27 +100,7 @@
           Uncheck "Unlock all" for guided path: Topic 1 open, then pass
           threshold on each topic to unlock the next.
         </p>
-        <div class="export-block">
-          <h3 class="export-title">AI quiz explanations (optional)</h3>
-          <p class="hint">
-            Connect your self-hosted LLM proxy — API keys stay on the server only.
-            See <code>api/README.md</code>.
-          </p>
-          <button type="button" class="btn" id="btn-llm-proxy-setup">
-            Configure LLM proxy…
-          </button>
-          <p class="hint" id="llm-proxy-status"></p>
-        </div>
-        <div class="export-block">
-          <h3 class="export-title">Setup package (quick copy/paste)</h3>
-          <p class="hint">
-            Generate or apply one Base64 setup string for Supabase, optional LLM proxy config,
-            and optional student fields.
-          </p>
-          <button type="button" class="btn" id="btn-config-package-setup">
-            Open setup package tool…
-          </button>
-        </div>
+
         <div class="export-block">
           <h3 class="export-title">Transfer progress between browsers</h3>
           <p class="hint">
