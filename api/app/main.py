@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import collections
 import os
-import secrets
-from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.auth import verify_supabase_jwt
 from app.llm_upstream import UpstreamHttpError, chat_completion_json
+from app.stripe_webhook import create_stripe_webhook_router
 
 
 class Settings(BaseSettings):
@@ -21,10 +23,17 @@ class Settings(BaseSettings):
         validation_alias="OPENAI_BASE_URL",
     )
     model: str = Field(default="gpt-4o-mini", validation_alias="MODEL")
-    app_token: str = Field(default="", validation_alias="APP_TOKEN")
     cors_origins: str = Field(default="", validation_alias="CORS_ORIGINS")
     max_tokens: int = Field(default=512, validation_alias="MAX_TOKENS")
     llm_timeout_s: float = Field(default=60.0, validation_alias="LLM_TIMEOUT_S")
+    supabase_url: str = Field(default="", validation_alias="SUPABASE_URL")
+    supabase_service_role_key: str = Field(default="", validation_alias="SUPABASE_SERVICE_ROLE_KEY")
+    supabase_jwt_secret: str = Field(default="", validation_alias="SUPABASE_JWT_SECRET")
+    stripe_secret_key: str = Field(default="", validation_alias="STRIPE_SECRET_KEY")
+    stripe_webhook_secret: str = Field(default="", validation_alias="STRIPE_WEBHOOK_SECRET")
+    stripe_default_entitlement: str = Field(
+        default="olevel_chem", validation_alias="STRIPE_DEFAULT_ENTITLEMENT"
+    )
 
 
 def get_settings() -> Settings:
@@ -34,6 +43,32 @@ def get_settings() -> Settings:
 settings = get_settings()
 
 app = FastAPI(title="LevelUp LLM proxy", version="0.1.0")
+
+_RATE_WINDOW_SECONDS = 60.0
+_RATE_MAX_REQUESTS = 5
+_rate_windows: dict[str, collections.deque[float]] = {}
+
+
+def _enforce_per_user_rate_limit(user_id: str) -> None:
+    import time
+
+    now = time.time()
+    win = _rate_windows.get(user_id)
+    if win is None:
+        win = collections.deque()
+        _rate_windows[user_id] = win
+    cutoff = now - _RATE_WINDOW_SECONDS
+    while win and win[0] < cutoff:
+        win.popleft()
+    if len(win) >= _RATE_MAX_REQUESTS:
+        raise HTTPException(
+            status_code=429,
+            detail={
+                "error": "rate_limited",
+                "message": "Rate limit exceeded (max 5 requests per minute per user)",
+            },
+        )
+    win.append(now)
 
 
 def _parse_cors_origins(raw: str) -> list[str]:
@@ -75,20 +110,16 @@ else:
     )
 
 
-def require_app_token(request: Request) -> None:
-    """When APP_TOKEN is non-empty, require Authorization: Bearer <token>."""
-    expected = (settings.app_token or "").strip()
-    if not expected:
-        return
-    auth = request.headers.get("authorization") or ""
-    parts = auth.split(None, 1)
-    if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise HTTPException(status_code=401, detail="Missing or invalid Authorization")
-    if not secrets.compare_digest(parts[1].strip(), expected):
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-
-TokenDep = Annotated[None, Depends(require_app_token)]
+@app.middleware("http")
+async def auth_guard_middleware(request: Request, call_next):
+    path = request.url.path
+    if path.startswith("/llm/"):
+        try:
+            ctx = verify_supabase_jwt(request, settings.supabase_jwt_secret)
+        except HTTPException as exc:
+            return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+        request.state.auth_user_id = ctx.user_id
+    return await call_next(request)
 
 
 def _context_line(value: str | None, max_len: int) -> str:
@@ -124,7 +155,11 @@ async def health() -> dict[str, str]:
 
 
 @app.post("/llm/quiz-explain")
-async def quiz_explain(body: QuizExplainBody, _: TokenDep) -> dict:
+async def quiz_explain(body: QuizExplainBody, request: Request) -> dict:
+    user_id = str(getattr(request.state, "auth_user_id", "") or "")
+    if user_id:
+        _enforce_per_user_rate_limit(user_id)
+
     key = (settings.openai_api_key or "").strip()
     if not key:
         raise HTTPException(
@@ -248,9 +283,21 @@ async def quiz_explain(body: QuizExplainBody, _: TokenDep) -> dict:
     }
 
 
+if (settings.supabase_url or "").strip() and (settings.supabase_service_role_key or "").strip():
+    app.include_router(
+        create_stripe_webhook_router(
+            stripe_secret_key=settings.stripe_secret_key,
+            stripe_webhook_secret=settings.stripe_webhook_secret,
+            default_entitlement=settings.stripe_default_entitlement,
+            supabase_url=settings.supabase_url,
+            supabase_service_role_key=settings.supabase_service_role_key,
+        )
+    )
+
+
 # Allow `uvicorn app.main:app` with cwd = api/
 if __name__ == "__main__":
     import uvicorn
 
-    port = int(os.environ.get("PORT", "8000"))
+    port = int(os.environ.get("PORT", "8080"))
     uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)
