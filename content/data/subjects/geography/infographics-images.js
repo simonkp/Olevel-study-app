@@ -1,10 +1,6 @@
 (function () {
-  // Build absolute URLs so the shell can live anywhere (root vs /geography/).
-  const img = (filename) =>
-    new URL(
-      "data/subjects/geography/images/" + filename,
-      window.location.href
-    ).toString();
+  // Storage-native key; runtime signs this into a Supabase URL.
+  const img = (filename) => "geography/images/" + filename;
 
   const imagesByTopic = {
     "1.1": [

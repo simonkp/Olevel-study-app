@@ -28,7 +28,8 @@
       var base = file.split("/").pop();
       out.push(
         Object.assign({}, row, {
-          file: "data/subjects/" + sid + "/free/" + base,
+          // storage-native path (topic-load.js supports legacy + this format)
+          file: sid + "/free/" + base,
         })
       );
     }
@@ -163,21 +164,43 @@
   }
 
   async function rewriteInfographicUrls(subjectId) {
-    var byTopic = global.SUBJECT_INFOS_BY_TOPIC;
-    if (!byTopic || typeof byTopic !== "object") return;
     var jobs = [];
-    Object.keys(byTopic).forEach(function (tid) {
-      var list = byTopic[tid];
-      if (!Array.isArray(list)) return;
-      list.forEach(function (inf) {
-        if (!inf || !inf.image) return;
-        jobs.push(
-          signedImageUrl(subjectId, inf.image).then(function (url) {
-            if (url) inf.image = url;
-          })
-        );
+    var seen = Object.create(null);
+
+    function queueOne(inf) {
+      if (!inf || !inf.image) return;
+      var raw = String(inf.image || "");
+      if (!raw) return;
+      if (/^https?:\/\//i.test(raw) && raw.indexOf("/storage/v1/object/sign/") >= 0) {
+        return; // already signed
+      }
+      var key = String(subjectId) + "::" + raw;
+      if (seen[key]) return;
+      seen[key] = true;
+      jobs.push(
+        signedImageUrl(subjectId, raw).then(function (url) {
+          if (url) inf.image = url;
+        })
+      );
+    }
+
+    // Source 1: fallback images loaded by <subject>/infographics-images.js
+    var byTopic = global.SUBJECT_INFOS_BY_TOPIC;
+    if (byTopic && typeof byTopic === "object") {
+      Object.keys(byTopic).forEach(function (tid) {
+        var list = byTopic[tid];
+        if (!Array.isArray(list)) return;
+        list.forEach(queueOne);
       });
+    }
+
+    // Source 2: manifest-native infographics used directly by renderVisuals(t)
+    var manifest = Array.isArray(global.TOPICS_MANIFEST) ? global.TOPICS_MANIFEST : [];
+    manifest.forEach(function (topic) {
+      if (!topic || !Array.isArray(topic.infographics)) return;
+      topic.infographics.forEach(queueOne);
     });
+
     if (jobs.length) await Promise.all(jobs);
   }
 

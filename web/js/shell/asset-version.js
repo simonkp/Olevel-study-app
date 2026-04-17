@@ -33,5 +33,5 @@
     g.APP_VERSION = new Date().toISOString().slice(0, 10).replace(/-/g, "") + "-dev";
     return;
   }
-  g.APP_VERSION = "2026-04-13-22";
+  g.APP_VERSION = "2026-04-17-02";
 })(window);

@@ -1,10 +1,6 @@
 (function () {
-  // Build absolute URLs so the shell can live anywhere (root vs /physics/).
-  const img = (filename) =>
-    new URL(
-      "data/subjects/physics/images/" + filename,
-      window.location.href
-    ).toString();
+  // Storage-native key; runtime signs this into a Supabase URL.
+  const img = (filename) => "physics/images/" + filename;
 
   const imagesByTopic = {
     "1": [
