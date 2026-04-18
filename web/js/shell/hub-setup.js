@@ -193,6 +193,169 @@
     }
 
     updateSubjectCardsAccess();
+    markContinueCard();
+    updatePerSubjectProgress(user).catch(function () {});
+    renderTodayPlan(user).catch(function () {});
+  }
+
+  // ── Continue-card highlight ──────────────────────────────────────────────────
+
+  function markContinueCard() {
+    var last = "";
+    try { last = String(localStorage.getItem("LEVELUP_LAST_SUBJECT") || "").toLowerCase(); } catch (_e) {}
+    document.querySelectorAll(".s-card[data-subject]").forEach(function (card) {
+      var sid = String(card.getAttribute("data-subject") || "").toLowerCase();
+      var badge = card.querySelector('[data-role="continue-badge"]');
+      var isContinue = last && sid === last && !!state.entitlements[sid];
+      card.classList.toggle("is-continue", !!isContinue);
+      if (badge) badge.hidden = !isContinue;
+    });
+  }
+
+  // ── Per-subject mastery rings ────────────────────────────────────────────────
+
+  async function updatePerSubjectProgress(user) {
+    var sb = window.LevelupAuth && window.LevelupAuth.getClient && window.LevelupAuth.getClient();
+    if (!sb || !user || !user.id) return;
+    var q = await sb
+      .from("study_topic_stats")
+      .select("subject_id, mastery, seen")
+      .eq("user_id", user.id);
+    if (q.error || !Array.isArray(q.data)) return;
+    var buckets = {};
+    q.data.forEach(function (r) {
+      var sid = String(r.subject_id || "").toLowerCase();
+      if (!sid) return;
+      if (!buckets[sid]) buckets[sid] = { sum: 0, n: 0 };
+      if (Number(r.seen || 0) > 0) {
+        buckets[sid].sum += Number(r.mastery || 0);
+        buckets[sid].n += 1;
+      }
+    });
+    document.querySelectorAll(".s-card[data-subject]").forEach(function (card) {
+      var sid = String(card.getAttribute("data-subject") || "").toLowerCase();
+      var ring = card.querySelector('[data-role="mastery-ring"]');
+      var pctEl = card.querySelector('[data-role="mastery-pct"]');
+      if (!ring || !pctEl) return;
+      var b = buckets[sid];
+      var pct = b && b.n ? Math.round(b.sum / b.n) : 0;
+      ring.style.setProperty("--pct", String(pct));
+      pctEl.textContent = pct + "%";
+    });
+  }
+
+  // ── Today's plan ─────────────────────────────────────────────────────────────
+
+  function todayIso() {
+    var d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d.toISOString();
+  }
+
+  async function renderTodayPlan(user) {
+    var host  = document.getElementById("hub-today");
+    var list  = document.getElementById("hub-today-list");
+    var hint  = document.getElementById("hub-today-hint");
+    if (!host || !list) return;
+    var sb = window.LevelupAuth && window.LevelupAuth.getClient && window.LevelupAuth.getClient();
+    if (!sb || !user || !user.id) return;
+
+    var ents  = state.entitlements || {};
+    var items = [];
+
+    // Pull today's XP ledger + the weakest owned topic in one round trip.
+    try {
+      var [xpToday, weakQ] = await Promise.all([
+        sb.from("study_xp_ledger")
+          .select("delta, topic_id, subject_id")
+          .eq("user_id", user.id)
+          .gte("created_at", todayIso()),
+        sb.from("study_topic_stats")
+          .select("subject_id, topic_id, mastery, seen")
+          .eq("user_id", user.id)
+          .gt("seen", 0)
+          .order("mastery", { ascending: true })
+          .limit(8),
+      ]);
+
+      var xpSumToday = 0;
+      var subjectsTouchedToday = {};
+      (xpToday && Array.isArray(xpToday.data) ? xpToday.data : []).forEach(function (r) {
+        var d = Number(r.delta || 0);
+        if (d <= 0) return;
+        xpSumToday += d;
+        if (r.subject_id) subjectsTouchedToday[String(r.subject_id).toLowerCase()] = true;
+      });
+
+      // Daily habit goal
+      if (xpSumToday < 25) {
+        items.push({
+          href: firstEntitledSubjectHref() || "subject.html?subject=chemistry",
+          title: "Earn 25 XP today",
+          meta: xpSumToday + " / 25 XP so far",
+        });
+      } else {
+        items.push({
+          href: "profile.html#report",
+          title: "Habit complete — " + xpSumToday.toLocaleString() + " XP today",
+          meta: "Open your report",
+        });
+      }
+
+      // Weakest topic in an owned subject
+      var weak = (weakQ && Array.isArray(weakQ.data) ? weakQ.data : []).find(function (r) {
+        var sid = String(r.subject_id || "").toLowerCase();
+        return sid && ents[sid];
+      });
+      if (weak) {
+        items.push({
+          href: "subject.html?subject=" + encodeURIComponent(weak.subject_id) + "&topic=" + encodeURIComponent(weak.topic_id),
+          title: "Revisit your weakest topic",
+          meta: weak.subject_id + " · T" + weak.topic_id + " · " + Math.round(Number(weak.mastery || 0)) + "% mastery",
+        });
+      } else if (Object.keys(ents).some(function (k) { return ents[k]; })) {
+        // Entitled but no weak data yet → start a fresh topic in the last/first subject
+        var href = firstEntitledSubjectHref();
+        if (href) items.push({ href: href, title: "Start a new chapter", meta: "No mastery data yet — pick any topic" });
+      } else {
+        items.push({ href: "subject.html?subject=chemistry&preview=1", title: "Try a free topic", meta: "Chemistry Topic 1 is always free" });
+      }
+    } catch (_e) {
+      return;
+    }
+
+    if (!items.length) return;
+    list.innerHTML = items.map(function (i) {
+      return (
+        '<li class="hub-today__item">' +
+          '<a href="' + i.href + '">' +
+            '<span class="dot"></span>' +
+            '<span><strong>' + escapeHtml(i.title) + '</strong><br>' +
+            '<span class="meta">' + escapeHtml(i.meta) + '</span></span>' +
+          '</a>' +
+          '<span class="meta" aria-hidden="true">→</span>' +
+        '</li>'
+      );
+    }).join("");
+    if (hint) hint.textContent = "Quick wins · personalised from your recent activity.";
+    host.hidden = false;
+  }
+
+  function firstEntitledSubjectHref() {
+    var last = "";
+    try { last = String(localStorage.getItem("LEVELUP_LAST_SUBJECT") || "").toLowerCase(); } catch (_e) {}
+    if (last && state.entitlements[last]) return "subject.html?subject=" + encodeURIComponent(last);
+    var owned = Object.keys(state.entitlements || {}).filter(function (k) { return state.entitlements[k]; });
+    if (owned.length) return "subject.html?subject=" + encodeURIComponent(owned[0]);
+    return "";
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
   }
 
   // ── Auth state listener ─────────────────────────────────────────────────────
