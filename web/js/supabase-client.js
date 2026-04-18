@@ -66,10 +66,22 @@
          (entry.reason || "manual") + "-" + (entry.deltaXp || 0)),
       created_at: new Date(Number(entry.ts || Date.now())).toISOString(),
     };
-    var res = await sb.from("study_xp_ledger")
-      .upsert(row, { onConflict: "user_id,client_event_id", ignoreDuplicates: true });
-    if (res.error) throw res.error;
-    return { ok: true };
+    // Plain insert: PostgREST upsert(..., onConflict: "user_id,client_event_id") returns
+    // 400 against our *partial* unique index (uq_xp_ledger_client_event … where
+    // client_event_id is not null) — Postgres cannot use that as an ON CONFLICT
+    // arbiter. Treat unique violations as success (idempotent replay).
+    var res = await sb.from("study_xp_ledger").insert(row);
+    if (!res.error) return { ok: true };
+    if (isLedgerDuplicateError(res.error)) return { ok: true, duplicate: true };
+    throw res.error;
+  }
+
+  function isLedgerDuplicateError(err) {
+    if (!err) return false;
+    var c = String(err.code || "");
+    if (c === "23505") return true;
+    var m = (String(err.message || "") + " " + String(err.details || "")).toLowerCase();
+    return m.indexOf("duplicate") !== -1 || m.indexOf("unique") !== -1 || m.indexOf("already exists") !== -1;
   }
 
   async function upsertTopicStats(subjectId, topicStats) {

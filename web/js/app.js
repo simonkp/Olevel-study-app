@@ -80,11 +80,24 @@ if (!manifest || !manifest.length) {
   var _shopBtn = document.getElementById("btn-shop");
   if (_shopBtn) _shopBtn.onclick = function () { openShop(); };
 
-  // Auto-open shop when arriving via the global header's Shop button on hub.
+  // Auto-open shop once when arriving with ?shop=1 (global header from hub).
+  // Strip the flag immediately so a normal refresh does not reopen the modal.
   try {
     var _qs = new URLSearchParams(window.location.search);
     if (_qs.get("shop") === "1") {
-      setTimeout(function () { try { openShop(true); } catch (_e) {} }, 200);
+      _qs.delete("shop");
+      var _clean =
+        window.location.pathname +
+        (_qs.toString() ? "?" + _qs.toString() : "") +
+        (window.location.hash || "");
+      try {
+        window.history.replaceState({}, "", _clean);
+      } catch (_h) {}
+      setTimeout(function () {
+        try {
+          openShop(true);
+        } catch (_e) {}
+      }, 200);
     }
   } catch (_e) {}
 

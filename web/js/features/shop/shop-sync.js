@@ -53,7 +53,13 @@ function applyServerDailyCounts(result) {
     }
     if (Number.isFinite(Number(snapshot.xp_balance))) {
       const serverXp = Number(snapshot.xp_balance);
-      if (serverXp !== Number(state.xp || 0)) {
+      const localXp = Math.floor(Number(state.xp || 0));
+      // If ledger inserts failed (e.g. broken upsert against partial unique index),
+      // the server sum can stay 0 while the subject UI still shows earned XP.
+      // Never wipe local XP down to 0 from a snapshot in that situation.
+      if (serverXp === 0 && localXp > 0) {
+        /* keep state.xp */
+      } else if (serverXp !== localXp) {
         state.xp = serverXp;
         changed = true;
       }

@@ -356,6 +356,14 @@ state         = loadState();
   });
   assert(SCshop, "snapshot xp overwrites local (post-RPC reconcile)", state.xp === 100);
 
+  state.xp = 42;
+  applyShopSnapshot({ ok: true, xp_balance: 0, coupons_today: [], date: _todayShop, counts: [] });
+  assert(
+    SCshop,
+    "applyShopSnapshot does not clobber local XP with server 0 (ledger not synced)",
+    state.xp === 42
+  );
+
   _restoreShopContract();
 
   // ── SUITE: Quiz scoring ───────────────────────────────────────────────────
