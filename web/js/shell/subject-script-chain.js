@@ -22,13 +22,11 @@
     "js/utils/array.js",
     "js/utils/format.js",
     "js/utils/text.js",
-    "js/utils/crypto-transfer.js",
     "js/utils/quiz-keys.js",
 
     // ── Core state ────────────────────────────────────────────────────────────
     "js/core/state-schema.js",
     "js/core/state-persistence.js",
-    "js/core/transfer-ui.js",
 
     // ── Study: foundational topic helpers ────────────────────────────────────
     "js/features/study/topic-stats.js",

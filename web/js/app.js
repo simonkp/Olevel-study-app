@@ -76,7 +76,8 @@ if (!manifest || !manifest.length) {
     renderHome();
   };
 
-  document.getElementById("btn-shop").onclick = function () { openShop(); };
+  var _shopBtn = document.getElementById("btn-shop");
+  if (_shopBtn) _shopBtn.onclick = function () { openShop(); };
 
   var _shopRefreshBtn = document.getElementById("btn-shop-refresh");
   if (_shopRefreshBtn) {
@@ -100,14 +101,8 @@ if (!manifest || !manifest.length) {
     if (route.view === "home") renderHome();
   };
 
-  var _exportBtn = document.getElementById("btn-export-progress");
-  if (_exportBtn) _exportBtn.onclick = function () { handleExportProgress(); };
-  var _importBtn = document.getElementById("btn-import-progress");
-  if (_importBtn) _importBtn.onclick = function () { handleImportProgress(); };
-  var _reportBtn = document.getElementById("btn-open-report");
-  if (_reportBtn) _reportBtn.onclick = function () { openReport(); };
-
-  document.getElementById("btn-settings").onclick = function () {
+  var _settingsBtn = document.getElementById("btn-settings");
+  if (_settingsBtn) _settingsBtn.onclick = function () {
     var _pExplain  = document.getElementById("panel-explain");
     var _pShop     = document.getElementById("panel-shop");
     var _pReport   = document.getElementById("panel-report");
@@ -146,12 +141,16 @@ if (!manifest || !manifest.length) {
     };
   }
 
-  document.getElementById("btn-close-settings").onclick = function () {
-    state.unlockAll     = document.getElementById("opt-unlock-all").checked;
-    state.challengeMode = document.getElementById("opt-challenge").checked;
+  var _closeSettingsBtn = document.getElementById("btn-close-settings");
+  if (_closeSettingsBtn) _closeSettingsBtn.onclick = function () {
+    var _optUnlock = document.getElementById("opt-unlock-all");
+    var _optChall  = document.getElementById("opt-challenge");
+    if (_optUnlock) state.unlockAll     = _optUnlock.checked;
+    if (_optChall)  state.challengeMode = _optChall.checked;
     saveState();
     var _root = document.getElementById("modal-root");
-    document.getElementById("panel-settings").hidden = true;
+    var _ps = document.getElementById("panel-settings");
+    if (_ps) _ps.hidden = true;
     closeModalRoot(_root);
     if (route.view === "home") renderHome();
   };
@@ -160,7 +159,8 @@ if (!manifest || !manifest.length) {
   if (_closeReportBtn) {
     _closeReportBtn.onclick = function () {
       var _root = document.getElementById("modal-root");
-      document.getElementById("panel-report").hidden = true;
+      var _pr = document.getElementById("panel-report");
+      if (_pr) _pr.hidden = true;
       closeModalRoot(_root);
       if (route.view === "home") renderHome();
     };

@@ -45,23 +45,7 @@
             title="Theme boss beaten"
             >🏆</span
           >
-          <button
-            type="button"
-            class="pill pill-shop"
-            id="btn-shop"
-            title="Rewards shop"
-          >
-            🛒 Shop
-          </button>
         </div>
-        <button
-          type="button"
-          class="icon-btn"
-          id="btn-settings"
-          title="Settings"
-        >
-          ⚙
-        </button>
       </header>
 
       <main id="main"></main>
@@ -83,85 +67,6 @@
       hidden
       aria-hidden="true"
     >
-      <div class="modal modal-settings" id="panel-settings" hidden>
-        <h2>Settings</h2>
-        <p class="hint settings-lead">
-          Use these settings to adjust your study path. Progress is automatically synced to the cloud.
-        </p>
-        <label class="check-row">
-          <input type="checkbox" id="opt-unlock-all" />
-          <span>Unlock all topics (free study)</span>
-        </label>
-        <label class="check-row">
-          <input type="checkbox" id="opt-challenge" />
-          <span>Hard mode: 80% (not 70%) on previous topic to unlock next</span>
-        </label>
-        <p class="hint">
-          Uncheck "Unlock all" for guided path: Topic 1 open, then pass
-          threshold on each topic to unlock the next.
-        </p>
-
-        <div class="export-block">
-          <h3 class="export-title">Transfer progress between browsers</h3>
-          <p class="hint">
-            Set a short password, export to get a code, then import on another
-            browser with the <em>same</em> password. Optional if Supabase sync is connected; useful as backup/restore.
-          </p>
-          <label class="export-row">
-            <span>Password</span>
-            <input
-              type="password"
-              id="export-password"
-              autocomplete="off"
-            />
-          </label>
-          <button
-            type="button"
-            class="btn"
-            id="btn-export-progress"
-          >
-            Export → code
-          </button>
-          <textarea
-            id="export-output"
-            class="progress-code"
-            rows="3"
-            readonly
-            placeholder="Encrypted code will appear here. Copy it somewhere safe."
-          ></textarea>
-          <label class="export-row">
-            <span>Import password</span>
-            <input
-              type="password"
-              id="import-password"
-              autocomplete="off"
-            />
-          </label>
-          <textarea
-            id="import-input"
-            class="progress-code"
-            rows="3"
-            placeholder="Paste encrypted code here to import."
-          ></textarea>
-          <button type="button" class="btn primary" id="btn-import-progress">
-            Import progress
-          </button>
-          <p class="hint" id="sync-status"></p>
-        </div>
-        <div class="export-block">
-          <h3 class="export-title">Parent study report</h3>
-          <p class="hint">
-            View a readable study audit or export the raw local data.
-          </p>
-          <button type="button" class="btn" id="btn-open-report">
-            Open study report
-          </button>
-        </div>
-        <button type="button" class="btn primary" id="btn-close-settings">
-          Done
-        </button>
-      </div>
-
       <div class="modal explain-modal" id="panel-explain" hidden>
         <h2 id="explain-title">Let's fix that</h2>
         <p id="explain-body"></p>
@@ -197,28 +102,6 @@
         </div>
       </div>
 
-      <div class="modal modal-report" id="panel-report" hidden>
-        <h2>Study Report</h2>
-        <div id="report-body"></div>
-        <div class="report-actions">
-          <button type="button" class="btn" id="btn-report-text">
-            Export text summary
-          </button>
-          <button type="button" class="btn" id="btn-report-json">
-            Export JSON
-          </button>
-          <button type="button" class="btn primary" id="btn-close-report">
-            Done
-          </button>
-        </div>
-        <textarea
-          id="report-export-output"
-          class="progress-code report-export"
-          rows="8"
-          readonly
-          placeholder="Report export will appear here."
-        ></textarea>
-      </div>
     </div>
 
     <!-- ── HTML Templates (cloned by JS for dynamic UI) ─────────────────────── -->
