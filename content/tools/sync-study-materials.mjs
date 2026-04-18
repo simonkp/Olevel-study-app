@@ -113,6 +113,24 @@ function contentTypeFor(filePath) {
   return "application/octet-stream";
 }
 
+function extractPreviewImageFiles(topicJs, subject) {
+  const out = new Set();
+  const s = String(subject || "").toLowerCase();
+  // Matches:
+  // - data/subjects/<subject>/images/<file>
+  // - <subject>/images/<file>
+  const re = new RegExp(
+    `(?:data\\/subjects\\/${s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\/images\\/|${s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\/images\\/)([^"'\\s)]+)`,
+    "gi"
+  );
+  let m;
+  while ((m = re.exec(topicJs))) {
+    const name = String(m[1] || "").split("?")[0].trim();
+    if (name) out.add(name);
+  }
+  return Array.from(out);
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const subject = args.subject.toLowerCase();
@@ -158,9 +176,40 @@ async function main() {
     const src = uploadMap[srcKey];
     if (!src) throw new Error(`--free-topic not found in subject folder: ${args.freeTopic}`);
     const base = path.basename(args.freeTopic);
+    let freeTopicBuf = src.buf;
+    const topicText = src.buf.toString("utf8");
+    const imageFiles = extractPreviewImageFiles(topicText, subject);
+    // Keep preview fully self-contained by copying referenced images into
+    // <subject>/free/images/* and rewriting the free topic copy to those keys.
+    if (imageFiles.length) {
+      imageFiles.forEach((filename) => {
+        const srcImageKey = `${subject}/images/${filename}`;
+        const srcImage = uploadMap[srcImageKey];
+        if (!srcImage) {
+          process.stdout.write(`Warn: preview image missing in subject/images: ${srcImageKey}\n`);
+          return;
+        }
+        uploadMap[`${subject}/free/images/${filename}`] = {
+          buf: srcImage.buf,
+          hash: srcImage.hash,
+          contentType: srcImage.contentType,
+        };
+      });
+      const escapedSubject = subject.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const rewritten = topicText
+        .replace(
+          new RegExp(`data/subjects/${escapedSubject}/images/`, "g"),
+          `${subject}/free/images/`
+        )
+        .replace(
+          new RegExp(`${escapedSubject}/images/`, "g"),
+          `${subject}/free/images/`
+        );
+      freeTopicBuf = Buffer.from(rewritten, "utf8");
+    }
     uploadMap[`${subject}/free/${base}`] = {
-      buf: src.buf,
-      hash: src.hash,
+      buf: freeTopicBuf,
+      hash: sha256(freeTopicBuf),
       contentType: src.contentType,
     };
   }

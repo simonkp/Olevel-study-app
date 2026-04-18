@@ -100,7 +100,10 @@
       // Optional payloads. Skip the entitled-only ones in preview mode so we don't
       // spam the console with 403s (RLS denies them for non-entitled users).
       var optional = isPreview
-        ? []
+        ? [
+            // Needed for subjects whose topic files don't embed infographic arrays.
+            sid + "/infographics-images.js",
+          ]
         : [
             sid + "/infographics-images.js",
             sid + "/extra-quiz.js",
@@ -144,11 +147,11 @@
     var raw = String(originalOrFilename || "");
     if (!raw) return null;
     // Strip to just `<subject>/images/<file>` (RLS-compatible storage path).
-    var m = raw.match(/data\/subjects\/([^\/]+)\/images\/(.+)$/i);
+    var m = raw.match(/data\/subjects\/([^\/]+)\/((?:free\/)?images\/.+)$/i);
     var storagePath;
     if (m) {
-      storagePath = m[1] + "/images/" + m[2].split("?")[0];
-    } else if (/^[a-z0-9_-]+\/images\//i.test(raw)) {
+      storagePath = m[1] + "/" + m[2].split("?")[0];
+    } else if (/^[a-z0-9_-]+\/(?:free\/)?images\//i.test(raw)) {
       storagePath = raw.split("?")[0];
     } else {
       // Assume bare filename under current subject's images/ folder.
