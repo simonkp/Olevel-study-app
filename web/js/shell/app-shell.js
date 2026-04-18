@@ -10,7 +10,17 @@
     { id: "parent", label: "Parent dashboard", href: "parent.html", auth: true },
   ];
 
-  var PAGE_MAP = { landing: "home", hub: "hub", parent: "parent" };
+  var PAGE_MAP = {
+    landing: "home",
+    hub: "hub",
+    parent: "parent",
+    subject: "hub",
+    profile: "hub",
+    pricing: "home",
+  };
+
+  // Pages that should show the global "Shop" button when the user is signed in.
+  var SHOP_PAGES = { hub: 1, subject: 1, profile: 1 };
 
   function el(tag, attrs, html) {
     var e = document.createElement(tag);
@@ -78,13 +88,25 @@
     var cta = el("div", { class: "site-header__cta" });
     if (page === "landing") {
       cta.innerHTML =
+        '<a class="btn btn-outline btn-sm" href="pricing.html">Pricing</a>' +
         '<button class="btn btn-outline btn-sm js-signin" type="button">Sign in</button>' +
         '<button class="btn btn-primary btn-sm js-signin" type="button" data-umami-event="header-cta-click">Get started</button>';
     } else {
+      var shopBtn = SHOP_PAGES[page]
+        ? '<button class="btn btn-outline btn-sm levelup-shop-trigger" id="levelup-shop-btn" type="button" title="Spend your XP">' +
+          '<span aria-hidden="true">🛒</span>&nbsp;Shop' +
+          '<span class="levelup-shop-xp" id="levelup-shop-xp" hidden></span>' +
+          '</button>'
+        : "";
+      var profileLink =
+        page === "profile"
+          ? '<span class="profile-pill__name" id="levelup-name">Student</span>'
+          : '<a class="profile-pill__name" id="levelup-name" href="profile.html">Student</a>';
       cta.innerHTML =
+        shopBtn +
         '<div class="profile-pill" id="levelup-profile" hidden>' +
         '<span class="profile-pill__avatar" id="levelup-avatar">S</span>' +
-        '<span class="profile-pill__name" id="levelup-name">Student</span>' +
+        profileLink +
         '<button class="btn-ghost profile-pill__out" id="levelup-signout" type="button" title="Sign out" aria-label="Sign out">' +
         '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
         '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>' +
@@ -135,12 +157,18 @@
     if (page === "landing") {
       var cta = el("div", { class: "stack" });
       cta.innerHTML =
+        '<a class="btn btn-outline btn-lg" href="pricing.html">See pricing</a>' +
         '<button class="btn btn-primary btn-lg js-signin" type="button">Get started with Google</button>' +
         '<button class="btn btn-outline js-signin" type="button">I already have an account</button>';
       drawer.appendChild(cta);
     } else {
       var out = el("div", { class: "stack" });
+      var shopBtn = SHOP_PAGES[page]
+        ? '<button class="btn btn-outline levelup-shop-trigger" id="levelup-drawer-shop" type="button">🛒 Shop (spend XP)</button>'
+        : "";
       out.innerHTML =
+        shopBtn +
+        '<a class="btn btn-outline" href="profile.html">My profile</a>' +
         '<button class="btn btn-outline" type="button" id="levelup-drawer-signout">Sign out</button>';
       drawer.appendChild(out);
     }
@@ -255,6 +283,23 @@
     if (out1) out1.addEventListener("click", doSignOut);
     if (out2) out2.addEventListener("click", doSignOut);
 
+    // Global Shop button — opens the per-page shop bridge if the page registered
+    // one; otherwise falls back to the user's last-visited subject.
+    function openGlobalShop() {
+      try { closeDrawer(d.drawer, h.toggle); } catch (_e) {}
+      if (window.LevelupShop && typeof window.LevelupShop.open === "function") {
+        window.LevelupShop.open();
+        return;
+      }
+      var last = "";
+      try { last = localStorage.getItem("LEVELUP_LAST_SUBJECT") || ""; } catch (_e) {}
+      var slug = last || "chemistry";
+      window.location.href = "subject.html?subject=" + encodeURIComponent(slug) + "&shop=1";
+    }
+    document.querySelectorAll(".levelup-shop-trigger").forEach(function (btn) {
+      btn.addEventListener("click", openGlobalShop);
+    });
+
     window.LevelupShell = {
       setProfile: function (name, email, avatarUrl) {
         var pill = document.getElementById("levelup-profile");
@@ -275,6 +320,19 @@
         var pill = document.getElementById("levelup-profile");
         if (pill) pill.hidden = true;
       },
+      setShopXp: function (xp) {
+        var n = Number(xp);
+        var el = document.getElementById("levelup-shop-xp");
+        if (!el) return;
+        if (!Number.isFinite(n)) {
+          el.hidden = true;
+          el.textContent = "";
+          return;
+        }
+        el.hidden = false;
+        el.textContent = " · " + n.toLocaleString() + " XP";
+      },
+      openShop: openGlobalShop,
       closeDrawer: function () { closeDrawer(d.drawer, h.toggle); },
     };
   }

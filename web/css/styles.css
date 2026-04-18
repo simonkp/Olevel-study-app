@@ -45,15 +45,30 @@ body {
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 10px 16px;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   position: sticky;
-  top: 0;
-  z-index: 50;
+  /* Sit below the global site-header (defined in app-shell.css). */
+  top: var(--header-h, 64px);
+  z-index: 30;
 }
+
+/* Subject-page "All subjects" / "Profile" link styled like a pill button. */
+.pill-link {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  text-decoration: none;
+}
+.pill-link:hover { background: rgba(255, 255, 255, 0.06); }
 
 .logo-btn {
   font-family: var(--font);

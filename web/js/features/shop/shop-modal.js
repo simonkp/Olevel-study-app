@@ -3,13 +3,9 @@ function openShop(triggerServerSync) {
     const shouldSync = triggerServerSync !== false;
     const root = document.getElementById("modal-root");
     const panelExplain = document.getElementById("panel-explain");
-    const panelSettings = document.getElementById("panel-settings");
-    const panelReport = document.getElementById("panel-report");
-    if (!panelExplain.hidden) return;
-    panelSettings.hidden = true;
-    if (panelReport) panelReport.hidden = true;
-    panelExplain.hidden = true;
     const panelShop = document.getElementById("panel-shop");
+    if (!root || !panelShop) return;
+    if (panelExplain && !panelExplain.hidden) return;
     panelShop.hidden = false;
     root.hidden = false;
     root.setAttribute("aria-hidden", "false");
@@ -237,3 +233,9 @@ function openShop(triggerServerSync) {
         });
     }
   }
+
+// Expose to the global header (app-shell.js). The header's "Shop" button calls
+// window.LevelupShop.open() — on subject pages we open the modal in-place; on
+// hub.html the global handler falls back to navigating to a default subject.
+window.LevelupShop = window.LevelupShop || {};
+window.LevelupShop.open = function () { openShop(true); };

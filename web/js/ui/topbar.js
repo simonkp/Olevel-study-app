@@ -13,6 +13,9 @@ function updateTopbar() {
     }
     var xpEl = document.getElementById("stat-xp");
     if (xpEl) xpEl.textContent = `${state.xp} XP`;
+    if (window.LevelupShell && typeof window.LevelupShell.setShopXp === "function") {
+      window.LevelupShell.setShopXp(state.xp);
+    }
     var streakEl = document.getElementById("stat-streak");
     if (streakEl) {
       const s = state.streak || 0;

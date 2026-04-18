@@ -447,10 +447,17 @@ function formatMinutes(ms) {
 
   async function openReport() {
     const root = document.getElementById("modal-root");
-    document.getElementById("panel-settings").hidden = true;
-    document.getElementById("panel-shop").hidden = true;
-    document.getElementById("panel-explain").hidden = true;
     const panel = document.getElementById("panel-report");
+    if (!root || !panel) {
+      // Subject-page report modal removed; redirect to the global profile page
+      // where the redesigned report lives (phase 7).
+      window.location.href = "profile.html#report";
+      return;
+    }
+    var pShop = document.getElementById("panel-shop");
+    if (pShop) pShop.hidden = true;
+    var pExp = document.getElementById("panel-explain");
+    if (pExp) pExp.hidden = true;
     let report = buildStudyReport();
     if (progressStore && progressStore.hasClient()) {
       const merged = await progressStore.fetchReportWithFallback(

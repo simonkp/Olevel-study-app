@@ -70,7 +70,8 @@ if (!manifest || !manifest.length) {
     el.textContent = "LLM: off.";
   }
 
-  document.getElementById("btn-home").onclick = function () {
+  var _btnHome = document.getElementById("btn-home");
+  if (_btnHome) _btnHome.onclick = function () {
     if (window.SUBJECT_ID) { window.location.href = "hub.html"; return; }
     route = { view: "home" };
     renderHome();
@@ -78,6 +79,14 @@ if (!manifest || !manifest.length) {
 
   var _shopBtn = document.getElementById("btn-shop");
   if (_shopBtn) _shopBtn.onclick = function () { openShop(); };
+
+  // Auto-open shop when arriving via the global header's Shop button on hub.
+  try {
+    var _qs = new URLSearchParams(window.location.search);
+    if (_qs.get("shop") === "1") {
+      setTimeout(function () { try { openShop(true); } catch (_e) {} }, 200);
+    }
+  } catch (_e) {}
 
   var _shopRefreshBtn = document.getElementById("btn-shop-refresh");
   if (_shopRefreshBtn) {
@@ -94,77 +103,14 @@ if (!manifest || !manifest.length) {
     };
   }
 
-  document.getElementById("btn-close-shop").onclick = function () {
+  var _btnCloseShop = document.getElementById("btn-close-shop");
+  if (_btnCloseShop) _btnCloseShop.onclick = function () {
     var _root = document.getElementById("modal-root");
-    document.getElementById("panel-shop").hidden = true;
+    var _pShop = document.getElementById("panel-shop");
+    if (_pShop) _pShop.hidden = true;
     closeModalRoot(_root);
     if (route.view === "home") renderHome();
   };
-
-  var _settingsBtn = document.getElementById("btn-settings");
-  if (_settingsBtn) _settingsBtn.onclick = function () {
-    var _pExplain  = document.getElementById("panel-explain");
-    var _pShop     = document.getElementById("panel-shop");
-    var _pReport   = document.getElementById("panel-report");
-    if (!_pExplain.hidden) return;
-    var _root = document.getElementById("modal-root");
-    if (_pShop)   _pShop.hidden   = true;
-    if (_pReport) _pReport.hidden = true;
-    document.getElementById("opt-unlock-all").checked = state.unlockAll;
-    document.getElementById("opt-challenge").checked  = state.challengeMode;
-    refreshLlmProxyStatusLine();
-    document.getElementById("panel-settings").hidden = false;
-    _root.hidden = false;
-    _root.setAttribute("aria-hidden", "false");
-  };
-
-  var _llmSetupBtn = document.getElementById("btn-llm-proxy-setup");
-  if (_llmSetupBtn && window.LevelupLlmSetupForms) {
-    _llmSetupBtn.onclick = function () {
-      window.LevelupLlmSetupForms.openLlmProxySetup().then(function () {
-        refreshLlmProxyStatusLine();
-      });
-    };
-  }
-
-  var _configPackBtn = document.getElementById("btn-config-package-setup");
-  if (_configPackBtn && window.LevelupSetupForms && typeof window.LevelupSetupForms.openConfigPackageSetup === "function") {
-    _configPackBtn.onclick = function () {
-      window.LevelupSetupForms.openConfigPackageSetup().then(function (r) {
-        if (r && r.action === "save") {
-          window.alert("Setup package applied. Reloading to use updated profile/sync config.");
-          window.location.reload();
-          return;
-        }
-        refreshLlmProxyStatusLine();
-      });
-    };
-  }
-
-  var _closeSettingsBtn = document.getElementById("btn-close-settings");
-  if (_closeSettingsBtn) _closeSettingsBtn.onclick = function () {
-    var _optUnlock = document.getElementById("opt-unlock-all");
-    var _optChall  = document.getElementById("opt-challenge");
-    if (_optUnlock) state.unlockAll     = _optUnlock.checked;
-    if (_optChall)  state.challengeMode = _optChall.checked;
-    saveState();
-    var _root = document.getElementById("modal-root");
-    var _ps = document.getElementById("panel-settings");
-    if (_ps) _ps.hidden = true;
-    closeModalRoot(_root);
-    if (route.view === "home") renderHome();
-  };
-
-  var _closeReportBtn = document.getElementById("btn-close-report");
-  if (_closeReportBtn) {
-    _closeReportBtn.onclick = function () {
-      var _root = document.getElementById("modal-root");
-      var _pr = document.getElementById("panel-report");
-      if (_pr) _pr.hidden = true;
-      closeModalRoot(_root);
-      if (route.view === "home") renderHome();
-    };
-  }
 
   dock.querySelectorAll("button").forEach(function (b) {
     b.addEventListener("click", function () {

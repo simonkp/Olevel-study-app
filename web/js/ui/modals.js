@@ -5,9 +5,7 @@ function showExplain(title, body, then, note, llmWhyPayload) {
     }
     const root = document.getElementById("modal-root");
     const panelExplain = document.getElementById("panel-explain");
-    const panelSettings = document.getElementById("panel-settings");
     const panelShop = document.getElementById("panel-shop");
-    panelSettings.hidden = true;
     if (panelShop) panelShop.hidden = true;
     document.getElementById("explain-title").textContent = title;
     const explainBody = document.getElementById("explain-body");

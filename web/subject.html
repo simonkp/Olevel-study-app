@@ -19,23 +19,19 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
     />
+    <!-- Global header / footer styles (shared with hub.html, parent.html, index.html) -->
+    <link rel="stylesheet" href="css/app-shell.css" />
     <!-- Cache bust: bump js/shell/asset-version.js only -->
     <script src="js/shell/asset-version.js"></script>
     <script src="js/shell/subject-head-assets.js"></script>
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div id="levelup-shell" data-page="subject"></div>
+
     <div id="app">
       <header class="topbar">
-        <button
-          type="button"
-          class="logo-btn"
-          id="btn-home"
-          aria-label="Home"
-        >
-          LevelUp!
-        </button>
         <div class="topbar-stats">
-          <span class="pill user" id="stat-user" title="">Student</span>
           <span class="pill xp" id="stat-xp">0 XP</span>
           <span class="pill streak" id="stat-streak">🔥 0 day</span>
           <span
@@ -45,6 +41,7 @@
             title="Theme boss beaten"
             >🏆</span
           >
+          <button type="button" class="pill-link" id="btn-home" aria-label="All subjects">All subjects</button>
         </div>
       </header>
 
@@ -153,6 +150,9 @@
       defer
       src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
     ></script>
+
+    <!-- Global header/footer (shared with hub.html, parent.html) -->
+    <script src="js/shell/app-shell.js"></script>
 
     <!-- Shell scripts emitted with ?v=APP_VERSION (see write-subject-tail-scripts.js) -->
     <script src="js/shell/write-subject-tail-scripts.js"></script>
