@@ -520,7 +520,29 @@ body {
   text-align: center;
   color: var(--muted);
   font-size: 0.85rem;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
+}
+
+/* Subtle read-time hint: depletes toward the right (origin right) so it feels like time “moving left”. */
+.flash-read-meter {
+  max-width: 280px;
+  margin: 0 auto 12px;
+}
+.flash-read-meter__track {
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+.flash-read-meter__fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  transform-origin: right center;
+  transform: scaleX(1);
+  background: rgba(148, 163, 184, 0.22);
+  will-change: transform;
 }
 
 /* Quiz */
@@ -1208,7 +1230,7 @@ body {
   background: rgba(12, 14, 18, 0.92);
   backdrop-filter: blur(10px);
   border-top: 1px solid var(--border);
-  z-index: 40;
+  z-index: 45;
 }
 
 .dock[hidden] {
@@ -1800,10 +1822,10 @@ html:has(#modal-root:not([hidden])) {
 }
 
 /* ── Preview banner (subject.html, non-entitled users) ───────────────────── */
+/* Scrolls with content — avoids stacking under a fixed global header alone. */
 #preview-banner {
-  position: sticky;
-  top: 0;
-  z-index: 25;
+  position: relative;
+  z-index: 1;
   background: linear-gradient(90deg, rgba(94, 234, 212, 0.14), rgba(167, 139, 250, 0.14));
   border-bottom: 1px solid rgba(167, 139, 250, 0.35);
   color: var(--text);

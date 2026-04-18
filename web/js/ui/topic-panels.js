@@ -65,6 +65,11 @@ function formatCheatPoint(p) {
     return `
       <div class="panel active" data-panel="flash">
         <p class="flash-progress" id="flash-progress">Tap card to flip · <span id="flash-count"></span></p>
+        <div class="flash-read-meter" aria-hidden="true">
+          <div class="flash-read-meter__track">
+            <span class="flash-read-meter__fill" id="flash-read-fill"></span>
+          </div>
+        </div>
         <div class="flash-area"><div class="flash-card" id="flash-card"><div class="flash-face flash-front" id="flash-front"></div><div class="flash-face flash-back" id="flash-back"></div></div></div>
         <div class="flash-actions">
           <button type="button" class="btn danger-outline" id="flash-review">Need review</button>
@@ -196,6 +201,23 @@ function formatCheatPoint(p) {
     let backReadAccumMs = 0;
     const validatedCards = typeof WeakSet !== "undefined" ? new WeakSet() : null;
     let validatedCount = 0;
+    let flashMeterId = null;
+    function clearFlashMeter() {
+      if (flashMeterId) {
+        clearInterval(flashMeterId);
+        flashMeterId = null;
+      }
+    }
+    function tickFlashReadMeter() {
+      const fill = document.getElementById("flash-read-fill");
+      if (!fill || flashCompleted) {
+        clearFlashMeter();
+        return;
+      }
+      const { elapsed } = getReadState(Date.now());
+      const p = Math.max(0, Math.min(1, 1 - elapsed / MIN_FLASH_TOTAL_MS));
+      fill.style.transform = "scaleX(" + p + ")";
+    }
     const front = document.getElementById("flash-front");
     const back = document.getElementById("flash-back");
     const card = document.getElementById("flash-card");
@@ -219,6 +241,7 @@ function formatCheatPoint(p) {
     }
 
     function show() {
+      clearFlashMeter();
       if (idx >= pool.length) {
         if (review.length) {
           pool.splice(0, pool.length, ...shuffle(review));
@@ -226,6 +249,7 @@ function formatCheatPoint(p) {
           idx = 0;
         } else {
           flashCompleted = true;
+          clearFlashMeter();
           const baseBonus = hadReviewRound ? 18 : 10;
           const ratio = deckSize > 0 ? validatedCount / deckSize : 0;
           const bonus = Math.floor(baseBonus * ratio);
@@ -265,6 +289,13 @@ function formatCheatPoint(p) {
       if (progLabel) {
         progLabel.textContent =
           "Read both sides for XP: 1.5s front + 1.2s back (3.5s total)";
+      }
+      const fill = document.getElementById("flash-read-fill");
+      if (fill) {
+        fill.style.transform = "scaleX(1)";
+        clearFlashMeter();
+        flashMeterId = setInterval(tickFlashReadMeter, 100);
+        tickFlashReadMeter();
       }
     }
 
