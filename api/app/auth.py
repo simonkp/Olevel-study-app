@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+import httpx
 import jwt
 from fastapi import HTTPException, Request
 from jwt import InvalidTokenError
@@ -47,3 +48,26 @@ def verify_supabase_jwt(request: Request, jwt_secret: str) -> AuthContext:
     if role not in ("authenticated", "service_role"):
         raise HTTPException(status_code=403, detail="JWT role is not allowed")
     return AuthContext(user_id=user_id, role=role, claims=claims)
+
+
+async def is_admin_user(supabase_url: str, service_role_key: str, user_id: str) -> bool:
+    """Look up profiles.role for a user via the REST API. Returns True iff role='admin'."""
+    if not (supabase_url or "").strip() or not (service_role_key or "").strip() or not user_id:
+        return False
+    base = supabase_url.rstrip("/")
+    headers = {
+        "apikey": service_role_key,
+        "Authorization": f"Bearer {service_role_key}",
+    }
+    async with httpx.AsyncClient(timeout=5.0) as client:
+        res = await client.get(
+            f"{base}/rest/v1/profiles",
+            params={"user_id": f"eq.{user_id}", "select": "role"},
+            headers=headers,
+        )
+    if res.status_code != 200:
+        return False
+    rows = res.json() or []
+    if not rows:
+        return False
+    return str(rows[0].get("role", "")).strip() == "admin"
