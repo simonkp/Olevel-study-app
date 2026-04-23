@@ -41,7 +41,8 @@
     ],
     infographics: [ 
         { image: "data/subjects/chemistry/images/reactions-08-periodic-table.jpg", caption: "Periodic trends: radius and electronegativity" } ,
-        { image: "data/subjects/chemistry/images/topic-13-infographic.png", caption: "Periodic Table Trends Infographic" }
+        { image: "data/subjects/chemistry/images/topic-13-infographic.png", caption: "Periodic Table Trends Infographic" },
+        { image: "data/subjects/chemistry/images/chemistry-periodic-table-pic.png", caption: "Periodic Table" }
     ],
     flashcards: [
         {

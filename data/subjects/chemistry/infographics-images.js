@@ -13,6 +13,7 @@
         caption: "Experimental Design",
         infoKey: "matter-01-experimental-design.jpg",
       },
+      
     ],
     "2": [
       {
@@ -137,6 +138,11 @@
         image: img("reactions-08-periodic-table.jpg"),
         caption: "Periodic Table",
         infoKey: "reactions-08-periodic-table.jpg",
+      },
+      {
+        image: img("chemistry-periodic-table-pic.png"),
+        caption: "Periodic Table",
+        infoKey: "chemistry-periodic-table-pic.png",
       },
       {
         image: img("topic-13-infographic.png"),
