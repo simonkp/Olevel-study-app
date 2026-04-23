@@ -49,7 +49,11 @@
         ]
     }
     ],
-    infographics: [ { image: "data/subjects/chemistry/images/reactions-01-calculations.jpg", caption: "Mole triangle and concentration" } ],
+    infographics: [ 
+        { image: "data/subjects/chemistry/images/reactions-01-calculations.jpg", caption: "Mole triangle and concentration" },
+        { image: "data/subjects/chemistry/images/topic-06-1-infographic.png", caption: "Chemical Calculations Infographic" },
+        { image: "data/subjects/chemistry/images/topic-06-2-infographic.png", caption: "Moles and Stoichiometry Infographic" }
+    ],
     flashcards: [
         {
             "front": "n from mass?",

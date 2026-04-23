@@ -2,7 +2,7 @@
   window.__registerTopic({
     id: "11",
     theme: "Theme 2: Chemical Reactions",
-    title: "Redox Chemistry",
+    title: "Oxidation and Reduction",
     cheatBlocks: [
         {
             "title": "Definitions",
@@ -39,7 +39,10 @@
         ] 
     }
     ],
-    infographics: [ { image: "data/subjects/chemistry/images/reactions-06-redox.jpg", caption: "Redox: electron transfer and OIL RIG" } ],
+    infographics: [ 
+        { image: "data/subjects/chemistry/images/reactions-06-redox.jpg", caption: "Redox: electron transfer and OIL RIG" },
+        { image: "data/subjects/chemistry/images/topic-11-infographic.png", caption: "Oxidation and Reduction Infographic" }
+    ],
     flashcards: [
         {
             "front": "Oxidising agent?",
