@@ -139,6 +139,11 @@
         infoKey: "reactions-08-periodic-table.jpg",
       },
       {
+        image: img("chemistry-periodic-table-pic.png"),
+        caption: "Periodic Table",
+        infoKey: "chemistry-periodic-table-pic.png",
+      },
+      {
         image: img("topic-13-infographic.png"),
         caption: "Periodic Table Trends Infographic",
         infoKey: "topic-13-infographic.png",
