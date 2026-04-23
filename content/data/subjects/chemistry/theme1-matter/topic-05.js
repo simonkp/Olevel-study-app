@@ -84,7 +84,8 @@
     ],
     infographics: [
       { image: "data/subjects/chemistry/images/matter-05-Bonding.jpg", caption: "Ionic, covalent and metallic bonding" },
-      { svg: "<svg viewBox=\"0 0 280 110\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"280\" height=\"110\" fill=\"#1c222d\"/><text x=\"8\" y=\"18\" fill=\"#5eead4\" font-size=\"10\">IONIC</text><text x=\"10\" y=\"48\" fill=\"#a78bfa\" font-size=\"22\">Na⁺</text><text x=\"120\" y=\"48\" fill=\"#fb923c\" font-size=\"22\">Cl⁻</text><line x1=\"55\" y1=\"42\" x2=\"105\" y2=\"42\" stroke=\"#666\" stroke-width=\"2\"/><text x=\"8\" y=\"88\" fill=\"#5eead4\" font-size=\"10\">COVALENT</text><circle cx=\"200\" cy=\"82\" r=\"12\" fill=\"none\" stroke=\"#4ade80\" stroke-width=\"2\"/><circle cx=\"235\" cy=\"82\" r=\"12\" fill=\"none\" stroke=\"#4ade80\" stroke-width=\"2\"/><line x1=\"212\" y1=\"82\" x2=\"223\" y2=\"82\" stroke=\"#4ade80\" stroke-width=\"3\"/></svg>", caption: "Ionic vs covalent (simplified)" }
+      { image: "data/subjects/chemistry/images/topic-05-1-infographic.png", caption: "Chemical Bonding Infographic" },
+      { image: "data/subjects/chemistry/images/topic-05-2-infographic.png", caption: "Structure and properties of materials" },      
     ],
     flashcards: [
         { "front": "Why molten NaCl conducts?","back": "Ions mobile."},

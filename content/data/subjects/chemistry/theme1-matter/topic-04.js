@@ -75,6 +75,7 @@
 ],
     infographics: [
       { image: "data/subjects/chemistry/images/matter-04-atomic-structure.jpg", caption: "Bohr-style atom: nucleus and shells" },
+      { image: "data/subjects/chemistry/images/topic-04-infographic.png", caption: "Atomic Structure Infographic" },
       { svg: "<svg viewBox=\"0 0 260 150\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"260\" height=\"150\" fill=\"#1c222d\"/><circle cx=\"130\" cy=\"75\" r=\"45\" fill=\"none\" stroke=\"#6366f1\" stroke-width=\"2\" stroke-dasharray=\"5 4\"/><circle cx=\"130\" cy=\"75\" r=\"14\" fill=\"#f87171\"/><text x=\"118\" y=\"80\" fill=\"#fff\" font-size=\"10\">nucleus</text><circle cx=\"90\" cy=\"50\" r=\"4\" fill=\"#5eead4\"/><circle cx=\"175\" cy=\"95\" r=\"4\" fill=\"#5eead4\"/><circle cx=\"165\" cy=\"48\" r=\"4\" fill=\"#5eead4\"/><text x=\"12\" y=\"138\" fill=\"#8b95a8\" font-size=\"9\">Protons+neutrons in nucleus · electrons in shells</text></svg>", caption: "Nucleus + electron shells (schematic)" }
     ],
     flashcards: [
@@ -115,10 +116,54 @@
     {id:"chem-T4-014",question:"Tungsten is commonly used to make drill bits. It is represented in nuclide notation as $^{184}_{74}\\text{W}$. How many neutrons does an atom of tungsten-184 have?",options:["74","110","184","258"],correctIndex:1,explanation:"Number of neutrons = Nucleon number (A) - Proton number (Z) = 184 - 74 = 110."},
     {id:"chem-T4-015",question:"Which of the following is true regarding the isotopes of chlorine, $^{35}\\text{Cl}$ and $^{37}\\text{Cl}$?",options:["They have different electronic configurations","They react differently with sodium","They have the same density and boiling point","They have identical chemical properties but slightly different physical properties"],correctIndex:3,explanation:"Isotopes share chemical properties because their electron configurations are identical, but differ in physical properties due to mass differences."},    
     {id:"chem-T4-017",question:"Isotopes have same:",options:["Chemical properties mostly","Mass number always","Neutron count","Density in all forms"],correctIndex:0,explanation:"Same electron config."},
-    {id:"chem-T4-018",question: "A sulfide ion is formed from the isotope $^{32}_{16}\\text{S}$. How many protons, neutrons, and electrons does this ion contain?",options: ["16 protons, 16 neutrons, 16 electrons","16 protons, 16 neutrons, 18 electrons","16 protons, 18 neutrons, 16 electrons","18 protons, 16 neutrons, 18 electrons"],correctIndex: 1,explanation: "Protons = 16. Neutrons = 32 - 16 = 16. The sulfur atom is in Group 16 and gains 2 electrons to form an $S^{2-}$ ion, so it has 16 + 2 = 18 electrons."},
-    {id:"chem-T4-019",question: "Element $X$ has an atomic number of 13 and a mass number of 27. Element $Y$ has an atomic number of 14 and a mass number of 28. Which statement is correct?",options: ["They are isotopes of the same element.","They have the same number of neutrons.","Element X forms an anion with a -3 charge.","They have the same number of valence electrons."],correctIndex: 1,explanation: "Neutrons in $X$ = 27 - 13 = 14. Neutrons in $Y$ = 28 - 14 = 14. They are different elements (different Z) in different groups (Group 13 vs Group 14)."},
-    {id:"chem-T4-020",question: "An atom $W$ has a nucleon number of 39 and contains 20 neutrons. What is the electronic configuration of its most stable ion?",options: ["2, 8, 8, 1","2, 8, 8","2, 8, 18, 8, 3","2, 8, 7"],correctIndex: 1,explanation: "Protons in $W$ = 39 - 20 = 19. $W$ is Potassium (K), which has the atom configuration 2, 8, 8, 1. It loses 1 electron to form $K^+$, resulting in a 2, 8, 8 configuration."},
-    {id:"chem-T4-021",question: "A particle $Q$ has 15 protons, 16 neutrons, and 18 electrons. Which of the following best describes $Q$?",options: ["It is an atom of Phosphorus-31.","It is a cation with a +3 charge.","It is an anion with a -3 charge and a nucleon number of 31.","It is an isotope of Argon."],correctIndex: 2,explanation: "Protons = 15, meaning the element is Phosphorus. Nucleon number = 15 + 16 = 31. Because it has 18 electrons (3 more than protons), it has a -3 charge ($P^{3-}$)."},
+    {
+        id: "chem-T4-018",
+        question: "A sulfide ion is formed from the isotope $^{32}_{16}\\text{S}$. How many protons, neutrons, and electrons does this ion contain?",
+        options: [
+            "16 protons, 16 neutrons, 16 electrons",
+            "16 protons, 16 neutrons, 18 electrons",
+            "16 protons, 18 neutrons, 16 electrons",
+            "18 protons, 16 neutrons, 18 electrons"
+        ],
+        correctIndex: 1,
+        explanation: "Protons = 16. Neutrons = 32 - 16 = 16. The sulfur atom is in Group 16 and gains 2 electrons to form an $S^{2-}$ ion, so it has 16 + 2 = 18 electrons."
+    },
+    {
+        id: "chem-T4-019",
+        question: "Element $X$ has an atomic number of 13 and a mass number of 27. Element $Y$ has an atomic number of 14 and a mass number of 28. Which statement is correct?",
+        options: [
+            "They are isotopes of the same element.",
+            "They have the same number of neutrons.",
+            "Element X forms an anion with a -3 charge.",
+            "They have the same number of valence electrons."
+        ],
+        correctIndex: 1,
+        explanation: "Neutrons in $X$ = 27 - 13 = 14. Neutrons in $Y$ = 28 - 14 = 14. They are different elements (different Z) in different groups (Group 13 vs Group 14)."
+    },
+    {
+        id: "chem-T4-020",
+        question: "An atom $W$ has a nucleon number of 39 and contains 20 neutrons. What is the electronic configuration of its most stable ion?",
+        options: [
+            "2, 8, 8, 1",
+            "2, 8, 8",
+            "2, 8, 18, 8, 3",
+            "2, 8, 7"
+        ],
+        correctIndex: 1,
+        explanation: "Protons in $W$ = 39 - 20 = 19. $W$ is Potassium (K), which has the atom configuration 2, 8, 8, 1. It loses 1 electron to form $K^+$, resulting in a 2, 8, 8 configuration."
+    },
+    {
+        id: "chem-T4-021",
+        question: "A particle $Q$ has 15 protons, 16 neutrons, and 18 electrons. Which of the following best describes $Q$?",
+        options: [
+            "It is an atom of Phosphorus-31.",
+            "It is a cation with a +3 charge.",
+            "It is an anion with a -3 charge and a nucleon number of 31.",
+            "It is an isotope of Argon."
+        ],
+        correctIndex: 2,
+        explanation: "Protons = 15, meaning the element is Phosphorus. Nucleon number = 15 + 16 = 31. Because it has 18 electrons (3 more than protons), it has a -3 charge ($P^{3-}$)."
+    },
     {id:"chem-T4-022",question:"Noble gas unreactive largely because:",options:["Large atoms","Full outer shell","No mass","Liquid"],correctIndex:1,explanation:"Stable config."},
     {id:"chem-T4-023",question:"Number of neutrons in ¹⁴C:",options:["6","8","14","20"],correctIndex:1,explanation:"14−6=8."},
     {id:"chem-T4-024",question:"Which pair has the same number of electrons?",options:["Na atom and Ne atom","Na⁺ and Ne atom","Mg atom and Ne atom","Cl atom and Ar atom"],correctIndex:1,explanation:"Na⁺ has 10 electrons, same as Ne."},
