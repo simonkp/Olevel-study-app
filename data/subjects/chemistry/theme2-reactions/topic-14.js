@@ -31,7 +31,10 @@
             "**Alloying**: stainless steel (Cr, Ni) forms passive Cr₂O₃ layer."
         ]
     }],
-    infographics: [ { image: "data/subjects/chemistry/images/reactions-09-reactivity-series.jpg", caption: "Reactivity series and displacement" } ],
+    infographics: [ 
+        { image: "data/subjects/chemistry/images/reactions-09-reactivity-series.jpg", caption: "Reactivity series and displacement" } ,
+        { image: "data/subjects/chemistry/images/topic-14-infographic.png", caption: "Reactivity Series Infographic" }
+    ],
     flashcards: [
         {
             "front": "Fe + CuSO₄?",

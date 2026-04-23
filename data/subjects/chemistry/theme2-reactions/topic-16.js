@@ -47,7 +47,10 @@
             ] 
         }
     ],
-    infographics: [ { image: "data/subjects/chemistry/images/reactions-11-rates.jpg", caption: "Surface area and catalyst effects on rate" } ],
+    infographics: [ 
+        { image: "data/subjects/chemistry/images/reactions-11-rates.jpg", caption: "Surface area and catalyst effects on rate" } ,
+        { image: "data/subjects/chemistry/images/topic-16-infographic.png", caption: "Rate of Reactions Infographic" }
+    ],
     flashcards: [
         {
             "front": "Rate units?",

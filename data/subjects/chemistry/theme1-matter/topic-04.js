@@ -75,6 +75,7 @@
 ],
     infographics: [
       { image: "data/subjects/chemistry/images/matter-04-atomic-structure.jpg", caption: "Bohr-style atom: nucleus and shells" },
+      { image: "data/subjects/chemistry/images/topic-04-infographic.png", caption: "Atomic Structure Infographic" },
       { svg: "<svg viewBox=\"0 0 260 150\" xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"260\" height=\"150\" fill=\"#1c222d\"/><circle cx=\"130\" cy=\"75\" r=\"45\" fill=\"none\" stroke=\"#6366f1\" stroke-width=\"2\" stroke-dasharray=\"5 4\"/><circle cx=\"130\" cy=\"75\" r=\"14\" fill=\"#f87171\"/><text x=\"118\" y=\"80\" fill=\"#fff\" font-size=\"10\">nucleus</text><circle cx=\"90\" cy=\"50\" r=\"4\" fill=\"#5eead4\"/><circle cx=\"175\" cy=\"95\" r=\"4\" fill=\"#5eead4\"/><circle cx=\"165\" cy=\"48\" r=\"4\" fill=\"#5eead4\"/><text x=\"12\" y=\"138\" fill=\"#8b95a8\" font-size=\"9\">Protons+neutrons in nucleus · electrons in shells</text></svg>", caption: "Nucleus + electron shells (schematic)" }
     ],
     flashcards: [

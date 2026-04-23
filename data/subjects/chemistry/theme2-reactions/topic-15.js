@@ -47,7 +47,10 @@
         ]
     }
     ],
-    infographics: [ { image: "data/subjects/chemistry/images/reactions-10-energetics.jpg", caption: "Exothermic and endothermic profiles" } ],
+    infographics: [ 
+        { image: "data/subjects/chemistry/images/reactions-10-energetics.jpg", caption: "Exothermic and endothermic profiles" } ,
+        { image: "data/subjects/chemistry/images/topic-15-infographic.png", caption: "Energetics Infographic" }
+    ],
     flashcards: [
         {
             "front": "Combustion ΔH?",

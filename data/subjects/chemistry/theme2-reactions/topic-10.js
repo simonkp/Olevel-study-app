@@ -18,8 +18,7 @@
                 "Cl⁻ + AgNO₃ → white AgCl (insoluble in dil HNO₃).",
                 "SO₄²⁻ + Ba²⁺ → white BaSO₄."
             ]
-        }
-    ,
+        },
     {
         "title": "Flame Test Colours",
         "points": [
@@ -64,7 +63,10 @@
             "**NO₃⁻** — add NaOH + Al foil, heat: NH₃ gas produced (litmus test)."
         ]
     }],
-    infographics: [ { image: "data/subjects/chemistry/images/reactions-05-qualitative-analysis.jpg", caption: "Flame colours and precipitate tests" } ],
+    infographics: [ 
+        { image: "data/subjects/chemistry/images/reactions-05-qualitative-analysis.jpg", caption: "Flame colours and precipitate tests" },
+        { image: "data/subjects/chemistry/images/topic-10-infographic.png", caption: "Qualitative Analysis Infographic" }
+    ],
     flashcards: [
         {
             "front": "Carbonate test?",
